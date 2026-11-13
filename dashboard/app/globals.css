@@ -338,3 +338,27 @@ button.row:active, a.row:active { background: var(--press); }
 .formules-sec { margin-top: 12px; font-size: 13.5px; color: var(--fg-2); }
 .formules-sec p { margin: 8px 0 0; }
 .formules-sec b { font-weight: 600; color: var(--fg); }
+.decomp { display: flex; gap: 2px; height: 10px; margin-top: 12px; border-radius: 5px; overflow: hidden; background: var(--z1); }
+.decomp i { display: block; height: 100%; }
+.action { margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--grouped); }
+.action b { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.action p { margin: 4px 0 0; font-size: 14.5px; color: var(--fg); }
+.action span { display: block; margin-top: 8px; font-size: 13px; color: var(--fg-2); }
+.contrib { display: grid; gap: 6px; margin-top: 14px; }
+.contrib > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 10px; font-size: 13px; color: var(--fg-2); }
+.contrib > div.on { font-weight: 600; color: var(--fg); }
+.contrib .axe { position: relative; height: 10px; }
+.contrib .axe::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--edge); }
+.contrib .axe i { position: absolute; top: 0; height: 100%; border-radius: 3px; }
+.actions-liste { display: grid; margin-top: 6px; }
+.actions-liste > div { padding: 10px 0; }
+.actions-liste > div + div { border-top: 1px solid var(--line); }
+.actions-liste b { display: block; font-size: 15px; font-weight: 600; }
+.actions-liste p { margin: 2px 0 0; font-size: 13.5px; color: var(--fg-2); }
+.actions-liste .noms { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-3); }
+.actions-liste .lien { font-weight: 500; color: var(--fg-2); }
+.apercu-action { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--fg-2); }
+.apercu-action b { font-weight: 600; color: var(--fg); }
+/* A region tapped on the map is outlined by the selection; the focus box would draw a rectangle. */
+.carte-svg path:focus { outline: none; }
+.carte-svg path:focus-visible { outline: none; stroke: var(--fg); }

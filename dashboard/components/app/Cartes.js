@@ -2,29 +2,13 @@
 // The figure cards. Each one carries its context: a scale, a comparison, a range or a history.
 // Colour only where it means something (the blue ramp, a decline); text stays in text colours.
 import { useState } from "react";
-import { Bande, Courbe, Echelle, Fourchette, Matrice, Pile } from "./Graphes";
+import { Bande, Courbe, Fourchette, Matrice, Pile } from "./Graphes";
 import { Chevron } from "./icones";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, couches, niveau, niveauScore, PRIORITES, risque, scoreGlobal, signe, ZONES_SCORE } from "@/lib/regles";
+import { centaine, couches, facteurDominant, PRIORITES, risque, scoreGlobal, signe, ZONES_SCORE } from "@/lib/regles";
 
 const pctFr = (v, d = 1) => `${fr(v, d)} %`;
-
-export function CarteRisque({ jeu, region: r, onOuvrir }) {
-  const p = risque(r), s = alerteSeptembre(r), n = niveau(p, jeu.seuils);
-  const Tag = onOuvrir ? "button" : "section";
-  return (
-    <Tag className="card" onClick={onOuvrir} aria-label={onOuvrir ? `Risque de baisse, ${r.nom} : ouvrir la région` : undefined}>
-      <div className="ch"><b>Risque de baisse</b><span>Rentrée <span className="nw">2026-2027</span>{onOuvrir && <Chevron />}</span></div>
-      <div className="kpi"><b className="num">{p} %</b><span className="u">risque {n}</span></div>
-      <Echelle p={p} p2={s} seuils={jeu.seuils} actif={n} label={`${p} %, risque ${n} ; alerte de septembre ${s} %`} />
-      <p className="foot">
-        Probabilité d'une baisse des effectifs de plus de 5 %. {s !== p && <>Le rond : l'alerte de septembre, {s} %. </>}
-        On lit des niveaux, pas des pourcentages exacts.
-      </p>
-    </Tag>
-  );
-}
 
 export function CartePriorites({ jeu, onFiltre }) {
   const c = [1, 2, 3].map((p) => jeu.regions.filter((r) => r.priorite === p).length), v = jeu.validation;
@@ -62,6 +46,33 @@ export function CarteScore({ jeu, onOuvrir }) {
       <Bande points={jeu.regions.map((x) => ({ id: x.cle, nom: x.nom, v: scoreGlobal(jeu, x) ?? 0, c: `var(--c${C.classe(x)})` }))}
         seuils={jeu.seuils} zones={ZONES_SCORE} lu={lu} onLire={setLu} onOuvrir={onOuvrir} />
       <p className="foot">Moitié risque de chute des effectifs (la violence), moitié part d'enfants qui n'achèvent pas le primaire : le brutal et le lent.</p>
+    </section>
+  );
+}
+
+// What to act on, across the country: the regions grouped by their dominant background factor.
+export function CarteActions({ jeu, onOuvrir }) {
+  if (!jeu.facteur_dominant) return null;
+  const groupes = new Map();
+  for (const r of [...jeu.regions].sort((a, b) => (scoreGlobal(jeu, b) ?? 0) - (scoreGlobal(jeu, a) ?? 0))) {
+    const k = facteurDominant(jeu, r)?.dominant ?? "aucun";
+    if (!groupes.has(k)) groupes.set(k, []);
+    groupes.get(k).push(r);
+  }
+  const ordre = [...groupes.entries()].sort((a, b) => (a[0] === "aucun") - (b[0] === "aucun") || b[1].length - a[1].length);
+  const def = (id) => jeu.facteurs_def.find((d) => d.id === id);
+  return (
+    <section className="card" aria-label="Sur quoi agir">
+      <div className="ch"><b>Sur quoi agir</b><span>facteur dominant de chaque région</span></div>
+      <div className="actions-liste">
+        {ordre.map(([k, rs]) => (
+          <div key={k}>
+            <b>{k === "aucun" ? "Aucun facteur au-dessus de la moyenne" : def(k)?.libelle}</b>
+            {k !== "aucun" && def(k)?.levier && <p>{def(k).levier}</p>}
+            <span className="noms">{rs.map((r, i) => <span key={r.cle}><button className="lien" onClick={() => onOuvrir(r.cle)}>{r.nom}</button>{i < rs.length - 1 ? ", " : ""}</span>)}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

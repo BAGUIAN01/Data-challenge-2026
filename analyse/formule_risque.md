@@ -91,6 +91,36 @@ Pour comparer à égalité, on retient chaque année autant de régions que la m
 
 Changer le poids du risque entre 0,3 et 0,7 fait varier l'AUC de 0,77 à 0,81. Ce test est donné pour information : il n'a pas servi à choisir le poids.
 
+## Le facteur dominant : sur quoi agir
+
+Pour chaque région, on cherche le facteur de fond qui pèse le plus. Pour un facteur $f$ et une région $r$ :
+
+$$
+\text{poids}(r, f) = |\rho_f| \times z_{r,f}
+$$
+
+- $z_{r,f}$ : l'écart de la région à la moyenne des 13 régions, en écarts-types. Il est orienté pour qu'une valeur positive veuille dire **plus exposé** ; pour le préscolaire, c'est une valeur basse qui expose.
+- $|\rho_f|$ : la force du lien du facteur avec l'achèvement 2024/25 sur les 13 régions (`analyse/P14_facteurs_correlations.csv`).
+
+| Facteur | Violence | Femmes sans instruction | Déplacés | Faim | Grossesses précoces | Pauvreté | Préscolaire |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| $\lvert\rho_f\rvert$ | 0,92 | 0,85 | 0,83 | 0,72 | 0,72 | 0,69 | 0,55 |
+
+Le **facteur dominant** est celui qui a le plus grand poids. L'action proposée est le levier de ce facteur ; le deuxième poids donne la suite. Si aucun poids n'est positif, la région n'a aucun facteur au-dessus de la moyenne : on consolide. Le CEP est laissé de côté, car ce n'est pas un signal de risque (effet de sélection, décision D15).
+
+| Facteur dominant | Régions | Levier |
+| --- | --- | --- |
+| Violence | Goulmou + Sirba + Tapoa, Bankui + Sourou, Nakambé | Continuité éducative : écoles délocalisées, enseignement à distance, radio |
+| Grossesses précoces | Koulsé, Tannounyan, Djôrô | Maintien des filles à l'école, lutte contre le mariage d'enfants |
+| Déplacés | Liptako + Soum | Places d'accueil, classes passerelles, inscription sans pièces |
+| Pauvreté | Yaadga | Cantines scolaires, aides aux familles, fournitures |
+| Préscolaire | Nazinon | Préscolaire communautaire |
+| Aucun au-dessus de la moyenne | Guiriko, Oubri, Nando, Kadiogo | Consolider |
+
+Calcul : `scripts/facteur_dominant.py`, résultats dans `analyse/P19_facteur_dominant.csv`.
+
+Ce facteur **explique et oriente l'action, il ne prévoit pas** (décision D16). Avec 13 régions, c'est une lecture d'orientation : le deuxième facteur est souvent proche du premier, et l'écran donne les deux.
+
 ## Les deux autres prévisions de l'application
 
 - **Élèves de l'année, à partir des écoles ouvertes à la rentrée** (D13) : $\ln(E_{t+n}/E_{2024/25}) = 0{,}0197\,n + 0{,}7784 \cdot \ln(O_{t+n}/O_{2024/25})$.

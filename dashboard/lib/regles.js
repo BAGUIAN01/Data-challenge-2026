@@ -57,3 +57,17 @@ export function couches(jeu) {
 export const centaine = (v) => (v === null || v === undefined ? v : Math.round(v / 100) * 100);
 
 export const signe = (v) => (v > 0 ? "+" : v < 0 ? "−" : "");
+
+// Dominant background factor of a region, what to act on (scripts/facteur_dominant.py): read from the
+// data set. null when the data set does not carry it; dominant is null when no factor stands out.
+export function facteurDominant(jeu, r) {
+  const f = jeu?.facteur_dominant?.par_region?.[r.cle];
+  if (!f) return null;
+  const def = (id) => jeu.facteurs_def.find((d) => d.id === id) ?? null;
+  return { ...f, def: f.dominant ? def(f.dominant) : null, defSecond: f.second ? def(f.second) : null };
+}
+
+// Plain name of a factor for "agir sur …".
+export const NOM_ACTION = { violence: "l'insécurité", deplaces: "l'accueil des déplacés", pauvrete: "la pauvreté", faim: "la faim",
+  meres: "l'instruction des mères", grossesses: "les grossesses précoces", prescolaire: "le préscolaire" };
+

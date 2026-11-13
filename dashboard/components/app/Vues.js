@@ -2,11 +2,11 @@
 // Content of the screens: the country summary (sheet over the map), the region preview, the tab
 // roots (Régions, Alertes, Plus) and the pushed screens (region, method, sources, pending entries).
 import { useEffect, useRef, useState } from "react";
-import { BlocEstimation, CarteBande, CarteCalendrier, CarteElevesPays, CarteMatrice, CartePriorites, CarteRisque, CarteScore, CarteTapPays } from "./Cartes";
+import { BlocEstimation, CarteActions, CarteBande, CarteCalendrier, CarteElevesPays, CarteMatrice, CartePriorites, CarteScore, CarteTapPays } from "./Cartes";
 import { Chevron, IconeApp } from "./icones";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { ANNEES_SAISIE, estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, PRIORITES, risque, scoreGlobal, trierRegions } from "@/lib/regles";
+import { alerteSeptembre, centaine, facteurDominant, niveauScore, PRIORITES, risque, scoreGlobal, trierRegions } from "@/lib/regles";
 
 export function derniere(saisies, cle) {
   return saisies.filter((s) => s.cle === cle).sort((a, b) => String(b.saisi_le).localeCompare(String(a.saisi_le)))[0] ?? null;
@@ -35,13 +35,20 @@ function Silhouette({ jeu, cle, c }) {
   return <svg viewBox={`${x - m} ${y - m} ${w + 2 * m} ${h + 2 * m}`} aria-hidden="true"><path d={jeu.carte.regions[cle].d} fill={`var(--c${c})`} /></svg>;
 }
 
+// "agir sur …" when the data set carries the dominant factor, the completion rate otherwise.
+function sousTitre(jeu, r) {
+  const fd = facteurDominant(jeu, r);
+  if (!fd) return `achèvement ${fr(r.tap.at(-1), 1)} %`;
+  return fd.def ? `agir sur : ${fd.def.libelle.toLowerCase()}` : "aucun facteur ne ressort";
+}
+
 export function LigneRegion({ jeu, r, onOuvrir, valeur = "score" }) {
   const s = scoreGlobal(jeu, r), montre = valeur === "score" && s !== null ? "score" : valeur === "score" ? "risque" : valeur;
   const v = montre === "sept" ? `${alerteSeptembre(r)} %` : montre === "risque" ? `${risque(r)} %` : s;
   return (
     <button className="row" onClick={() => onOuvrir(r.cle)}>
       <span className="lead"><Silhouette jeu={jeu} cle={r.cle} c={r.priorite} /></span>
-      <span className="t"><b>{r.nom}</b><span>{PRIORITES[r.priorite].libelle} · achèvement {fr(r.tap.at(-1), 1)} %</span></span>
+      <span className="t"><b>{r.nom}</b><span>{PRIORITES[r.priorite].libelle} · {sousTitre(jeu, r)}</span></span>
       <span className="v num">{v}<small>{montre === "sept" ? "septembre" : montre === "risque" ? "risque" : "score /100"}</small></span><Chevron />
     </button>
   );
@@ -52,6 +59,7 @@ export function ResumePays({ jeu, saisies, nav }) {
   return (
     <>
       <CarteScore jeu={jeu} onOuvrir={nav.ouvrirRegion} />
+      <CarteActions jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <CarteBande jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <CartePriorites jeu={jeu} onFiltre={(f) => nav.ongletRegions(f)} />
       <CarteElevesPays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
@@ -63,9 +71,17 @@ export function ResumePays({ jeu, saisies, nav }) {
 }
 
 export function ApercuRegion({ jeu, r, nav }) {
+  const s = scoreGlobal(jeu, r), fd = facteurDominant(jeu, r);
   return (
     <>
-      <CarteRisque jeu={jeu} region={r} />
+      <section className="card">
+        <div className="kpi"><b className="num">{s ?? `${risque(r)} %`}</b>
+          <span className="u">{s === null ? "risque de baisse" : `/ 100 · score ${niveauScore(s)}`}</span>
+          <span className="d">risque de chute {risque(r)} % · achèvement {fr(r.tap.at(-1), 1)} %</span></div>
+        {fd && (fd.def
+          ? <p className="apercu-action"><b>Agir sur : {fd.def.libelle.toLowerCase()}.</b> {fd.def.levier}</p>
+          : <p className="apercu-action"><b>Aucun facteur ne ressort.</b> Consolider ce qui marche.</p>)}
+      </section>
       <div className="btns">
         <button className="btn" onClick={() => nav.ouvrirRegion(r.cle)}>Voir la région</button>
         <button className="btn2" onClick={() => nav.saisir(r.cle)}>Saisir les écoles</button>

@@ -93,6 +93,16 @@ def score_global():
                        "perdus_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "eleves_perdus_pris_%"]))}}
 
 
+def facteur_dominant():
+    """Dominant background factor of each region, what to act on (scripts/facteur_dominant.py)."""
+    f = pd.read_csv("analyse/P19_facteur_dominant.csv").set_index("region_2025")
+    names = {v: k for k, v in fiches.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
+    ids = [c for c in f.columns if c not in ("dominant", "second")]
+    txt = lambda v: None if pd.isna(v) else str(v)
+    return {"par_region": {names[n]: {"dominant": txt(r.dominant), "second": txt(r.second),
+                                      "contributions": {i: float(r[i]) for i in ids}} for n, r in f.iterrows()}}
+
+
 def main():
     data = fiches.load()
     p = data[0]
@@ -144,7 +154,8 @@ def main():
                     "erreur_persistance_pct": round(float(nowc["effectifs_persistance_%"]), 1)},
         "validation": {"rang_tap": 0.97, "auc_reference": 0.83, "auc_septembre": 0.85, "auc_janvier": 0.88,
                        "matrice_regions_pct": 35, "matrice_baisses_pct": 71, "matrice_perdus_pct": 69},
-        "facteurs_def": [{"id": fid, "libelle": lab, "unite": u, "haut_expose": up} for fid, lab, u, up, _ in FACTORS],
+        "facteurs_def": [{"id": fid, "libelle": lab, "unite": u, "haut_expose": up, "levier": lev} for fid, lab, u, up, lev in FACTORS],
+        "facteur_dominant": facteur_dominant(),
         "formule_risque": formule_risque(),
         "score_global": score_global(),
         "carte": carte(),

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Colonnes, Courbe, Fourchette } from "./Graphes";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, EXPOSITION, niveau, niveauScore, PRIORITES, risque, scoreGlobal, signe } from "@/lib/regles";
+import { alerteSeptembre, centaine, EXPOSITION, facteurDominant, niveau, niveauScore, NOM_ACTION, PRIORITES, risque, scoreGlobal, signe } from "@/lib/regles";
 
 const pct = (v, d = 1) => `${fr(v, d)} %`;
 // What each factor's value measures, in a few words.
@@ -45,8 +45,60 @@ function Repere({ titre, sous, valeur, droite, bande }) {
 
 function verdict(jeu, r) {
   const sous = r.tap.at(-1) < jeu.seuils.tap_national, n = niveau(risque(r), jeu.seuils), s = scoreGlobal(jeu, r);
-  const debut = s === null ? "" : `Score global ${s}/100, ${rangFr(rang(jeu.regions, (x) => scoreGlobal(jeu, x) ?? 0, r, "haut"))} sur 13. `;
-  return `${debut}Risque ${n} de baisse des effectifs en 2026/27 (${risque(r)} %), achèvement ${sous ? "sous" : "au-dessus de"} la moyenne du pays.`;
+  const fd = facteurDominant(jeu, r);
+  const action = fd?.dominant ? ` Agir d'abord sur ${NOM_ACTION[fd.dominant] ?? fd.def?.libelle.toLowerCase()}.` : "";
+  return `Risque ${n} de baisse des effectifs en 2026/27 (${risque(r)} %), achèvement ${sous ? "sous" : "au-dessus de"} la moyenne du pays.${s === null ? "" : action}`;
+}
+
+// 1. The global score: one number, its two halves, and where the region stands among the 13.
+function BlocScore({ jeu, r }) {
+  const R = jeu.regions, s = scoreGlobal(jeu, r), w = jeu.score_global.poids_risque;
+  const brutal = 100 * w * (risque(r) / 100), lent = 100 * (1 - w) * (1 - r.tap.at(-1) / 100);
+  return (
+    <section className="sec">
+      <h2>Score global de risque<span>{rangFr(rang(R, (x) => scoreGlobal(jeu, x) ?? 0, r, "haut"))} sur 13 · {niveauScore(s)}</span></h2>
+      <div className="chiffre num">{s}<span> / 100</span></div>
+      <div className="decomp" role="img" aria-label={`Score ${s} : ${fr(brutal, 0)} viennent du risque de chute, ${fr(lent, 0)} des enfants qui n'achèvent pas`}>
+        <i style={{ width: `${brutal}%`, background: "var(--fg)" }} /><i style={{ width: `${lent}%`, background: "var(--z3)" }} />
+      </div>
+      <div className="lg">
+        <span><i className="bx" style={{ "--c": "var(--fg)" }} />Chute des effectifs (violence) : {fr(brutal, 0)}</span>
+        <span><i className="bx" style={{ "--c": "var(--z3)" }} />Enfants qui n'achèvent pas : {fr(lent, 0)}</span>
+      </div>
+      <Bande13 valeurs={R.map((x) => scoreGlobal(jeu, x) ?? 0)} choisie={s} reference={50} min={0} max={100}
+        label={`Score global des 13 régions ; ${r.nom} ${s} sur 100`} />
+    </section>
+  );
+}
+
+// 2. What to act on: the dominant background factor, its lever, and the weight of every factor.
+function BlocAction({ jeu, r }) {
+  const fd = facteurDominant(jeu, r);
+  const toutes = Object.values(jeu.facteur_dominant.par_region).flatMap((x) => Object.values(x.contributions));
+  const m = Math.max(...toutes.map(Math.abs)) || 1;
+  const lignes = Object.entries(fd.contributions).sort((a, b) => b[1] - a[1]);
+  const def = (id) => jeu.facteurs_def.find((d) => d.id === id);
+  return (
+    <section className="sec">
+      <h2>Sur quoi agir<span>facteur dominant</span></h2>
+      {fd.def ? (
+        <div className="action">
+          <b>{fd.def.libelle}</b>
+          {fd.def.levier && <p>{fd.def.levier}</p>}
+          {fd.defSecond && <span>Ensuite : {fd.defSecond.libelle.toLowerCase()}{fd.defSecond.levier ? `, ${fd.defSecond.levier.charAt(0).toLowerCase()}${fd.defSecond.levier.slice(1)}` : "."}</span>}
+        </div>
+      ) : <p className="lecture">Aucun facteur de fond n'est au-dessus de la moyenne des 13 régions : consolider ce qui marche.</p>}
+      <div className="contrib" role="img" aria-label={`Poids des facteurs pour ${r.nom}`}>
+        {lignes.map(([id, v]) => (
+          <div key={id} className={id === fd.dominant ? "on" : ""}>
+            <span>{def(id)?.libelle ?? id}</span>
+            <span className="axe"><i style={{ [v >= 0 ? "left" : "right"]: "50%", width: `${(Math.abs(v) / m) * 50}%`, background: v < 0 ? "var(--z2)" : id === fd.dominant ? "var(--fg)" : "var(--z3)" }} /></span>
+          </div>
+        ))}
+      </div>
+      <p className="lecture">Poids d'un facteur : son écart à la moyenne des 13 régions, multiplié par la force de son lien avec l'achèvement. À droite du trait, plus exposé que la moyenne. Ces facteurs expliquent et orientent l'action ; ils ne prévoient pas.</p>
+    </section>
+  );
 }
 
 export default function FicheRegion({ jeu, r, saisies, onMethode }) {
@@ -76,14 +128,11 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
         <span>{verdict(jeu, r)}</span>
       </div>
 
+      {scoreGlobal(jeu, r) !== null && <BlocScore jeu={jeu} r={r} />}
+      {facteurDominant(jeu, r) && <BlocAction jeu={jeu} r={r} />}
+
       <section className="sec">
         <h2>Prévision<span>rang sur 13 : 1 = le plus préoccupant</span></h2>
-        {scoreGlobal(jeu, r) !== null && (
-          <Repere titre="Score global de décrochage" sous={`moitié risque de chute (${p} %), moitié enfants qui n'achèvent pas (${pct(100 - r.tap.at(-1))})`}
-            valeur={`${scoreGlobal(jeu, r)}/100`} droite={`${rangFr(rang(R, (x) => scoreGlobal(jeu, x) ?? 0, r, "haut"))}/13`}
-            bande={<Bande13 valeurs={R.map((x) => scoreGlobal(jeu, x) ?? 0)} choisie={scoreGlobal(jeu, r)} reference={50} min={0} max={100}
-              label={`Score global des 13 régions ; ${r.nom} ${scoreGlobal(jeu, r)} sur 100, niveau ${niveauScore(scoreGlobal(jeu, r))}`} />} />
-        )}
         <Repere titre="Risque de baisse des effectifs" sous={`2026/27 · ${niveau(p, jeu.seuils)} · alerte de septembre ${sept} % · mise à jour début janvier`} valeur={`${p} %`}
           droite={`${rangFr(rang(R, risque, r, "haut"))}/13`}
           bande={<Bande13 valeurs={R.map(risque)} choisie={p} reference={jeu.seuils.risque_eleve} min={0} max={100}
@@ -135,7 +184,7 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
       </section>
 
       <section className="sec">
-        <h2>Ce qui pèse en fond<span>exposition parmi les 13</span></h2>
+        <h2>Les facteurs, valeur par valeur<span>exposition parmi les 13</span></h2>
         {jeu.facteurs_def.map((def) => {
           const f = r.facteurs[def.id];
           if (!f || f.valeur === null) return null;

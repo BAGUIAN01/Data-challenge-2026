@@ -16,7 +16,7 @@ Une seule page (`app/page.js`), gardée par le service worker, dans laquelle on 
 | Onglet | Ce qu'on y trouve |
 | --- | --- |
 | **Carte** | Les 13 régions en quatre couches : score global (moitié risque de chute, moitié part d'enfants qui n'achèvent pas), risque, priorité, achèvement. Le bleu est une seule rampe : plus foncé, plus préoccupant. Toucher une région ouvre son aperçu dans la feuille du bas ; la feuille montre le pays : où agir, les 13 régions sur l'échelle du risque, les élèves, l'achèvement. |
-| **Régions** | La matrice de priorité et la liste des régions, avec des filtres. Chaque région ouvre sa fiche : risque, élèves attendus, achèvement avec la prévision 2025/26, filles et garçons, violence, facteurs, leviers, fiche PDF. |
+| **Régions** | La matrice de priorité et la liste des régions, avec des filtres. Chaque région ouvre sa fiche, dans cet ordre : le score global, le facteur dominant avec l'action à mener, puis les détails (prévision, achèvement, violence, facteurs, constats, leviers, fiche PDF). |
 | **Alertes** | Le calendrier d'alerte, les saisies d'écoles ouvertes, l'alerte de septembre. |
 | **Plus** | État de la synchronisation, apparence (clair, sombre), installation, méthode et sources. |
 
