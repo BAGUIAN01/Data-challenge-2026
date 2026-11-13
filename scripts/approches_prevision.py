@@ -1,17 +1,4 @@
-"""Two forecasting approaches not tried before, tested on years the models never saw.
-
-A. Nowcast from the schools open at the start of the year. The number of schools
-   working at the October start is known to the administration weeks or months
-   before the annual statistics. Predict the year's change in pupils (and in the
-   completion rate) from the change in open schools, with a slope learned on
-   earlier years only.
-
-B. Cohort pipeline (national, grades are national only). The pupils who reach CM2
-   next year are mostly in CM1 this year: CM2(t+1) = CM1(t) x last observed passage
-   rate. Two years ahead: CM2(t+2) = CE2(t) x the two last passage rates.
-
-Usage: python approches_prevision.py   (run from the project root)
-"""
+"""Two forecasting approaches not tried before, tested on years the models never saw."""
 import numpy as np
 import pandas as pd
 
@@ -55,7 +42,7 @@ def main():
     gr = e4.groupby(["niveau", "annee"]).valeur.sum().unstack("annee")[YEARS]
     nat = p[p.region == "NATIONAL"].set_index("annee").loc[YEARS]
     rows = []
-    for i in range(2, 10):  # predict year i from year i-1, passage rate seen at i-1
+    for i in range(2, 10):
         y0, y1, ym = YEARS[i - 1], YEARS[i], YEARS[i - 2]
         rate = gr.loc["CM2", y0] / gr.loc["CM1", ym]
         cm2_hat = gr.loc["CM1", y0] * rate
@@ -70,7 +57,7 @@ def main():
     print("Moyennes :", b[["err_CM2_filiere_%", "err_CM2_persistance_%", "err_TAP_filiere", "err_TAP_persistance"]]
           .mean().round(2).to_dict())
     rows = []
-    for i in range(3, 10):  # two years ahead: CE2(t) -> CM1(t+1) -> CM2(t+2)
+    for i in range(3, 10):
         y0, y2 = YEARS[i - 2], YEARS[i]
         r1 = gr.loc["CM1", y0] / gr.loc["CE2", YEARS[i - 3]]
         r2 = gr.loc["CM2", y0] / gr.loc["CM1", YEARS[i - 3]]
@@ -79,7 +66,6 @@ def main():
                      "err_persistance_2ans_%": abs(gr.loc["CM2", y0] / gr.loc["CM2", y2] - 1) * 100})
     c = pd.DataFrame(rows)
     print("\nDeux ans à l'avance (CM2), erreur moyenne :", c.iloc[:, 1:].mean().round(1).to_dict())
-    # Forward projection from the last year available
     rate = gr.loc["CM2", "2024-2025"] / gr.loc["CM1", "2023-2024"]
     r1 = gr.loc["CM1", "2024-2025"] / gr.loc["CE2", "2023-2024"]
     print(f"\nProjection : CM2 2025/26 ≈ {gr.loc['CM1', '2024-2025'] * rate:,.0f} (CM1 2024/25 = "
@@ -92,17 +78,11 @@ def main():
 
 
 def robustness(gr, nat):
-    """How far the CM2 projection can be trusted, and what the record CP1 cohorts imply.
-
-    Band: the lowest and highest CM1 -> CM2 passage rates observed up to the base year,
-    so the band includes the 2022/23 shock. Its coverage and the direction of change
-    are checked on past years with rates known at the time only.
-    """
     print("\n=== C. Solidité de la projection du CM2, et ce qu'annoncent les grandes cohortes de CP1 ===")
     passage = pd.Series({YEARS[i]: gr.loc["CM2", YEARS[i]] / gr.loc["CM1", YEARS[i - 1]] for i in range(1, 10)})
     print("Passage du CM1 au CM2 :", {SHORT[y]: f"{v:.1%}" for y, v in passage.items()})
     rows = []
-    for i in range(3, 10):  # at least two passage rates known before predicting year i
+    for i in range(3, 10):
         y0, y1 = YEARS[i - 1], YEARS[i]
         known = passage.loc[:y0]
         lo, hi = gr.loc["CM1", y0] * known.min(), gr.loc["CM1", y0] * known.max()
@@ -121,11 +101,9 @@ def robustness(gr, nat):
     print(f"CM2 2025/26 : {proj['central']:,.0f} [{proj['bas']:,.0f} ; {proj['haut']:,.0f}] contre "
           f"{gr.loc['CM2', '2024-2025']:,.0f} en 2024/25 ; même le pire passage observé ({passage.min():.1%}, année du choc) "
           f"donne {proj['bas'] / gr.loc['CM2', '2024-2025'] - 1:+.1%}")
-    # Implied denominator of the completion rate: not smooth, so a CM2 count cannot be turned into a TAP.
     den = gr.loc["CM2"] / (nat.TAP_T / 100)
     print("Variation du dénominateur implicite du TAP (CM2 / TAP) :",
           {SHORT[y]: f"{v:+.1%}" for y, v in (den / den.shift() - 1).dropna().items()})
-    # Long horizon: CP1 of year t reaches CM2 five years later, with the apparent survival seen so far.
     surv = pd.Series({YEARS[i]: gr.loc["CM2", YEARS[i]] / gr.loc["CP1", YEARS[i - 5]] for i in range(5, 10)})
     print("Survie apparente CP1 -> CM2 (5 ans plus tard) :", {SHORT[y]: f"{v:.1%}" for y, v in surv.items()})
     print("National, taux brut d'admission :", {SHORT[y]: round(v) for y, v in nat.TBA_T.items()})

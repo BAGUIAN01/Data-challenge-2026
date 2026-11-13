@@ -1,20 +1,4 @@
-"""Do the non-security factors help to predict? Tests fixed before running.
-
-Factors usable without looking ahead:
-- food insecurity of school year t (Cadre Harmonisé, known during the year; until 2023/24);
-- "fond": women without schooling and births per 1,000 girls aged 15-19, from the latest
-  DHS round fielded at least two years before the start of school year t (2010, 2014, 2017,
-  2021), so that it was published at the time.
-Poverty (2021 only) and displacement (2022 snapshot) are left out: using them for earlier
-years would be looking ahead.
-
-T1  Drop of more than 5 % in pupils next year (logistic, AUC and Brier).
-T2  Change in the completion rate next year (least squares, mean absolute error).
-T3  Change in the completion rate three years ahead (least squares), the horizon where
-    slow factors should matter most.
-All: expanding window, each test year predicted from rows whose target was already known.
-Usage: python prevision_facteurs.py (from the project root). Writes analyse/P15_*.csv.
-"""
+"""Do the non-security factors help to predict? Tests fixed before running."""
 import sys
 import warnings
 
@@ -26,7 +10,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from solution_prevision import SHORT, build, key  # noqa: E402
+from solution_prevision import SHORT, build, key
 
 warnings.filterwarnings("ignore")
 DHS_NAMES = {"Boucle de Mouhoun": "BOUCLEDUMOUHOUN", "Centre (including Ouagadougou)": "CENTRE",
@@ -101,7 +85,6 @@ def regress(p, target, horizon, label):
     years = sorted(d.annee.unique())
     rows = []
     for i, ty in enumerate(years):
-        # Rows whose target year (t + horizon) is not later than the forecast year ty.
         tr = d[d.annee.map(years.index) <= i - horizon]
         if len(tr) < 26:
             continue

@@ -1,16 +1,13 @@
-"""Figures for the two forecasting approaches that work: nowcast from open schools, cohort pipeline.
-
-Usage: python figures_approches.py   (run from the project root, after approches_prevision.py and solution_prevision.py)
-"""
+"""Figures for the two forecasting approaches that work: nowcast from open schools, cohort pipeline."""
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import matplotlib.ticker  # noqa: E402,F401
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
+import matplotlib.pyplot as plt
+import matplotlib.ticker
+import numpy as np
+import pandas as pd
 
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # validated categorical order
+SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
 INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
 plt.rcParams.update({
     "figure.facecolor": SURFACE, "axes.facecolor": SURFACE, "savefig.facecolor": SURFACE,
@@ -22,7 +19,6 @@ plt.rcParams.update({
 
 
 def fr(x, dec=1):
-    """French number: thin space for thousands, decimal comma."""
     s = f"{x:,.{dec}f}".replace(",", " ").replace(".", ",")
     return s
 
@@ -92,11 +88,8 @@ def cohorts():
     plt.close(fig)
 
 
-
-
 PRIO = {1: ("Priorité 1 : agir maintenant", "#104281"), 2: ("Priorité 2 : veille renforcée", "#3987e5"),
         3: ("Priorité 3 : consolider", "#b7d3f6")}
-# Label offsets in points (dx, dy, horizontal alignment), set by hand to avoid collisions.
 LABEL = {"Liptako + Soum": (0, -13, "center"), "Goulmou + Sirba + Tapoa": (-4, 10, "center"),
          "Koulsé": (6, 8, "left"), "Bankui + Sourou": (0, -13, "center"), "Yaadga": (0, 9, "center"),
          "Nakambé": (8, 0, "left"), "Tannounyan": (-8, 0, "right"), "Guiriko": (8, 2, "left"),
@@ -135,8 +128,6 @@ def matrix():
                            "logistique sur la violence d'oct. 2025 à sept. 2026. Calculs de l'équipe.")
     fig.savefig("analyse/figures/15_matrice_priorite_2026_27.png", dpi=200)
     plt.close(fig)
-
-
 
 
 COLS = [("violence", "Violence", "incidents_moy", "{:.0f}"), ("deplaces", "Déplacés\naccueillis", None, "{:.0f} %"),

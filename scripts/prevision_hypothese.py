@@ -1,19 +1,4 @@
-"""Finish the analysis on the data we have: cautious forecast, escalation alert, hypothesis test.
-
-A. Forecast of the completion rate (TAP) for 2025-26: "same as last year", with an
-   80 % band taken from past one-year changes; the band's coverage is checked on
-   years it was not built on.
-B. Escalation alert from ACLED: incidents of the school year before the census at
-   least 1.5 times those of the year before, and at least 30. Thresholds set before
-   looking at the outcome; their past record is reported as it is.
-C. Hypothesis "insecurity x poverty": does violence hurt completion more where
-   poverty is high? Additive vs interaction model, coefficient with a bootstrap by
-   region, and out-of-sample errors.
-D. Attacks on education (Insecurity Insight): do they announce school closures
-   better than all violence?
-
-Usage: python prevision_hypothese.py   (run from the project root)
-"""
+"""Finish the analysis on the data we have: cautious forecast, escalation alert, hypothesis test."""
 import unicodedata
 
 import numpy as np
@@ -55,11 +40,10 @@ def main():
     p["dlog_ecoles_next"] = np.log(g.ecoles.shift(-1) / p.ecoles)
     p["l_inc"] = np.log1p(p.incidents)
 
-    # ---------------- A. Cautious forecast with an 80 % band ----------------
     print("=== A. Prévision du TAP 2025/26 : « comme l'an passé » avec fourchette à 80 % ===")
     ch = p.dropna(subset=["dTAP_next"])
     cover = []
-    for ty in YEARS[3:-1]:  # band built only on changes observed before the predicted year
+    for ty in YEARS[3:-1]:
         past = ch[ch.annee < ty].dTAP_next
         lo, hi = past.quantile(0.10), past.quantile(0.90)
         test = ch[ch.annee == ty]
@@ -72,7 +56,7 @@ def main():
     lo, hi = ch.dTAP_next.quantile(0.10), ch.dTAP_next.quantile(0.90)
     pop = pd.read_csv("data/raw/externe/hdx_cod_ps/bfa_admpop_adm2_2024.csv", encoding="utf-8-sig")
     pop["cle"] = pop.ADM1_FR.map(key)
-    pop11 = (pop.groupby("cle").T_10_14.sum() / 5).rename("enfants_11_ans_approx")  # one fifth of the 10-14 group
+    pop11 = (pop.groupby("cle").T_10_14.sum() / 5).rename("enfants_11_ans_approx")
     last = p[p.annee == "2024-2025"].set_index("cle")
     fc = pd.DataFrame({
         "region": last.region, "region_2025": last.region.map(names2025),
@@ -82,7 +66,6 @@ def main():
     fc["enfants_hors_CM2_estimes"] = ((1 - fc.TAP_24_25 / 100).clip(lower=0) * fc.enfants_11_ans_approx).round(-2)
     print(f"Fourchette appliquée : {lo:+.1f} à {hi:+.1f} points autour du TAP 2024/25")
 
-    # ---------------- B. Escalation alert ----------------
     print("\n=== B. Alerte d'escalade (incidents ≥ 1,5 × l'année d'avant, et ≥ 30) ===")
     p["inc_prev"] = g.incidents.shift()
     p["alerte"] = (p.incidents >= 1.5 * p.inc_prev) & (p.incidents >= 30)
@@ -115,10 +98,9 @@ def main():
     print("\n--- Tableau de prévision et d'alerte ---")
     print(fc.drop(columns=["region", "enfants_11_ans_approx"]).round(1).to_string())
 
-    # ---------------- C. Hypothesis: insecurity x poverty ----------------
     print("\n=== C. Hypothèse : l'insécurité pèse-t-elle plus là où la pauvreté est forte ? ===")
     m = p.dropna(subset=["dTAP_next"]).copy()
-    m["pauv"] = (m.incidence_pauvrete_2021_pct - m.incidence_pauvrete_2021_pct.mean()) / 10  # per 10 points
+    m["pauv"] = (m.incidence_pauvrete_2021_pct - m.incidence_pauvrete_2021_pct.mean()) / 10
     m["inc_c"] = m.l_inc - m.l_inc.mean()
     m["inter"] = m.inc_c * m.pauv
 
@@ -130,7 +112,7 @@ def main():
     b_add, b_int = fit(m, add), fit(m, inter)
     regions = m.region.unique()
     boots = []
-    for _ in range(2000):  # resample whole regions: years of one region are not independent
+    for _ in range(2000):
         pick = RNG.choice(regions, size=len(regions), replace=True)
         bs = pd.concat([m[m.region == r] for r in pick])
         boots.append(fit(bs, inter))
@@ -150,7 +132,6 @@ def main():
         rows.append({"modele": "comme l'an passé", "annee": ty, "erreur": np.abs(te.dTAP_next).mean()})
     oos = pd.DataFrame(rows).groupby("modele").erreur.mean().round(2)
     print("Erreur moyenne sur années non vues (points) :", oos.to_dict())
-    # Cross-section 2021-22 -> 2024-25: the shock period, poverty measured just before it
     cs = p[p.annee.isin(["2021-2022", "2024-2025"])].pivot_table(index="region", columns="annee", values="TAP_T")
     cs["variation_TAP"] = cs["2024-2025"] - cs["2021-2022"]
     inc = p[p.annee.isin(["2021-2022", "2022-2023", "2023-2024"])].groupby("region").incidents.sum()
@@ -162,7 +143,6 @@ def main():
     print(f"r(variation TAP, pauvreté) = {np.corrcoef(cs.variation_TAP, cs.pauvrete_2021)[0, 1]:+.2f} ; "
           f"r(variation TAP, log incidents) = {np.corrcoef(cs.variation_TAP, np.log1p(cs.incidents_21_24))[0, 1]:+.2f} (n = 13)")
 
-    # ---------------- D. Attacks on education vs all violence ----------------
     print("\n=== D. Attaques contre l'éducation (Insecurity Insight) ===")
     e = pd.read_excel("data/raw/externe/hdx_insecurity_insight/education_in_danger_2017_2026.xlsx")
     print(f"{len(e)} incidents ; région non renseignée : {int(e['Admin 1'].isna().sum())}")
@@ -170,8 +150,6 @@ def main():
     e["cle"] = e["Admin 1"].map(lambda x: key(EN.get(x, x)))
     e["annee"] = pd.to_datetime(e.Date).map(school_year)
     ea = e.groupby(["cle", "annee"]).size().rename("attaques_education")
-    # Our aggregate (count per region and school year) is deposited, as for ACLED: the test can be
-    # replayed from it without the source file.
     ea.reset_index().sort_values(["cle", "annee"]).to_csv("analyse/P10_attaques_education_region_annee.csv", index=False)
     q = p.join(ea, on=["cle", "annee"])
     q["attaques_education"] = q.attaques_education.fillna(0)

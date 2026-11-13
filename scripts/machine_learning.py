@@ -1,22 +1,4 @@
-"""Machine learning put in competition with simple rules, on years the models never saw.
-
-Two questions, both about next year (t -> t+1), with only what is known before the
-next school census (t's school data, violence from October t to September t+1,
-poverty 2021):
-
-1. Regression: change in the completion rate (points). Competitors: "same as last
-   year", ridge regression, random forest, gradient boosting.
-2. Classification: will pupil numbers drop by more than 5 %? Competitors: the
-   escalation rule (decision D7), logistic regression on violence only, logistic
-   regression on all variables, random forest.
-
-Protocol: expanding window. Each test year is predicted by models trained on the
-earlier years only; settings are fixed in advance (no tuning on the test years),
-because 104 observations leave no room for a separate tuning set.
-
-Writes analyse/P11_ml_regression.csv, P11_ml_classification.csv, P11_importance.csv,
-P11_probabilites_alerte.csv. Usage: python machine_learning.py (from the project root).
-"""
+"""Machine learning put in competition with simple rules, on years the models never saw."""
 import unicodedata
 import warnings
 
@@ -58,16 +40,14 @@ def build():
     p = p.merge(acled, on=["cle", "annee"], how="left").merge(
         pov[["cle", "incidence_pauvrete_2021_pct"]], on="cle", how="left").sort_values(["region", "annee"])
     g = p.groupby("region")
-    # Features known at t (school census of year t, violence from October t to September t+1).
     p["dTAP"] = p.TAP_T - g.TAP_T.shift()
     p["dlog_cp1"] = np.log(p.nouveaux_CP1_T / g.nouveaux_CP1_T.shift())
     p["part_public"] = p.ecoles_publiques / p.ecoles
-    p["sorties_prev"] = g.sorties_app.shift()  # exits t-1 -> t ; sorties_app itself uses year t+1
+    p["sorties_prev"] = g.sorties_app.shift()
     p["l_inc"] = np.log1p(p.incidents)
     p["d_l_inc"] = p.l_inc - g.l_inc.shift()
     p["l_morts"] = np.log1p(p.morts)
     p["pauvrete"] = p.incidence_pauvrete_2021_pct
-    # Targets (year t+1).
     p["y_dTAP"] = g.TAP_T.shift(-1) - p.TAP_T
     p["y_drop"] = (np.log(g.eleves_T.shift(-1) / p.eleves_T) < np.log(0.95)).astype(float)
     p.loc[g.eleves_T.shift(-1).isna(), "y_drop"] = np.nan
@@ -83,11 +63,10 @@ def main():
     p = build()
     data = p.dropna(subset=FEATURES + ["y_dTAP", "y_drop"]).copy()
     years = sorted(data.annee.unique())
-    tests = years[3:]  # at least 3 years to learn from
+    tests = years[3:]
     print(f"Observations utilisables : {len(data)} (13 régions × {len(years)} années) ; "
           f"années testées : {SHORT[tests[0]]} à {SHORT[tests[-1]]} (prédiction de l'année suivante)")
 
-    # ---------------- 1. Regression ----------------
     reg_models = {
         "Ridge (linéaire régularisé)": lambda: make_pipeline(StandardScaler(), Ridge(alpha=10.0)),
         "Forêt aléatoire": lambda: RandomForestRegressor(n_estimators=500, min_samples_leaf=5, max_features=0.5,
@@ -123,7 +102,6 @@ def main():
           "points d'erreur gagnés quand la variable est connue) :")
     print(imp.head(8).round(3).to_string(index=False))
 
-    # ---------------- 2. Classification ----------------
     clf_models = {
         "Logistique, violence seule": (["l_inc", "d_l_inc"],
                                        lambda: make_pipeline(StandardScaler(), LogisticRegression(C=1.0))),
@@ -166,8 +144,6 @@ def main():
     print(clf.round(3).to_string(index=False))
     print("AUC : 0,5 = hasard, 1 = parfait. Brier : plus bas = probabilités plus justes. Seuil d'alerte des modèles : 50 %.")
 
-    # Current probabilities with the violence-only logistic model (the only one usable for 2026/27:
-    # the 2025/26 school data are not published yet).
     cols, mk = clf_models["Logistique, violence seule"]
     final = mk().fit(data[cols], data.y_drop)
     acled = pd.read_csv("analyse/acled_region_annee.csv").sort_values(["cle", "annee"])

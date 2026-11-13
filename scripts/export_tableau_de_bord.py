@@ -1,12 +1,4 @@
-"""Export everything the dashboard shows into one JSON file: dashboard/public/data/tableau_de_bord.json.
-
-The same file seeds the Neon database (dashboard/db/seed.mjs) and is bundled with the app as the
-offline snapshot. Key facts and levers come from scripts/fiches_regionales.py (one rule, two outputs:
-the PDF fiche and the dashboard). The map is projected here into SVG paths, so the dashboard needs
-no map tiles and works without network.
-
-Usage: python export_tableau_de_bord.py (from the project root, after all analysis scripts).
-"""
+"""Export everything the dashboard shows into one JSON file: dashboard/public/data/tableau_de_bord.json."""
 import hashlib
 import json
 import math
@@ -18,12 +10,12 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, "scripts")
-import fiches_regionales as fiches  # noqa: E402
+import fiches_regionales as fiches
 
 OUT = "dashboard/public/data/tableau_de_bord.json"
 YEARS = fiches.YEARS
 SHORT = fiches.SHORT
-FACTORS = [  # id, label, unit, higher value means more exposed, lever when among the 4 most exposed
+FACTORS = [
     ("violence", "Violence", "incidents par an", True, "Continuité éducative : écoles délocalisées, enseignement à distance, radio."),
     ("deplaces", "Déplacés accueillis", "% de la population", True, "Places d'accueil, classes passerelles, inscription sans pièces."),
     ("pauvrete", "Pauvreté", "% de la population", True, "Cantines scolaires, aides aux familles liées à la scolarité, fournitures."),
@@ -40,7 +32,6 @@ def num(v, nd=1):
 
 
 def project(geom, lon0, lat_max, k):
-    """Equirectangular projection scaled by cos(latitude): good enough for a country of this size."""
     c = math.cos(math.radians(12.3))
     polys = [geom] if geom.geom_type == "Polygon" else list(geom.geoms)
     parts = []
@@ -66,8 +57,6 @@ def carte():
 
 
 def formule_risque():
-    """The risk models as formulas, in original units (scripts/formule_risque.py, checked there against
-    the probabilities shown): logit(p) = constante + sum of coefficient x variable."""
     f = pd.read_csv("analyse/P17_formule_risque.csv")
     cles = {"Référence": "reference", "Alerte de septembre": "septembre", "Alerte de janvier": "janvier"}
     out = {"observations": int(f.observations.iloc[0]), "baisses": int(f.baisses.iloc[0])}
@@ -78,8 +67,6 @@ def formule_risque():
 
 
 def score_global():
-    """Global score per region and its replay on the past (scripts/score_global.py). Stored with the
-    data set's parameters: one computation (Python), read as is by the app and the database."""
     s = pd.read_csv("analyse/P18_score_global_2026_27.csv").set_index("region_2025").score_global
     names = {v: k for k, v in fiches.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
     rj = pd.read_csv("analyse/P18_score_global_rejoue.csv").set_index("mesure")
@@ -94,8 +81,6 @@ def score_global():
 
 
 def trajectoire(final):
-    """Score year by year, each one computed with its own year's information only, then the 2026/27
-    forecast. chute: drop of more than 5 % observed that year (null when not known yet)."""
     t = pd.read_csv("analyse/P18_score_global_trajectoire.csv")
     annees = sorted(t.annee_cible.unique()) + ["26/27"]
     par = {}
@@ -107,7 +92,6 @@ def trajectoire(final):
 
 
 def facteur_dominant():
-    """Dominant background factor of each region, what to act on (scripts/facteur_dominant.py)."""
     f = pd.read_csv("analyse/P19_facteur_dominant.csv").set_index("region_2025")
     names = {v: k for k, v in fiches.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
     ids = [c for c in f.columns if c not in ("dominant", "second")]

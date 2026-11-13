@@ -1,11 +1,4 @@
-"""Write out the risk model as a formula and check it against the probabilities shown in the app.
-The three alert models of the calendar (decision D17; reference = D12) are logistic regressions on
-standardised variables (scikit-learn, C = 1). Their coefficients are brought back to the original
-units, so that the probability can be computed by hand:
-    p = 1 / (1 + exp(-(b0 + b1 x1 + b2 x2 [+ b3 x3])))
-Check: for every region, the formula gives back the probability of analyse/P16_alertes_calendrier.csv.
-Usage: python scripts/formule_risque.py (from the project root). Writes analyse/P17_formule_risque.csv.
-"""
+"""Write out the risk model as a formula and check it against the probabilities shown in the app."""
 import sys
 import warnings
 
@@ -16,8 +9,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from anticipation_fine import SETS, features  # noqa: E402
-from solution_prevision import build  # noqa: E402
+from anticipation_fine import SETS, features
+from solution_prevision import build
 
 warnings.filterwarnings("ignore")
 NOMS = {"l_inc": "ln(1 + incidents de l'année scolaire)", "d_l_inc": "escalade : écart du terme précédent avec l'année d'avant",

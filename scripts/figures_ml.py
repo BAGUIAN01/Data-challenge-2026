@@ -1,14 +1,11 @@
-"""Figures for the machine learning comparison and the risk ranking for 2026/27.
-
-Usage: python figures_ml.py   (run from the project root, after machine_learning.py)
-"""
+"""Figures for the machine learning comparison and the risk ranking for 2026/27."""
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import pandas as pd  # noqa: E402
+import matplotlib.pyplot as plt
+import pandas as pd
 
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # validated categorical order, adjacent pairs
+SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
 INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
 TIERS = [(40, "Risque élevé (≥ 40 %)", "#104281"), (15, "Risque moyen (15-39 %)", "#3987e5"),
          (0, "Risque faible (< 15 %)", "#b7d3f6")]
@@ -38,7 +35,6 @@ def main():
     for c, col in zip(cols, SERIES):
         lw = 2.6 if c == "Comme l'an passé" else 1.8
         ax.plot(reg.annee_predite, reg[c], color=col, marker="o", markersize=5, linewidth=lw, label=c)
-    # End labels, pushed apart so that close values do not overlap (minimum gap in data units).
     ends = sorted(((reg[c].iloc[-1], s) for c, s in zip(cols, short)))
     placed = []
     for v, s in ends:

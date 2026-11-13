@@ -1,18 +1,4 @@
-"""Finer violence signals for anticipation, from ACLED by province and month. List fixed before running.
-
-Baseline: log incidents of school year t (October t to September t+1) and its change.
-Variants, each added to the baseline:
-  F1 extent      share of province-months with at least one event in the region (and its change)
-  F2 late        events of July-September just before the next school year (log)
-  F3 rentree     events of October-December of the target year (log): known at the start of the
-                 year, months before the statistical yearbook (a nowcast, said as such)
-  F4 civilians   attacks on civilians (log and change), instead of all political violence
-  F5 contagion   violence in neighbouring regions (mean log incidents, and change)
-  F6 combination (numbers only) average of "no change" and the baseline model
-Targets: drop of more than 5 % in pupils at the next census (AUC, paired bootstrap of the gain);
-change in pupils (mean absolute error). Expanding window, same test years as the other tests.
-Usage: python anticipation_fine.py (from the project root). Writes analyse/P16_*.csv.
-"""
+"""Finer violence signals for anticipation, from ACLED by province and month."""
 import sys
 import warnings
 
@@ -25,7 +11,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from solution_prevision import SHORT, build, key  # noqa: E402
+from solution_prevision import SHORT, build, key
 
 warnings.filterwarnings("ignore")
 SEED = 2026
@@ -37,7 +23,7 @@ def monthly(path):
     a = pd.read_excel(path, sheet_name="Data")
     a["cle"] = a.Admin1.map(key)
     a["m"] = a.Month.map(MONTHS)
-    a["start"] = np.where(a.m >= 10, a.Year, a.Year - 1)  # school year starting in October
+    a["start"] = np.where(a.m >= 10, a.Year, a.Year - 1)
     return a
 
 
@@ -46,9 +32,9 @@ def features(path_pv, path_civ):
     a["any"] = (a.Events > 0).astype(int)
     sy = a.groupby(["cle", "start"]).agg(incidents=("Events", "sum"), extent=("any", "mean")).reset_index()
     late = a[a.m.isin([7, 8, 9])].groupby(["cle", "Year"]).Events.sum().rename("late").reset_index()
-    late["start"] = late.Year - 1  # July-September closes the school year that started the year before
+    late["start"] = late.Year - 1
     rent = a[a.m.isin([10, 11, 12])].groupby(["cle", "Year"]).Events.sum().rename("rentree").reset_index()
-    rent["start"] = rent.Year - 1  # October-December of year Y opens the school year AFTER the one starting in Y-1
+    rent["start"] = rent.Year - 1
     c = monthly(path_civ).groupby(["cle", "start"]).Events.sum().rename("civils").reset_index()
     f = sy.merge(late[["cle", "start", "late"]], on=["cle", "start"], how="left") \
         .merge(rent[["cle", "start", "rentree"]], on=["cle", "start"], how="left") \
@@ -56,7 +42,6 @@ def features(path_pv, path_civ):
     f["annee"] = f.start.astype(str) + "-" + (f.start + 1).astype(str)
     for col in ["incidents", "late", "rentree", "civils"]:
         f["l_" + col] = np.log1p(f[col])
-    # Neighbours from the 13-region map.
     g = gpd.read_file("data/ref/regions_13.geojson")
     name_col = next(c for c in g.columns if g[c].astype(str).map(key).isin(f.cle.unique()).sum() >= 13)
     g["cle"] = g[name_col].map(key)
@@ -109,7 +94,7 @@ def main():
             b = np.linalg.lstsq(X, tr.y_eleves, rcond=None)[0]
             num[k] += list(np.column_stack([np.ones(len(te))] + [te[x] for x in c]) @ b)
     truth = np.array(truth)
-    real = d.set_index("annee").loc[sorted(set(yrs))].y_eleves.values  # same order as the loop
+    real = d.set_index("annee").loc[sorted(set(yrs))].y_eleves.values
     base = np.array(preds[list(SETS)[0]])
     rng = np.random.default_rng(SEED)
     idx = [rng.integers(0, len(truth), len(truth)) for _ in range(5000)]
@@ -134,7 +119,6 @@ def main():
     r.round(4).to_csv("analyse/P16_signaux_fins.csv", index=False)
     f.to_csv("analyse/P16_signaux_region_annee.csv", index=False)
 
-    # Is the gain spread over the years, or carried by one of them?
     yrs = np.array(yrs)
     per = []
     for ty in sorted(set(yrs)):
@@ -149,8 +133,6 @@ def main():
 
 
 def calendar(d, f):
-    """Two alerts a year: in September (F2, before the start of the year) and in January (F3, once
-    October-December is known). Fitted on all usable years, applied to the years not yet published."""
     n25 = pd.read_csv("analyse/panel_region_annee_2025.csv").drop_duplicates("region").set_index("region").region_2025
     names = d.drop_duplicates("cle").set_index("cle").region.map(n25)
     acled = pd.read_csv("analyse/acled_region_annee.csv").sort_values(["cle", "annee"])

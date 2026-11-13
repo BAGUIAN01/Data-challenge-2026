@@ -1,14 +1,4 @@
-"""Does insecurity (ACLED) help anticipate next year's figures, beyond "same as last year"?
-
-ACLED political-violence events (HDX, by former province and month) are summed by
-former region and school year, October to September: violence between two school
-censuses is known before the next one. For each region and year t, we predict the
-change from t to t+1 of three figures (completion rate, log pupils, log schools)
-from the violence of school year t, with a model trained on earlier years only.
-
-Writes analyse/acled_region_annee.csv and analyse/P8_anticipation_acled.csv.
-Usage: python acled_anticipation.py <acled.xlsx> analyse/panel_region_annee.csv analyse/
-"""
+"""Does insecurity (ACLED) help anticipate next year's figures, beyond "same as last year"?"""
 import sys
 import unicodedata
 
@@ -25,7 +15,7 @@ def key(name):
 
 
 def school_year(year, month):
-    start = year if month >= 10 else year - 1  # October to September
+    start = year if month >= 10 else year - 1
     return f"{start}-{start + 1}"
 
 
@@ -63,12 +53,12 @@ def main():
         print(f"\n=== {tname} : corrélations avec la variation de l'année suivante (n = {len(m)}) ===")
         for f in feats:
             print(f"  {f:8s} r = {np.corrcoef(m[f], m.y)[0, 1]:+.2f}")
-        for ty in years[3:]:  # at least 3 years of training
+        for ty in years[3:]:
             tr, te = m[m.annee < ty], m[m.annee == ty]
             X = np.c_[np.ones(len(tr)), tr[feats].values]
             coef, *_ = np.linalg.lstsq(X, tr.y.values, rcond=None)
             pred = np.c_[np.ones(len(te)), te[feats].values] @ coef
-            scale = 100 if "log" in tname else 1  # log changes reported in %
+            scale = 100 if "log" in tname else 1
             rows.append({"cible": tname, "annee_de_depart": ty,
                          "erreur_persistance": np.abs(te.y).mean() * scale,
                          "erreur_avec_ACLED": np.abs(te.y - pred).mean() * scale})

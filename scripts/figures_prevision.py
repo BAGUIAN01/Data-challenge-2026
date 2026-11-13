@@ -1,13 +1,10 @@
-"""Figures for the cautious forecast, the escalation alert and the hypothesis test.
-
-Usage: python figures_prevision.py   (run from the project root, after prevision_hypothese.py)
-"""
+"""Figures for the cautious forecast, the escalation alert and the hypothesis test."""
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 BLUE, BAND, WARN = "#2a78d6", "#b7d3f6", "#fab219"
 INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
@@ -51,7 +48,7 @@ def main():
         if r.alerte_2026_27:
             ax.annotate("⚠ alerte 2026/27", (r.fourchette_haute, i), xytext=(8, 0), textcoords="offset points",
                         va="center", fontsize=8.5, color=INK, fontweight="bold")
-            ax.scatter([r.fourchette_haute + 1.2], [i], s=0)  # keeps the label inside the drawing area
+            ax.scatter([r.fourchette_haute + 1.2], [i], s=0)
     ax.text(101.5, len(fc) - 0.2, "Enfants ≈ 11 ans\nhors CM2 (est.)", fontsize=8, color=INK2, va="bottom",
             clip_on=False)
     ax.legend(loc="lower left", fontsize=8.5)

@@ -1,14 +1,4 @@
-"""Global score: one number per region that combines the two forms of dropout.
-    score = 100 x ( 0.5 x p  +  0.5 x (1 - TAP / 100) )
-p: probability of a drop of more than 5 % in pupils next year (violence model, D12) - sudden dropout;
-1 - TAP/100: share of children who do not complete primary school - slow dropout.
-Weights fixed BEFORE testing (equal); fixed goalposts (0 and 1), so a region's score depends only on
-its own data. Test: replayed on 2019/20 to 2023/24 with the information of each year only (same
-protocol as the matrix, solution_prevision.backtest_matrix), compared with the risk alone, the
-completion rate alone and the matrix: AUC for the drop of the next year, and, for the same number of
-regions as priority 1 that year, the share of drops and of pupils lost that they contain.
-Usage: python scripts/score_global.py (from the project root). Writes analyse/P18_*.csv.
-"""
+"""Global score: one number per region that combines the two forms of dropout."""
 import sys
 import warnings
 
@@ -20,10 +10,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from solution_prevision import SHORT, build, priority  # noqa: E402
+from solution_prevision import SHORT, build, priority
 
 warnings.filterwarnings("ignore")
-POIDS = 0.5  # weight of the risk; 1 - POIDS for the completion gap. Fixed before the test.
+POIDS = 0.5
 
 
 def score(prob, tap):
@@ -66,7 +56,6 @@ def rejouer(p):
           f"à chaque année, autant de régions en tête que la matrice en met en priorité 1 ({int(p1.sum())} au total).")
     print(r.round(2).to_string(index=False))
     r.round(3).to_csv("analyse/P18_score_global_rejoue.csv", index=False)
-    # Sensitivity of the weight (reported, not used to choose it).
     sens = []
     for w in [0.3, 0.4, 0.5, 0.6, 0.7]:
         s = 100 * (w * t.prob + (1 - w) * (1 - t.TAP_T / 100))
@@ -76,10 +65,6 @@ def rejouer(p):
 
 
 def trajectoire(p):
-    """Score of each region year by year, each one computed with the information of its own year only
-    (model trained on the earlier years), labelled by the school year it forecasts. The last point,
-    2026/27, is the official forecast (score_2026). Observed: was there a drop of more than 5 % that
-    year (1/0, empty when not known yet)."""
     nat = pd.read_csv("analyse/panel_region_annee.csv").query("region == 'NATIONAL'").set_index("annee").TAP_T
     d = p.copy()
     d["y_drop"] = np.where(d.y_eleves.isna(), np.nan, (d.y_eleves < np.log(0.95)).astype(float))

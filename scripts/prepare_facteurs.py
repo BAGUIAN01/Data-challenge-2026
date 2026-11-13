@@ -1,13 +1,4 @@
-"""Clean the public sources on non-security drivers of dropout, by former region (13).
-
-- Food insecurity: Cadre Harmonisé (HDX `cadre-harmonise`), provinces, 2014 to March 2024.
-  Share of the population in phase 3 or worse, averaged over the periods of a school year
-  (Sep-Dec of t, Jan-May of t+1, lean season Jun-Aug of t+1), only rows flagged `usethisperiod`.
-- Families: DHS 2021 (HDX `dhs-subnational-data-for-burkina-faso`), regions.
-- Displacement: CONASUR registration, 31 December 2022 (HDX `situation-des-personnes-deplacees-internes`).
-
-Writes data/externe_propre/*.csv with a .SOURCE.txt next to each. Usage: python prepare_facteurs.py
-"""
+"""Clean the public sources on non-security drivers of dropout, by former region (13)."""
 import unicodedata
 
 import pandas as pd
@@ -29,7 +20,6 @@ def food():
     df = pd.read_excel(RAW + "hdx_cadre_harmonise/cadre_harmonise_caf_ipc_mars26.xlsx")
     b = df[(df.adm0_name == "Burkina Faso") & (df.usethisperiod == "Y")].copy()
     b["cle"] = b.adm1_name.map(key)
-    # School year t runs from October t to September t+1.
     start = b.reference_year - (b.reference_label != "Sep-Dec").astype(int)
     b["annee"] = start.astype(str) + "-" + (start + 1).astype(str)
     per = b.groupby(["cle", "annee", "reference_label"])[["phase35", "population"]].sum().reset_index()

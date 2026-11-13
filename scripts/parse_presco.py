@@ -1,26 +1,10 @@
-"""Turn the challenge's Presco.txt export into one tidy CSV.
-
-Presco.txt is an Excel sheet saved as tab-separated text: 21 tables
-(preschool 1-8, primary 1-13) separated by empty rows, some titles shifted
-to column X, and stray "2017" cells. Each table is located by its line range
-(checked by hand against the file) and read with one of three layouts:
-
-  wide  - one row per label, values in G/F/T triplets per year
-  long  - one row per label and sex (GARCONS/FILLES/TOTAL), one column per year
-  plain - one row per label, one column per year, no sex
-
-Output columns: table, cycle, indicateur, unite, region, statut, milieu,
-niveau, sexe, annee, valeur.  Years are school years "2015-2016" ... "2024-2025".
-
-Usage: python parse_presco.py data/raw/Presco.txt data/tidy/presco_tidy.csv
-"""
+"""Turn the challenge's Presco.txt export into one tidy CSV."""
 import csv
 import re
 import sys
 
-YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]  # the 10 school years covered
+YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 
-# (id, cycle, indicateur, unite, first line, last line, layout, label columns) - lines are 1-based.
 TABLES = [
     ("P1", "prescolaire", "effectifs", "eleves", 1, 17, "wide", ["region"]),
     ("P2", "prescolaire", "effectifs", "eleves", 19, 25, "wide", ["statut"]),
@@ -52,7 +36,6 @@ HEADERS = {"REGION", "RÉGION", "RÉGIONS", "REGIONS", "STATUT", "MILIEU"}
 
 
 def number(cell):
-    """'1 477 806' -> 1477806.0, '1,1760' -> 1.176; empty -> None. Raises on anything else."""
     c = cell.replace(" ", "").replace(" ", "").replace(",", ".").strip()
     if c == "":
         return None
@@ -89,19 +72,17 @@ def norm_label(kind, value):
 
 
 def labels_from_row(cells, kinds, carried):
-    """Read the label columns, carrying forward blank ones (merged cells in Excel)."""
     out = {}
     for i, kind in enumerate(kinds):
         raw = cells[i].strip() if i < len(cells) else ""
         out[kind] = raw if raw else carried.get(kind, "")
-    # "Total X" rows: a subtotal for X, or the grand total.
     first = kinds[0]
     raw0 = cells[0].strip() if cells else ""
     if raw0.upper().startswith("TOTAL ") and raw0.upper() not in NATIONAL:
         rest = raw0[6:]
         if first == "region":
             out["region"], out[kinds[1]] = rest, "Total"
-        else:  # "Total Public" in a statut table
+        else:
             out[first], out[kinds[1]] = rest, "Total"
     elif raw0.upper() in NATIONAL:
         out[first] = "NATIONAL" if first == "region" else "Total"
@@ -141,9 +122,9 @@ def parse(path):
                 cells = [c.strip() for c in r]
                 vals = cells[nlab:nlab + 10]
                 if not cells or len(vals) < 10 or not all(is_number(v) for v in vals):
-                    continue  # title, header ("2015-2016" is not a number) or stray cell
+                    continue
                 if cells[0].upper() in HEADERS or (layout == "long" and cells[len(kinds)].upper() == "SEXE"):
-                    continue  # header row whose year labels ("2016") look like numbers
+                    continue
                 lab = labels_from_row(cells, kinds, carried)
                 carried = {k: v for k, v in lab.items()}
                 if layout == "long":

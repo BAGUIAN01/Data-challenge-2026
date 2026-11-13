@@ -1,15 +1,4 @@
-"""One-page regional sheet (A4) for a regional director: situation, trend, risk, levers.
-
-Every figure comes from the analysis tables of analyse/; the text is built by
-fixed rules from those figures (no free text, no language model), so each
-sentence can be traced back to a number.
-
-The page is drawn like the region page of the dashboard and reads the dashboard data set, so run it
-after scripts/export_tableau_de_bord.py. contenu() (facts and levers) is used by that export.
-
-Usage: python fiches_regionales.py [CLE ...]   e.g. NORD ; no argument = all 13 regions and the booklet.
-Writes analyse/fiches/fiche_<nom>.pdf and .png, analyse/fiches_regionales_13.pdf, dashboard/public/fiches/<CLE>.pdf.
-"""
+"""One-page regional sheet (A4) for a regional director: situation, trend, risk, levers."""
 import os
 import sys
 import unicodedata
@@ -17,10 +6,10 @@ import unicodedata
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
-from matplotlib.patches import FancyBboxPatch  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib.patches import FancyBboxPatch
 
 YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 SHORT = [y[2:4] + "/" + y[7:] for y in YEARS]
@@ -58,7 +47,6 @@ def fr(v, nd=0, sign=False):
 
 
 def pts(v):
-    """Points of percentage, with the French agreement: singular below 2."""
     return f"{fr(v, 1, True)} point" + ("s" if abs(v) >= 2 else "")
 
 
@@ -91,7 +79,6 @@ def tile(fig, x, y, w, h, value, label, sub):
 
 
 def contenu(cle, data):
-    """Numbers, key facts and levers of one region: shared by the PDF fiche and the dashboard export."""
     p, fc, ex, typo, prob, acled, pov = data
     r = p[p.cle == cle].set_index("annee").loc[YEARS]
     n = p[p.region == "NATIONAL"].set_index("annee").loc[YEARS]
@@ -111,7 +98,6 @@ def contenu(cle, data):
     g, fgl = r.TAP_G.iloc[-1], r.TAP_F.iloc[-1]
     inc24, inc25 = inc.get("2024-2025", np.nan), inc.get("2025-2026", np.nan)
 
-    # Rule-built key facts: each sentence comes from one number above.
     facts = [f"Le taux d'achèvement est passé de {fr(tap0, 1)} % en 2015/16 à {fr(tap1, 1)} % en 2024/25 "
              f"({pts(tap1 - tap0)}), contre {fr(n.TAP_T.iloc[-1], 1)} % au niveau national."]
     if ec_worst <= -30:
@@ -135,7 +121,6 @@ def contenu(cle, data):
     facts.append(f"En 2024/25, {who} ({fr(g, 1)} % contre {fr(fgl, 1)} %).")
     levers = list(LEVERS[profile])
     if profile == "Stabilité / accueil":
-        # The host-region lever only where the region gains pupils from elsewhere (negative excess exits).
         levers = []
         if e.cumul_17_18_a_23_24 < 0:
             levers.append("Région d'accueil : garder des places pour les élèves déplacés (classes, enseignants).")
@@ -152,11 +137,6 @@ def contenu(cle, data):
     return {k: v for k, v in locals().items() if k in ('r', 'n', 'name25', 'old', 'f', 'e', 't', 'profile', 'pr26', 'level', 'inc', 'poverty', 'tap0', 'tap1', 'tap21', 'el_max', 'el_now', 'ec_worst', 'g', 'fgl', 'inc24', 'inc25', 'facts', 'levers')}
 
 
-# ---------- The PDF page, drawn like the app ----------
-# Same order as the region page of the dashboard: the global score, what to act on, the score year by
-# year up to the forecast, then completion and violence, and the levers. Same blue ramp, same type
-# (Inter). Every number is read from the dashboard data set (dashboard/public/data/tableau_de_bord.json),
-# so the page and the app cannot disagree.
 C1, C2, C3 = "#104281", "#3987e5", "#86b6ef"
 FG, FG2, FG3, LINE, EDGE, CARD, BAD, NATC = "#0f172a", "#475569", "#7d8799", "#e3e7ed", "#cfd5de", "#f4f6f9", "#b42318", "#b9c2cf"
 Z2, Z3 = "#dfe4eb", "#c3cbd7"
@@ -205,7 +185,6 @@ def make(cle, jeu, out):
     fig.patch.set_facecolor("white")
     L, W = 0.06, 0.88
 
-    # Header.
     fig.text(L, 0.968, "FICHE RÉGIONALE · RISQUE DE DÉCROCHAGE AU PRIMAIRE · RENTRÉE 2026/27", fontsize=7.5, color=FG3, va="top", fontweight="bold")
     fig.text(L, 0.950, r["nom"], fontsize=25, fontweight="bold", color=FG, va="top")
     lib, sous = PRIO[r["priorite"]]
@@ -213,7 +192,6 @@ def make(cle, jeu, out):
                                       transform=fig.transFigure, facecolor=[C1, C2, C3][r["priorite"] - 1], edgecolor="none"))
     fig.text(L + 0.018, 0.912, f"{lib} · {sous} · ancienne région {r['ancienne']}", fontsize=9.5, color=FG2, va="top")
 
-    # 1. Global score.
     y0, h0 = 0.745, 0.145
     _carte(fig, L, y0, W, h0)
     fig.text(L + 0.025, y0 + h0 - 0.02, "Score global de risque", fontsize=10.5, fontweight="bold", color=FG, va="top")
@@ -232,7 +210,6 @@ def make(cle, jeu, out):
     fig.text(L + 0.025, y0 + 0.018, f"Moitié risque de chute des effectifs ({fr(p)} %), moitié part d'enfants qui n'achèvent pas ({fr(100 - tap, 1)} %).",
              fontsize=7.8, color=FG3)
 
-    # 2. What to act on.
     y1, h1 = 0.585, 0.145
     _carte(fig, L, y1, W, h1)
     fig.text(L + 0.025, y1 + h1 - 0.02, "Sur quoi agir", fontsize=10.5, fontweight="bold", color=FG, va="top")
@@ -258,7 +235,6 @@ def make(cle, jeu, out):
             fig.patches.append(FancyBboxPatch((L + 0.68, yy - 0.004), 0.15 * v / mx, 0.008, boxstyle="round,pad=0,rounding_size=0.003",
                                               transform=fig.transFigure, facecolor=FG if fid == dom else C3, edgecolor="none"))
 
-    # 3. Score year by year, up to the forecast.
     tr = sg["trajectoire"]
     ann, sc, ch = tr["annees"], tr["par_region"][cle]["score"], tr["par_region"][cle]["chute"]
     y2, h2 = 0.375, 0.19
@@ -290,7 +266,6 @@ def make(cle, jeu, out):
     fig.text(L + 0.025, y2 + 0.013, "Cercle rouge : chute des effectifs de plus de 5 % observée cette année-là   ·   chaque point est calculé avec ce qu'on savait cette année-là",
              fontsize=7.3, color=FG3)
 
-    # 4. Completion and violence, side by side.
     y3, h3 = 0.185, 0.17
     wl = 0.52
     _carte(fig, L, y3, wl, h3)
@@ -328,7 +303,6 @@ def make(cle, jeu, out):
     ax.set_yticks([])
     _axes_propres(ax)
 
-    # 5. Levers.
     y4 = 0.168
     fig.text(L, y4, "Leviers", fontsize=10.5, fontweight="bold", color=FG, va="top")
     leviers = (r["leviers"] + r["leviers_facteurs"])[:3]
@@ -358,8 +332,6 @@ def make(cle, jeu, out):
 
 
 def main():
-    """Run after scripts/export_tableau_de_bord.py: the page reads the dashboard data set. Writes
-    analyse/fiches/, the booklet analyse/fiches_regionales_13.pdf, and the copies served by the app."""
     import json
     import shutil
     from pypdf import PdfWriter

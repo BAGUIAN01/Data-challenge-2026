@@ -1,17 +1,8 @@
-"""Dominant factor of each region: what to act on. For every background factor, the region's exposure
-is put on a common scale (standardised over the 13 regions, oriented so that a positive value means
-more exposed), then weighted by how strongly the factor goes with the completion gap across regions
-(|correlation with the 2024/25 completion rate|, analyse/P14_facteurs_correlations.csv):
-    contribution(region, factor) = |r(factor, TAP)| x z(region, factor)
-The dominant factor is the one with the largest contribution; if no contribution is positive, the
-region has no factor above the average of the 13 (nothing stands out). The CEP pass rate is left out:
-it is not a risk signal (selection effect, decision D15). Explanation, not prediction (D16).
-Usage: python scripts/facteur_dominant.py (from the project root). Writes analyse/P19_facteur_dominant.csv.
-"""
+"""Dominant factor of each region: what to act on."""
 import numpy as np
 import pandas as pd
 
-FACTEURS = {  # id in P14_profil_facteurs.csv -> row of P14_facteurs_correlations.csv, higher value = more exposed
+FACTEURS = {
     "violence": ("Violence", True), "deplaces": ("Déplacés", True), "pauvrete": ("Pauvreté", True), "faim": ("Faim", True),
     "meres": ("Femmes sans instruction", True), "grossesses": ("Grossesses précoces", True), "prescolaire": ("Préscolaire", False),
 }

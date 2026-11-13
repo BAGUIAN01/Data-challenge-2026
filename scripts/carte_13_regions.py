@@ -1,13 +1,4 @@
-"""Build the map layer of the 13 former regions and draw a first map.
-
-The official IGB boundaries (2025) have 17 regions, each carrying the code of
-the former region it comes from; dissolving them by that code gives back the
-13 former regions on which the challenge data are published.
-
-Writes data/ref/regions_13.geojson (simplified, light enough for an offline
-dashboard) and analyse/figures/08_carte_profils_achevement.png.
-Usage: python carte_13_regions.py <bfa_admin1.geojson> data/ref/regions_13_17.csv analyse/
-"""
+"""Build the map layer of the 13 former regions and draw a first map."""
 import sys
 import unicodedata
 
@@ -15,15 +6,14 @@ import geopandas as gpd
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import pandas as pd  # noqa: E402
-from matplotlib.patches import Patch  # noqa: E402
+import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.patches import Patch
 
 INK, INK2, MUTED, SURFACE, EDGE = "#0b0b0b", "#52514e", "#898781", "#fcfcfb", "#fcfcfb"
-# Ordinal blue ramp (reference palette), from step 250 so the lightest still clears 2:1 on the surface.
 ORDINAL = ["#86b6ef", "#3987e5", "#256abf", "#104281"]
 SEQUENTIAL = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
-PROFILES = {  # ordered from least to most severe
+PROFILES = {
     4: "Stabilité, régions d'accueil",
     3: "Érosion sans fermetures massives",
     1: "Choc puis reprise partielle",
@@ -36,11 +26,9 @@ def key(name):
     return "".join(ch for ch in s.upper() if ch.isalnum())
 
 
-# Small central regions get their label outside, with a leader line (offsets in degrees).
 OUTSIDE = {"Kadiogo": (-1.9, 1.15), "Oubri": (1.25, -2.15), "Nazinon": (0.1, -1.15)}
 
 
-# Labels nudged inside their own region, away from a border or a leader line (degrees).
 NUDGE = {"Liptako + Soum": (0.0, 0.45), "Nakambé": (0.5, -0.1)}
 
 
@@ -81,10 +69,9 @@ def main():
     fig, axes = plt.subplots(1, 2, figsize=(12, 6.4))
     fig.patch.set_facecolor(SURFACE)
     fig.subplots_adjust(top=0.84, bottom=0.20, left=0.01, right=0.99, wspace=0.04)
-    # Left: completion rate 2024-25, sequential bins.
     bins = [0, 20, 30, 40, 50, 60, 70, 100]
     m["classe"] = pd.cut(m.TAP_2024_25, bins, labels=False, include_lowest=True)
-    ramp = SEQUENTIAL[::-1]  # darkest = lowest completion = highest risk, as on the profile map
+    ramp = SEQUENTIAL[::-1]
     ax = axes[0]
     m.plot(ax=ax, color=[ramp[int(c)] for c in m.classe], edgecolor=EDGE, linewidth=1.2)
     for _, row in m.iterrows():
@@ -95,7 +82,6 @@ def main():
     ax.legend(handles=[Patch(color=ramp[i], label=f"{bins[i]}–{bins[i + 1]} %") for i in range(len(bins) - 1)],
               loc="upper center", bbox_to_anchor=(0.5, 0.0), ncol=4, fontsize=7.5, frameon=False)
     ax.axis("off")
-    # Right: the four profiles, ordinal ramp from stability to collapse.
     order = list(PROFILES)
     ax = axes[1]
     m.plot(ax=ax, color=[ORDINAL[order.index(int(k))] for k in m.groupe_k4], edgecolor=EDGE, linewidth=1.2)

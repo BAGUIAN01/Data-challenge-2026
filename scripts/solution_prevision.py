@@ -1,22 +1,4 @@
-"""Search for a regional forecast that works, with the candidate list fixed before running.
-
-The decision-maker's questions, and the candidates tested for each (all fitted by plain
-least squares on earlier years only, expanding window, no tuning on test years):
-
-1. WHERE will the risk be next year? Rank stability of the completion rate (TAP) and of
-   the apparent exits across regions, year t vs year t+1.
-2. HOW MANY pupils next year (change in regional pupils, t -> t+1)?
-   B0 no change ("comme l'an passé") ; B1 same change as last year ;
-   E1 violence (log incidents, escalation) ;
-   E2 violence + rebound (last year's change in pupils) ;
-   E3 two stages: open schools predicted from violence and last year's change in schools,
-      then pupils from schools (the nowcast slope).
-3. HOW MUCH will the completion rate move?
-   B0 no change ; T1 partial reversion of last year's change ; T2 T1 + escalation.
-
-Violence of school year t = incidents from October t to September t+1 (known before the
-census of t+1). Writes analyse/P13_*.csv. Usage: python solution_prevision.py
-"""
+"""Search for a regional forecast that works, with the candidate list fixed before running."""
 import unicodedata
 
 import numpy as np
@@ -111,7 +93,6 @@ def how_many(p):
         print(f"  {c:32s} gain par rapport à « comme l'an passé » : {(1 - r.iloc[-1][c] / base) * 100:+.0f} %")
     r.round(2).to_csv("analyse/P13_effectifs_modeles.csv", index=False)
     allp = pd.concat(preds)
-    # Do the models at least say which way pupil numbers go, where it matters (changes beyond 5 %)?
     big = allp[np.abs(allp.reel) > np.log(1.05)]
     print(f"\nSens de la variation quand elle dépasse 5 % ({big.region.nunique()} régions, "
           f"{len(big) // allp.modele.nunique()} cas) :")
@@ -144,7 +125,6 @@ def how_much(p):
 
 
 def priority(tap, tap_nat, prob):
-    """Decision matrix, thresholds taken from earlier decisions (national TAP ; D12 tiers)."""
     if tap < tap_nat and prob >= 0.40:
         return 1
     if tap < tap_nat or prob >= 0.15:
@@ -153,9 +133,6 @@ def priority(tap, tap_nat, prob):
 
 
 def backtest_matrix(p):
-    """Would the matrix have pointed at the right regions? Each year t, the violence model is
-    trained on rows s < t only (their target is s+1 <= t), then the matrix is set at t and
-    compared with what happened at t+1: drops of more than 5 % and pupils lost."""
     from sklearn.linear_model import LogisticRegression
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler

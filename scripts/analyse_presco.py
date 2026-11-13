@@ -1,15 +1,11 @@
-"""First descriptive analysis of the challenge data for Défi 1 (school dropout).
-
-Writes CSV tables to analyse/ and prints a summary in French.
-Usage: python analyse_presco.py data/tidy/presco_tidy.csv analyse/
-"""
+"""First descriptive analysis of the challenge data for Défi 1 (school dropout)."""
 import sys
 
 import numpy as np
 import pandas as pd
 
 YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
-SHORT = {y: y[2:4] + "/" + y[7:] for y in YEARS}  # "2015-2016" -> "15/16"
+SHORT = {y: y[2:4] + "/" + y[7:] for y in YEARS}
 
 
 def get(d, table, sexe="T", statut="Total", **f):
@@ -29,7 +25,6 @@ def main():
     pd.set_option("display.width", 250)
     pd.set_option("display.max_columns", 30)
 
-    # A. National trends
     nat = pd.DataFrame({
         "eleves_primaire": wide(get(d, "E1", region="NATIONAL")).iloc[0],
         "ecoles_primaires": wide(get(d, "E13", region="NATIONAL")).iloc[0],
@@ -45,12 +40,9 @@ def main():
     print("\n=== A. Tendances nationales (primaire) ===")
     print(nat.round(1).to_string())
 
-    # B. Regional shock and recovery
     eff = wide(get(d, "E1")).drop("NATIONAL")
     eco = wide(get(d, "E13")).drop("NATIONAL")
     tap = wide(get(d, "E8")).drop("NATIONAL")
-    # Largest fall from an earlier peak ("drawdown"): a region whose highest year is the last one
-    # can still have lost pupils in between, so the peak-to-later-trough reading would miss it.
     drawdown = (eff / eff.cummax(axis=1) - 1).min(axis=1)
     reg = pd.DataFrame({
         "eleves_max": eff.max(axis=1).astype(int),
@@ -72,7 +64,6 @@ def main():
     print("\n=== B. Choc et reprise par région (primaire) ===")
     print(reg.to_string())
 
-    # C. Apparent exit rate: share of year-t pupils not found in year t+1 (excluding new CP1 entrants).
     ni = wide(get(d, "E5")).drop("NATIONAL")
     nat_e = wide(get(d, "E1", region="NATIONAL")).iloc[0]
     nat_ni = wide(get(d, "E5", region="NATIONAL")).iloc[0]
@@ -85,7 +76,6 @@ def main():
     print("    inclut les fins de CM2 normales, les abandons et les départs nets vers d'autres régions")
     print(ex.to_string())
 
-    # D. National flow by grade (Public + Private) and sex
     e4 = d[(d.table == "E4") & d.statut.isin(["Public", "Prive"]) & (d.niveau != "Total")]
     g = e4.groupby(["sexe", "niveau", "annee"]).valeur.sum().unstack("annee")[YEARS]
     grades = ["CP1", "CP2", "CE1", "CE2", "CM1", "CM2"]
@@ -99,7 +89,7 @@ def main():
     print("\n=== D. Passages apparents d'un niveau au suivant, national (effectif niveau+1 l'année t+1 / effectif niveau l'année t, en %) ===")
     print(flows[flows.sexe == "T"].to_string(index=False))
     surv = []
-    for k in range(5):  # CP1 of 2015-16 ... 2019-20 -> CM2 five years later
+    for k in range(5):
         t0, t5 = YEARS[k], YEARS[k + 5]
         surv.append({"cohorte_CP1": SHORT[t0], "CM2_en": SHORT[t5],
                      **{f"survie_apparente_{sx}_%": round(g.loc[(sx, "CM2"), t5] / g.loc[(sx, "CP1"), t0] * 100, 1)
@@ -109,7 +99,6 @@ def main():
     print("\nSurvie apparente CP1 -> CM2 cinq ans plus tard (effectif CM2 / effectif CP1) :")
     print(surv.to_string(index=False))
 
-    # E. Gender gap in completion
     ips = wide(get(d, "E12")).round(2)
     ips.columns = [SHORT[c] for c in ips.columns]
     tapg = wide(get(d, "E8", sexe="G"))["2024-2025"]
@@ -120,7 +109,6 @@ def main():
     print("\n=== E. Parité filles/garçons de l'achèvement (IPS du TAP : >1 = filles devant) ===")
     print(gender.to_string())
 
-    # F. Schools closed vs pupils lost, region-year changes
     dl_e = np.log(eff[YEARS[1:]].values / eff[YEARS[:-1]].values).ravel()
     dl_s = np.log(eco[YEARS[1:]].values / eco[YEARS[:-1]].values).ravel()
     slope, intercept = np.polyfit(dl_s, dl_e, 1)
@@ -128,7 +116,6 @@ def main():
     print("\n=== F. Écoles en moins et élèves en moins (variations annuelles, 13 régions x 9 années) ===")
     print(f"pente = {slope:.2f} (1 % d'écoles en moins va avec {slope:.2f} % d'élèves en moins), R² = {r2:.2f}, n = {len(dl_e)}")
 
-    # G. How predictable is completion one year ahead? Persistence benchmark.
     err = []
     for t0, t1 in zip(YEARS[:-1], YEARS[1:]):
         e_ = (tap[t1] - tap[t0]).abs()

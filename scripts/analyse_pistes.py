@@ -1,16 +1,4 @@
-"""Analyses behind each avenue ("piste") for Défi 1, from the challenge data only.
-
-Builds a region x year panel (13 former regions, 2015-16 to 2024-25) and writes:
-  analyse/panel_region_annee.csv   one row per region and year, all indicators
-  analyse/P1_sorties_excedentaires.csv
-  analyse/P2_typologie_regions.csv
-  analyse/P3_contributions_recul_TAP.csv
-  analyse/P4_entree_sortie_national.csv
-  analyse/P5_genre.csv
-  analyse/P6_prevision.csv
-  analyse/P7_scenarios_reouverture.csv
-and prints a French summary. Usage: python analyse_pistes.py data/tidy/presco_tidy.csv analyse/
-"""
+"""Analyses behind each avenue ("piste") for Défi 1, from the challenge data only."""
 import sys
 
 import numpy as np
@@ -19,11 +7,10 @@ from scipy.cluster.hierarchy import fcluster, linkage
 
 YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 SHORT = {y: y[2:4] + "/" + y[7:] for y in YEARS}
-BASELINE = ["2015-2016", "2016-2017"]  # transitions 15/16->16/17 and 16/17->17/18, before the crisis spread
+BASELINE = ["2015-2016", "2016-2017"]
 
 
 def panel(d):
-    """Region x year table with every regional indicator, sexes in separate columns."""
     keep = {"E1": "eleves", "E5": "nouveaux_CP1", "E6": "TBA", "E7": "TBS", "E8": "TAP", "E9": "CEP"}
     x = d[d.table.isin(keep) & (d.statut == "Total")].copy()
     x["var"] = x.table.map(keep) + "_" + x.sexe
@@ -43,23 +30,17 @@ def main():
     p = panel(d)
     p = p.sort_values(["region", "annee"]).reset_index(drop=True)
     g = p.groupby("region")
-    # Apparent exits from year t to t+1: pupils of year t not found in t+1, new CP1 entrants aside.
     p["sorties_app"] = 1 - (g.eleves_T.shift(-1) - g.nouveaux_CP1_T.shift(-1)) / p.eleves_T
     p["dlog_eleves"] = np.log(p.eleves_T / g.eleves_T.shift())
     p["dlog_ecoles"] = np.log(p.ecoles / g.ecoles.shift())
-    # Size of the age-6 population implied by the admission rate (new CP1 entrants / TBA).
     p["pop6_impl"] = p.nouveaux_CP1_T / (p.TBA_T / 100)
     p.to_csv(f"{out}/panel_region_annee.csv", index=False)
     reg = p[p.region != "NATIONAL"].copy()
     nat = p[p.region == "NATIONAL"].set_index("annee")
 
-    # ---------- P1. Excess exits: losses beyond each region's own pre-crisis habit ----------
     print("\n=== P1. Sorties en excès par rapport à l'habitude de la région ===")
     base = reg[reg.annee.isin(BASELINE)].groupby("region").sorties_app.mean()
     reg["sorties_base"] = reg.region.map(base)
-    # Normal exits grow when more pupils reach CM2: the national CM2 share of enrolment moved from
-    # about 12.5 % to 13.9 % and back to 10.7 %. That part is completion, not loss, so it is removed,
-    # assuming each region's CM2 share moves like the national one (grades are national only).
     e4 = d[(d.table == "E4") & d.statut.isin(["Public", "Prive"]) & (d.sexe == "T")]
     cm2 = e4[e4.niveau == "CM2"].groupby("annee").valeur.sum() / e4[e4.niveau != "Total"].groupby("annee").valeur.sum()
     reg["part_CM2_nat"] = reg.annee.map(cm2)
@@ -69,7 +50,7 @@ def main():
     print("Part nationale du CM2 dans les effectifs (%) :", (cm2 * 100).round(1).rename(SHORT).to_dict())
     ex = reg.dropna(subset=["exces_eleves"]).pivot_table(index="region", columns="annee", values="exces_eleves")
     ex.columns = [SHORT[c] + "→" for c in ex.columns]
-    ex["cumul_17_18_a_23_24"] = ex.iloc[:, 2:].sum(axis=1)  # transitions from 17/18 onwards
+    ex["cumul_17_18_a_23_24"] = ex.iloc[:, 2:].sum(axis=1)
     ex["part_eleves_2017_18_%"] = (ex["cumul_17_18_a_23_24"] /
                                   reg[reg.annee == "2017-2018"].set_index("region").eleves_T * 100)
     ex["sorties_base_%"] = base * 100
@@ -81,7 +62,6 @@ def main():
     print(f"Somme des 13 régions : {ex.cumul_17_18_a_23_24.sum():,.0f} élèves (les départs vers une autre région"
           " apparaissent en plus au départ et en moins à l'arrivée, ils s'annulent dans la somme)".replace(",", " "))
 
-    # ---------- P2. Typology of regional trajectories ----------
     print("\n=== P2. Typologie des trajectoires régionales (classification ascendante de Ward, 4 indicateurs centrés réduits) ===")
     w = reg.pivot_table(index="region", columns="annee", values=["eleves_T", "ecoles", "TAP_T"])
     feat = pd.DataFrame({
@@ -99,7 +79,6 @@ def main():
     feat.round(1).to_csv(f"{out}/P2_typologie_regions.csv")
     print(feat.round(1).to_string())
 
-    # ---------- P3. Which regions drive the national fall in completion? ----------
     print("\n=== P3. Contributions régionales au recul national du TAP (21/22 -> 24/25) ===")
     sh = reg.pivot_table(index="region", columns="annee", values="pop6_impl")
     wts = sh / sh.sum()
@@ -121,7 +100,6 @@ def main():
     print(contrib.round(2).to_string())
     print(f"Total reconstitué : {contrib.contribution_pts.sum():.1f} points ; publié : {nat.TAP_T[b] - nat.TAP_T[a]:.1f} points")
 
-    # ---------- P4. Entry rebounds, completion does not: national flows ----------
     print("\n=== P4. Entrée et sortie du cycle, national ===")
     e2 = d[(d.table == "E2") & (d.sexe == "T")].pivot_table(index="annee", columns="statut", values="valeur")
     e3 = d[(d.table == "E3") & (d.sexe == "T")].pivot_table(index="annee", columns="milieu", values="valeur")
@@ -137,7 +115,6 @@ def main():
     flow.round(1).to_csv(f"{out}/P4_entree_sortie_national.csv")
     print(flow.round(1).to_string())
 
-    # ---------- P5. Gender ----------
     print("\n=== P5. Achèvement des garçons et des filles ===")
     tg = reg.pivot_table(index="region", columns="annee", values="TAP_G")
     tf = reg.pivot_table(index="region", columns="annee", values="TAP_F")
@@ -149,19 +126,18 @@ def main():
     gen.round(1).to_csv(f"{out}/P5_genre.csv")
     print(gen.round(1).to_string())
 
-    # ---------- P6. Can we anticipate next year's completion? ----------
     print("\n=== P6. Anticiper le TAP de l'année suivante : validation sur années non vues ===")
     reg = reg.sort_values(["region", "annee"])
     gg = reg.groupby("region")
     reg["TAP_next"] = gg.TAP_T.shift(-1)
     reg["dTAP"] = reg.TAP_T - gg.TAP_T.shift()
-    reg["dlog_ecoles_lag"] = reg.dlog_ecoles  # change observed in year t (known when predicting t+1)
+    reg["dlog_ecoles_lag"] = reg.dlog_ecoles
     reg["dlog_eleves_lag"] = reg.dlog_eleves
     feats = ["dlog_ecoles_lag", "dlog_eleves_lag", "dTAP"]
     m = reg.dropna(subset=feats + ["TAP_next"]).copy()
-    m["y"] = m.TAP_next - m.TAP_T  # predict the change, persistence = predicting zero
+    m["y"] = m.TAP_next - m.TAP_T
     rows = []
-    test_years = sorted(m.annee.unique())[2:]  # keep at least 2 years of training
+    test_years = sorted(m.annee.unique())[2:]
     for ty in test_years:
         tr, te = m[m.annee < ty], m[m.annee == ty]
         X = np.c_[np.ones(len(tr)), tr[feats].values]
@@ -183,7 +159,6 @@ def main():
     r = np.corrcoef(m.dlog_ecoles_lag, m.y)[0, 1]
     print(f"Corrélation entre la variation des écoles une année et la variation du TAP l'année suivante : r = {r:.2f} (n = {len(m)})")
 
-    # ---------- P7. Reopening scenarios ----------
     print("\n=== P7. Scénarios de réouverture (élasticité élèves / écoles estimée sur les 13 régions) ===")
     z2 = reg.dropna(subset=["dlog_eleves", "dlog_ecoles"])
     slope = np.polyfit(z2.dlog_ecoles, z2.dlog_eleves, 1)[0]
@@ -192,12 +167,9 @@ def main():
     mx = reg.groupby("region").ecoles.max()
     sc = pd.DataFrame({"ecoles_max": mx, "ecoles_21_22": ref.ecoles, "ecoles_24_25": last.ecoles,
                        "eleves_24_25": last.eleves_T})
-    # Scenario A: back to the 2021-22 school count (the last year before the national shock).
     sc["A_ecoles_a_rouvrir"] = (sc.ecoles_21_22 - sc.ecoles_24_25).clip(lower=0)
     sc["A_eleves_en_plus"] = (sc.eleves_24_25 * ((sc.ecoles_24_25 + sc.A_ecoles_a_rouvrir) / sc.ecoles_24_25) ** slope
                               - sc.eleves_24_25).round()
-    # Scenario B: back to each region's highest count. Far outside the observed range for the Sahel
-    # and the East (x5.5 and x2.5 schools): an order of magnitude, not a forecast.
     sc["B_ecoles_a_rouvrir"] = (sc.ecoles_max - sc.ecoles_24_25).clip(lower=0)
     sc["B_eleves_en_plus"] = (sc.eleves_24_25 * (sc.ecoles_max / sc.ecoles_24_25) ** slope - sc.eleves_24_25).round()
     sc = sc[sc.B_ecoles_a_rouvrir > 0].sort_values("B_ecoles_a_rouvrir", ascending=False)

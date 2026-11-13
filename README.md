@@ -93,7 +93,13 @@ python scripts/export_tableau_de_bord.py
 python scripts/fiches_regionales.py
 ```
 
-Chaque script décrit en tête ce qu'il fait, ce qu'il lit et ce qu'il écrit.
+**Ou tout d'un coup, en cahiers Jupyter** (un par étape, dans `notebooks/`, déjà exécutés : résultats et figures visibles sans rien lancer) :
+
+```bash
+python scripts/construire_notebooks.py
+```
+
+Les cahiers reprennent le code des scripts, étape par étape ; les relancer redonne exactement les mêmes résultats.
 
 **8. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
 

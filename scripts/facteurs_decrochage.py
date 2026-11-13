@@ -1,15 +1,4 @@
-"""Which drivers of dropout, besides insecurity, show up in the data? By former region (13).
-
-1. Level: rank correlation of each factor with the completion rate (TAP), before the crisis
-   (2015/16-2017/18) and in 2024/25, and again once violence is taken out (partial rank
-   correlation). Region bootstrap for the intervals. 13 regions: exploratory, said as such.
-2. Change over time: region x year panel 2014/15-2023/24 (food insecurity stops in 2024).
-   Does food insecurity move the TAP or pupil numbers beyond violence? Region fixed effects,
-   with and without year effects; region-cluster bootstrap.
-3. Profile: for each region, the factors on which it is among the 4 most exposed regions.
-
-Writes analyse/P14_*.csv. Usage: python facteurs_decrochage.py (from the project root).
-"""
+"""Which drivers of dropout, besides insecurity, show up in the data? By former region (13)."""
 import unicodedata
 
 import numpy as np
@@ -25,7 +14,6 @@ def key(name):
     return "".join(ch for ch in s.upper() if ch.isalnum())
 
 
-# name -> (label, higher value means more exposed?)
 FACTORS = {
     "violence": ("Violence (incidents, moyenne 21/22-24/25, log)", True),
     "deplaces": ("Déplacés accueillis (% de la population, 2022)", True),
@@ -67,17 +55,16 @@ def regions():
     })
     r["recul_TAP"] = r.TAP_2024_25 - r.TAP_avant_crise
     r["incidents_moy"] = acled[acled.annee.isin(["2021-2022", "2022-2023", "2023-2024", "2024-2025"])] \
-        .groupby("cle").incidents.mean()  # for display only
+        .groupby("cle").incidents.mean()
     assert r.notna().all().all(), r[r.isna().any(axis=1)]
     return r, p, acled, food
 
 
 def partial_rank(x, y, z):
-    """Spearman correlation of x and y once the rank of z is regressed out of both."""
     rx, ry, rz = rankdata(x), rankdata(y), rankdata(z)
     ex = rx - np.polyval(np.polyfit(rz, rx, 1), rz)
     ey = ry - np.polyval(np.polyfit(rz, ry, 1), rz)
-    if ex.std() == 0 or ey.std() == 0:  # degenerate bootstrap sample: no correlation defined
+    if ex.std() == 0 or ey.std() == 0:
         return np.nan
     return np.corrcoef(ex, ey)[0, 1]
 
@@ -113,7 +100,6 @@ def level(r):
 
 
 def fe_fit(df, y, year_fe):
-    """Least squares with region fixed effects (and year effects if asked)."""
     df = df.reset_index(drop=True)
     X = pd.get_dummies(df.cle, drop_first=False, dtype=float)
     if year_fe:
@@ -124,7 +110,6 @@ def fe_fit(df, y, year_fe):
 
 
 def fe_row(d, y, year_fe, rng, n_boot=2000):
-    """Point estimates and region-cluster bootstrap 90 % intervals."""
     b = fe_fit(d, y, year_fe)
     keys = d.cle.unique()
     bs = []
@@ -161,9 +146,6 @@ def panel(p, acled, food):
 
 
 def robustness(d):
-    """Two checks of the food result. (a) Does it hold in the 9 regions least hit by violence?
-    (b) Would food insecurity have predicted next year's drops better than violence? Same
-    protocol as the machine learning test: expanding window, logistic regression."""
     from sklearn.linear_model import LogisticRegression
     from sklearn.metrics import roc_auc_score
     from sklearn.pipeline import make_pipeline
@@ -211,7 +193,7 @@ def profile(r):
     r = r.merge(prio[["region_2025", "priorite"]], on="region_2025").set_index("region_2025")
     tiers = pd.DataFrame(index=r.index)
     for f, (_, up) in FACTORS.items():
-        rank = r[f].rank(ascending=not up, method="min")  # 1 = most exposed
+        rank = r[f].rank(ascending=not up, method="min")
         tiers[f] = np.where(rank <= 4, 1, np.where(rank >= 10, 3, 2))
     tiers["nb_facteurs_forts"] = (tiers[list(FACTORS)] == 1).sum(axis=1)
     out = r[["priorite", "TAP_2024_25", "incidents_moy"] + list(FACTORS)].join(tiers.rename(columns={f: f + "_niveau" for f in FACTORS}))

@@ -1,19 +1,13 @@
-"""Figures for the avenues of Défi 1 (static PNG, light theme, validated palette).
-
-Palette slots 1-3 (#2a78d6, #eb6834, #1baf7a) pass the colour-blindness checks
-(validate_palette.js, light mode); aqua sits under 3:1 contrast, so every
-figure has direct labels and its numbers are in the CSV tables of analyse/.
-Usage: python figures_pistes.py data/tidy/presco_tidy.csv analyse/ analyse/figures/
-"""
+"""Figures for the avenues of Défi 1 (static PNG, light theme, validated palette)."""
 import os
 import sys
 
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
 INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
@@ -47,7 +41,6 @@ NAMES = {"BOUCLE DU MOUHOUN": "Boucle du Mouhoun", "CASCADES": "Cascades", "CENT
 
 
 def fr(v, nd=1, sign=False):
-    """French number: decimal comma."""
     return (f"{v:+.{nd}f}" if sign else f"{v:.{nd}f}").replace(".", ",")
 
 
@@ -64,7 +57,6 @@ def main():
     nat = p[p.region == "NATIONAL"].set_index("annee").loc[YEARS]
     reg = p[p.region != "NATIONAL"]
 
-    # 1. Entry vs end of cycle, national, indexed to 2015-16 = 100 (one axis).
     e4 = d[(d.table == "E4") & d.statut.isin(["Public", "Prive"]) & (d.sexe == "T")]
     gr = e4.groupby(["niveau", "annee"]).valeur.sum().unstack("annee")[YEARS]
     series = [("Nouveaux inscrits au CP1", nat.nouveaux_CP1_T.values, BLUE),
@@ -88,7 +80,6 @@ def main():
     fig.savefig(f"{out}/01_entree_vs_fin_de_cycle.png", dpi=200)
     plt.close(fig)
 
-    # 2. Completion rate by region, small multiples, national in grey as reference.
     tap = reg.pivot_table(index="region", columns="annee", values="TAP_T")[YEARS]
     order = (tap["2024-2025"] - tap["2015-2016"]).sort_values().index
     fig, axes = plt.subplots(4, 4, figsize=(11, 9), sharex=True, sharey=True)
@@ -114,7 +105,6 @@ def main():
     fig.savefig(f"{out}/02_achevement_par_region.png", dpi=200)
     plt.close(fig)
 
-    # 3. Excess exits, cumulated 2017/18 -> 2024/25, corrected for normal CM2 completion.
     ex = pd.read_csv(f"{a}/P1_sorties_excedentaires.csv", index_col=0)["cumul_17_18_a_23_24"].sort_values()
     fig, ax = plt.subplots(figsize=(9, 5.6))
     fig.subplots_adjust(top=0.80, bottom=0.14, left=0.20, right=0.95)
@@ -135,7 +125,6 @@ def main():
     fig.savefig(f"{out}/03_sorties_en_exces.png", dpi=200)
     plt.close(fig)
 
-    # 4. Schools lost vs pupils lost, year-on-year by region.
     z = reg.dropna(subset=["dlog_eleves", "dlog_ecoles"])
     xs, ys = (np.exp(z.dlog_ecoles) - 1) * 100, (np.exp(z.dlog_eleves) - 1) * 100
     k, b = np.polyfit(z.dlog_ecoles, z.dlog_eleves, 1)
@@ -146,7 +135,6 @@ def main():
     gx = np.linspace(z.dlog_ecoles.min(), z.dlog_ecoles.max(), 50)
     ax.plot((np.exp(gx) - 1) * 100, (np.exp(k * gx + b) - 1) * 100, color=INK2, linewidth=1.2, zorder=2)
     for _, row in z.assign(xs=xs, ys=ys).nsmallest(3, "dlog_ecoles").iterrows():
-        # row.xs would be the Series.xs method, hence the brackets.
         ax.annotate(f"{NAMES[row['region']]} {row['annee'][2:4]}/{row['annee'][7:]}", (row["xs"], row["ys"]), xytext=(6, -2),
                     textcoords="offset points", fontsize=8, color=INK2)
     ax.axhline(0, color=AXIS, linewidth=0.8)
@@ -161,7 +149,6 @@ def main():
     fig.savefig(f"{out}/04_ecoles_et_eleves.png", dpi=200)
     plt.close(fig)
 
-    # 5. Who drives the national fall in completion (21/22 -> 24/25)? Shown as points lost (positive).
     c = pd.read_csv(f"{a}/P3_contributions_recul_TAP.csv", index_col=0)
     c["recul"] = -c.contribution_pts
     c = c.sort_values("recul")
@@ -182,7 +169,6 @@ def main():
     fig.savefig(f"{out}/05_contributions_recul_achevement.png", dpi=200)
     plt.close(fig)
 
-    # 6. Boys and girls, completion 2024-25 (dumbbell).
     gdf = pd.read_csv(f"{a}/P5_genre.csv", index_col=0)
     gdf = gdf.assign(m=(gdf.TAP_G_24_25 + gdf.TAP_F_24_25) / 2).sort_values("m")
     fig, ax = plt.subplots(figsize=(9, 6))
@@ -206,7 +192,6 @@ def main():
     fig.savefig(f"{out}/06_garcons_filles.png", dpi=200)
     plt.close(fig)
 
-    # 7. Can next year's completion be anticipated from this data alone?
     pv = pd.read_csv(f"{a}/P6_prevision.csv")
     pv = pv[pv.annee_predite != "toutes"]
     fig, ax = plt.subplots(figsize=(8.5, 5))

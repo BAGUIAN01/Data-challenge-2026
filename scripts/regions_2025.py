@@ -1,13 +1,4 @@
-"""Add the 2025 region names to the challenge data (13 former regions -> 17 new ones).
-
-Uses data/ref/regions_13_17.csv, built from the official IGB boundaries by
-referentiel_officiel.py. Ten former regions only changed name: they get their
-new name. Three were split (Boucle du Mouhoun, Est, Sahel); a regional figure
-cannot be split without province data, so they get a group label
-("Bankui + Sourou") and type "scission".
-
-Usage: python regions_2025.py data/ref/regions_13_17.csv <in.csv> <out.csv>
-"""
+"""Add the 2025 region names to the challenge data (13 former regions -> 17 new ones)."""
 import sys
 import unicodedata
 
@@ -32,7 +23,7 @@ def main():
     unknown = sorted(set(d.region[~k.isin(groups.index)]))
     if unknown:
         raise SystemExit(f"Régions absentes de la table de correspondance : {unknown}")
-    d = d.assign(_cle=k).join(groups, on="_cle").drop(columns="_cle")  # a Series key would leave a stray key_0 column
+    d = d.assign(_cle=k).join(groups, on="_cle").drop(columns="_cle")
     pos = d.columns.get_loc("region") + 1
     for i, col in enumerate(["region_2025", "codes_2025", "type_2025"]):
         d.insert(pos + i, col, d.pop(col))

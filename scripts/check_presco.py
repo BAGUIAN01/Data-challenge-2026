@@ -1,10 +1,4 @@
-"""Consistency checks on the tidy challenge data. Prints a report in French.
-
-Each check says what it compares, how many cases it tested and lists the
-failures. A check that tested nothing says so: an empty check proves nothing.
-
-Usage: python check_presco.py data/tidy/presco_tidy.csv
-"""
+"""Consistency checks on the tidy challenge data."""
 import sys
 
 import pandas as pd
@@ -32,7 +26,6 @@ def main():
     c = d[d.table.isin(COUNT_TABLES)].pivot_table(index=keys, columns="sexe", values="valeur").dropna()
     if {"G", "F", "T"} <= set(c.columns):
         c = c.dropna(subset=["G", "F", "T"])
-        # ⚠️ c.T is the transpose, not the "T" column: always c["T"].
         bad = c.loc[(c["G"] + c["F"] - c["T"]).abs() > 0.5].reset_index()
         bad["ecart"] = bad["G"] + bad["F"] - bad["T"]
         report("G + F = T", len(c), bad[keys + ["G", "F", "T", "ecart"]])

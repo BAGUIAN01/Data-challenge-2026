@@ -1,11 +1,4 @@
-"""Build the region and province correspondence tables from the official boundaries.
-
-Source: Institut Géographique du Burkina (IGB), administrative boundaries v03,
-valid from 2025-08-01, published on HDX (dataset cod-ab-bfa). The file gives,
-for each of the 17 regions and 47 provinces, its former code and name.
-
-Usage: python referentiel_officiel.py data/raw/externe/hdx_cod_ab/bfa_admin_boundaries.xlsx data/ref/
-"""
+"""Build the region and province correspondence tables from the official boundaries."""
 import sys
 import unicodedata
 
@@ -15,7 +8,6 @@ SOURCE = "IGB, limites administratives v03 (valides au 2025-08-01), HDX cod-ab-b
 
 
 def key(name):
-    """Accent- and case-insensitive key: 'Plateau-Central' == 'PLATEAU CENTRAL'."""
     s = unicodedata.normalize("NFKD", str(name)).encode("ascii", "ignore").decode()
     return "".join(ch for ch in s.upper() if ch.isalnum())
 

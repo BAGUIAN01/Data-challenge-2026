@@ -1,19 +1,4 @@
-"""Distance from the population to the nearest school, per province.
-
-Inputs, downloaded beforehand:
-  --schools    schools as GeoJSON or GeoPackage (OpenStreetMap export)
-  --provinces  province boundaries (HDX "cod-ab-bfa", admin level 2)
-  --worldpop   WorldPop population raster (GeoTIFF, 100 m)
-
-Output: a CSV with, for each province, its population, the mean distance to
-the nearest school weighted by population, and the share of people living
-farther than a threshold (5 km by default).
-
-Example:
-  python eloignement_ecoles.py --schools ecoles_osm.geojson \
-      --provinces bfa_admbnda_adm2.shp --province-field ADM2_FR \
-      --worldpop bfa_ppp_2020_UNadj_constrained.tif
-"""
+"""Distance from the population to the nearest school, per province."""
 import argparse
 
 import geopandas as gpd
@@ -30,16 +15,10 @@ EARTH_RADIUS_KM = 6371.0
 
 
 def block_sum(src, factor):
-    """Sum the first band into factor x factor blocks, reading the raster in strips.
-
-    GDAL refuses "sum" resampling on plain reads, so the aggregation is done
-    here; nodata and negative values count as zero, and the right and bottom
-    edges are zero-padded so that no population is dropped.
-    """
     H, W = src.height, src.width
-    h, w = -(-H // factor), -(-W // factor)  # ceiling division
+    h, w = -(-H // factor), -(-W // factor)
     out = np.zeros((h, w), dtype="float64")
-    step = factor * 64  # a multiple of factor keeps strips aligned on blocks
+    step = factor * 64
     for r0 in range(0, H, step):
         nrows = min(step, H - r0)
         strip = (src.read(1, window=Window(0, r0, W, nrows), masked=True)
@@ -64,14 +43,12 @@ def main():
     ap.add_argument("--out", default="eloignement_par_province.csv")
     a = ap.parse_args()
 
-    # Schools as lon/lat points; buildings and areas are reduced to one point inside them.
     schools = gpd.read_file(a.schools).to_crs(4326)
     schools["geometry"] = schools.geometry.representative_point()
     tree = BallTree(np.radians(np.c_[schools.geometry.y, schools.geometry.x]),
                     metric="haversine")
 
     with rasterio.open(a.worldpop) as src:
-        # Population is summed into coarser cells so that a whole country stays light to process.
         pop, transform = block_sum(src, a.factor)
         crs = src.crs
 
@@ -80,7 +57,7 @@ def main():
                      out_shape=pop.shape, transform=transform, fill=0, dtype="int32")
 
     rows, cols = np.nonzero((pop > 0) & (zone > 0))
-    xs, ys = xy(transform, rows, cols)  # cell centres, in the raster's CRS
+    xs, ys = xy(transform, rows, cols)
     centres = gpd.GeoSeries(gpd.points_from_xy(xs, ys), crs=crs).to_crs(4326)
     dist_km = tree.query(np.radians(np.c_[centres.y, centres.x]), k=1)[0][:, 0] * EARTH_RADIUS_KM
 
