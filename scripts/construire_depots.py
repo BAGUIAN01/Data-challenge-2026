@@ -134,7 +134,7 @@ MANIFEST = [
     ("04", "scientist", "sorties-brutes-modeles", ("concat", RAW_SCIENTIST), "Sorties brutes de tous les modèles, dans l'ordre", "scripts du Data Scientist"),
     ("04", "scientist", "eloignement-ecoles-methode", "scripts/eloignement_ecoles.py", "Méthode prête pour mesurer l'éloignement des écoles (OpenStreetMap, WorldPop), testée sur données simulées, non appliquée", "Équipe"),
     ("04", "scientist", "environnement-python", "requirements.txt", "Versions des bibliothèques Python utilisées", "Équipe"),
-    ("05", "analyst", "rapport-defi1", "rapport/rapport_defi1.pdf", "Le rapport (9 pages, LaTeX) : besoin, données, méthode et formules, résultats 2026/27, tableau de bord, limites", "Équipe"),
+    ("05", "analyst", "rapport-defi1", "rapport/rapport_defi1.pdf", "Le rapport (10 pages, LaTeX) : besoin, données, méthode et formules, résultats 2026/27, tableau de bord, limites", "Équipe"),
     ("05", "analyst", "fiches-regionales-13", "analyse/fiches_regionales_13.pdf", "Une fiche d'une page par région, pour un directeur régional", "cahier-interpretation"),
     ("05", "analyst", "carte-achevement-profils", FIG + "08_carte_profils_achevement.png", "Carte : taux d'achèvement 2024/25 et profils des régions", "cahier-transformation"),
     ("05", "analyst", "matrice-priorite-2026-27", FIG + "15_matrice_priorite_2026_27.png", "Où agir en premier à la rentrée 2026/27", "cahier-interpretation"),
@@ -266,7 +266,7 @@ def main():
         f = files[files.step == step]
         root.append(f"* {folder} : {title} - {len(f)} fichiers ({', '.join(ROLES[r] for r in ROLES if r in set(f.role))})")
     root += ["", "Par où commencer :",
-             f"* 05_interpretation : {v('rapport-defi1')} (le rapport, 9 pages)",
+             f"* 05_interpretation : {v('rapport-defi1')} (le rapport, 10 pages)",
              f"  puis {v('solution-anticipation')} (la solution en détail)",
              f"  et {v('fiches-regionales-13')} (une page par région).",
              f"* 04_analyse : {v('journal-decisions')} (chaque choix et ses limites).",
