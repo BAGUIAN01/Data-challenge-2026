@@ -23,6 +23,10 @@
   "signature": "42ae016207630c20c56e8fee9185e2d0",
   "version": 2
  },
+ "02-engineer-cahier-nettoyage.ipynb": {
+  "signature": "bb4853f03390df57ab8c8e905e6402b8",
+  "version": 1
+ },
  "02-engineer-controles-presco.py": {
   "signature": "8b66393692b620a82dce2bb5c252f961",
   "version": 1
@@ -61,6 +65,10 @@
  },
  "02-engineer-presco-propre.csv": {
   "signature": "96615bb2fe13504f88bdf6059992078a",
+  "version": 1
+ },
+ "03-architect-cahier-transformation.ipynb": {
+  "signature": "a5014c574196199d123e8fbfded96ba7",
   "version": 1
  },
  "03-architect-carte-13-regions.geojson": {
@@ -131,6 +139,10 @@
   "signature": "894466f15c541453af6765366de22f06",
   "version": 1
  },
+ "04-analyst-cahier-analyse-descriptive.ipynb": {
+  "signature": "2c1cbd752857ddb56c53fb8c4e16fd65",
+  "version": 1
+ },
  "04-analyst-figures-analyse.pdf": {
   "signature": "697c52e4cc82f6075cdf57e556a516b5",
   "version": 1
@@ -179,17 +191,17 @@
   "signature": "75d3efa497949c535fdd89c2d893ab11",
   "version": 1
  },
- "04-scientist-eloignement-ecoles-methode.py": {
-  "signature": "1af666b25bcf138a9922ace5b552573a",
+ "04-scientist-cahier-modeles.ipynb": {
+  "signature": "602a1324bebadfbd63139b6c096309ec",
   "version": 1
+ },
+ "04-scientist-eloignement-ecoles-methode.py": {
+  "signature": "84e7d80bc9488b0af230b5a26f2418e2",
+  "version": 2
  },
  "04-scientist-environnement-python.txt": {
-  "signature": "91ea3e72c6bd30ec4b488215eb6d68c3",
-  "version": 1
- },
- "04-scientist-facteur-dominant.py": {
-  "signature": "e979e0803b67f0833b74a66c2a58c7d6",
-  "version": 1
+  "signature": "cae318ab4b41b0a367e4fd3ae2c9ed14",
+  "version": 2
  },
  "04-scientist-facteurs-decrochage.md": {
   "signature": "d392fc805548fa5074deef291f152c5f",
@@ -211,10 +223,6 @@
   "signature": "704cdd9852e4ae92dcb60efb5c2c284c",
   "version": 1
  },
- "04-scientist-formule-risque-calcul.py": {
-  "signature": "2942d9f10986c63618b8f7a58ee7dd61",
-  "version": 1
- },
  "04-scientist-formule-risque.md": {
   "signature": "61b4495cfc4f5cb2ef844bb8dcb8e028",
   "version": 3
@@ -228,16 +236,12 @@
   "version": 1
  },
  "04-scientist-prevision-hypothese.py": {
-  "signature": "4213619604782b1d9ae014697cb9125a",
-  "version": 2
+  "signature": "d365d0adf2db0e41a7d31332957ce007",
+  "version": 1
  },
  "04-scientist-resultats-modeles.xlsx": {
   "signature": "9bef6e60414415079621438b01a6bba1",
   "version": 4
- },
- "04-scientist-score-global.py": {
-  "signature": "89e8f46bfc65846592b8b84c77a672ba",
-  "version": 1
  },
  "04-scientist-solution-prevision.py": {
   "signature": "0b11fa3beec7f2ab3df799f75941a325",
@@ -251,6 +255,10 @@
   "signature": "a1f3f1cd6ecb70fc84d35eb668351aea",
   "version": 1
  },
+ "05-analyst-cahier-interpretation.ipynb": {
+  "signature": "9b8af1153f3606754344a5c51661661f",
+  "version": 1
+ },
  "05-analyst-carte-achevement-profils.png": {
   "signature": "956ff70eeb0e6345521e49671d8c837d",
   "version": 1
@@ -260,16 +268,16 @@
   "version": 4
  },
  "05-analyst-export-tableau-de-bord.py": {
-  "signature": "d58638a7db0c072e37d2bd08728a383b",
-  "version": 4
+  "signature": "ea1444b85a9674becccf3961daf7e0ed",
+  "version": 3
  },
  "05-analyst-fiches-regionales-13.pdf": {
   "signature": "88edef3d8d44674c19f9cd500e8730fb",
   "version": 2
  },
  "05-analyst-fiches-regionales.py": {
-  "signature": "4c809a3ee40c9565974b5c969d696cf9",
-  "version": 3
+  "signature": "b42a9c72f5e20209ff6846e54b962643",
+  "version": 2
  },
  "05-analyst-figures-solution.py": {
   "signature": "9b85f11e1d39048990fba6099ef99780",
@@ -308,7 +316,7 @@
   "version": 1
  },
  "05-scientist-projet-complet-relancable.zip": {
-  "signature": "6fa50bc0bd423548df610c160722331f",
+  "signature": "6fd6c7a2cce133a5c32bf749881d315b",
   "version": 6
  },
  "05-scientist-risque-2026-27.png": {
