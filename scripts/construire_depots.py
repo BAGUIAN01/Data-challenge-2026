@@ -10,8 +10,13 @@ the solution can be run again.
 
 Versions are per file and automatic: docs/depots_versions.json keeps, for each deposit, a signature
 of its sources and its version; a file whose sources changed gets the next version, the others keep
-theirs, so only what changed has to be uploaded again. Usage: python construire_depots.py [TEAM]
+theirs, so only what changed has to be uploaded again.
+
+Usage: python construire_depots.py [TEAM] [--depuis GIT_REF]
+  --depuis: the update archive holds the files new or changed since the registry at GIT_REF (the
+  last delivery); without it, since the previous build.
 """
+import argparse
 import hashlib
 import json
 import re
@@ -24,7 +29,11 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-TEAM = sys.argv[1] if len(sys.argv) > 1 else "Biiga"
+_p = argparse.ArgumentParser(description="Construire les dépôts du challenge")
+_p.add_argument("equipe", nargs="?", default="Biiga")
+_p.add_argument("--depuis", default=None, help="référence git de la dernière livraison")
+_a = _p.parse_args()
+TEAM, DEPUIS = _a.equipe, _a.depuis
 REGISTRE = Path("docs/depots_versions.json")
 DEFI = "D1"
 OUT = Path("depots")
@@ -242,6 +251,7 @@ def main():
         shutil.rmtree(OUT)
     rows = []
     registre = json.loads(REGISTRE.read_text()) if REGISTRE.exists() else {}
+    reference = json.loads(git("show", f"{DEPUIS}:{REGISTRE.as_posix()}")) if DEPUIS else dict(registre)
     for step, role, desc, src, what, by in MANIFEST:
         folder = OUT / STEPS[step][0]
         folder.mkdir(parents=True, exist_ok=True)
@@ -253,7 +263,7 @@ def main():
         assert not (folder / n).exists(), f"nom en double : {n}"
         build(src, folder / n)
         rows.append({"step": step, "role": role, "file": n, "what": what, "by": by, "version": version,
-                     "nouveau": not avant or avant["version"] != version,
+                     "nouveau": reference.get(cle, {}).get("version") != version,
                      "src": src if isinstance(src, str) else src[0], "size": (folder / n).stat().st_size})
     files = pd.DataFrame(rows)
     sources = {p.stem.replace(".SOURCE", ""): p.read_text().strip() for p in Path("data/externe_propre").glob("*.SOURCE.txt")}

@@ -97,7 +97,7 @@ python scripts/export_tableau_de_bord.py
 **8. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
 
 ```bash
-python scripts/construire_depots.py Biiga 1
+python scripts/construire_depots.py Biiga --depuis <référence de la dernière livraison>
 ```
 
 Le résultat va dans `depots/`, qui n'est pas suivi par git.
