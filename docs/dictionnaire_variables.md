@@ -1,5 +1,7 @@
 # Dictionnaire des variables
 
+**Cases vides :** elles sont voulues. Une variation (`dlog_*`, `d_*`, `sorties_app`) n'existe pas pour la première année d'une série, faute d'année précédente ; une cible de l'année suivante (`y_*`) ou un signal de rentrée (`late`, `rentree`) n'existe pas encore pour la dernière.
+
 **Conventions communes :**
 - **Année scolaire** : « 2015-2016 » à « 2024-2025 », d'octobre à septembre. Ce n'est pas l'année civile.
 - **Région** : les 13 anciennes régions, en capitales, telles que dans le fichier du challenge, plus « NATIONAL ».

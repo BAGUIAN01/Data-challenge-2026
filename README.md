@@ -6,9 +6,11 @@ Data Challenge Burkina, édition Éducation 2026. **Défi 1 : cartographie et an
 
 | Dossier | Contenu |
 | --- | --- |
-| `scripts/` | Le code Python de toutes les étapes : lecture des données, contrôles, analyses, modèles, figures, fiches |
-| `analyse/` | Résultats : tableaux (`P1_` à `P16_`), notes d'analyse (`*.md`), sorties brutes (`resultats_*.txt`), figures, fiches régionales |
-| `docs/` | Flux de travail, audit des données, journal des décisions (D1 à D18), note d'intention |
+| `notebooks/` | **Le code de chaque étape en cahiers Jupyter, déjà exécutés** (02 nettoyage, 03 transformation, 04a analyse descriptive, 04b modèles, 05 interprétation) |
+| `scripts/` | Les mêmes étapes en scripts Python, dont les cahiers sont construits |
+| `rapport/` | **Le rapport** (`rapport_defi1.pdf`, LaTeX), avec sa source et les captures du tableau de bord |
+| `analyse/` | Résultats : tableaux (`P1_` à `P19_`), notes d'analyse (`*.md`), sorties brutes (`resultats_*.txt`), figures, fiches régionales |
+| `docs/` | Flux de travail, audit des données, journal des décisions (D1 à D21), note d'intention |
 | `data/tidy/` | Données du challenge remises en tableau long |
 | `data/ref/` | Correspondance 13 / 17 régions et fond de carte des 13 régions |
 | `data/externe_propre/` | Sources externes nettoyées, chacune avec sa source |
@@ -18,12 +20,14 @@ Data Challenge Burkina, édition Éducation 2026. **Défi 1 : cartographie et an
 
 ## Où lire les résultats
 
-1. `dashboard/` : le tableau de bord, à lancer (`dashboard/README.md`).
-2. `analyse/solution_anticipation.md` : la solution (où agir, où le risque monte, combien d'enfants, calendrier d'alerte).
-3. `analyse/facteurs_decrochage.md` : les causes autres que l'insécurité.
-4. `analyse/autres_approches_prevision.md` et `analyse/machine_learning.md` : ce qui prévoit et ce qui ne prévoit pas.
-5. `docs/journal_decisions.md` : chaque décision, sa raison et ses limites.
-6. `analyse/fiches_regionales_13.pdf` : une page par région.
+1. `rapport/rapport_defi1.pdf` : le rapport (10 pages).
+2. Le tableau de bord en ligne : <https://kalantigui-decrochage.vercel.app> (code dans `dashboard/`, voir `dashboard/README.md`).
+3. `analyse/solution_anticipation.md` : la solution (où agir, où le risque monte, combien d'enfants, calendrier d'alerte).
+4. `analyse/facteurs_decrochage.md` : les causes autres que l'insécurité.
+5. `analyse/autres_approches_prevision.md` et `analyse/machine_learning.md` : ce qui prévoit et ce qui ne prévoit pas.
+6. `analyse/formule_risque.md` : la formule du risque, le score global et le facteur dominant, avec des exemples calculés à la main.
+7. `docs/journal_decisions.md` : chaque décision, sa raison et ses limites.
+8. `analyse/fiches_regionales_13.pdf` : une page par région.
 
 ## Recalculer
 
@@ -78,6 +82,9 @@ python scripts/prepare_facteurs.py
 python scripts/facteurs_decrochage.py
 python scripts/prevision_facteurs.py
 python scripts/anticipation_fine.py
+python scripts/formule_risque.py
+python scripts/score_global.py
+python scripts/facteur_dominant.py
 python scripts/figures_approches.py
 ```
 
@@ -101,7 +108,13 @@ python scripts/construire_notebooks.py
 
 Les cahiers reprennent le code des scripts, étape par étape ; les relancer redonne exactement les mêmes résultats.
 
-**8. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
+**8. Rapport** (LaTeX, XeLaTeX ; lit les mêmes données que l'application)
+
+```bash
+python rapport/construire_rapport.py
+```
+
+**9. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
 
 ```bash
 python scripts/construire_depots.py Biiga --depuis <référence de la dernière livraison>

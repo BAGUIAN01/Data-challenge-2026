@@ -18,9 +18,9 @@ Une seule page (`app/page.js`), gardée par le service worker, dans laquelle on 
 | Onglet | Ce qu'on y trouve |
 | --- | --- |
 | **Carte** | Les 13 régions colorées par leur score global (moitié risque de chute, moitié part d'enfants qui n'achèvent pas), une barre par région pour le score, en pourcentage, et le nom des régions. Le petit lecteur en haut à droite fait défiler les années de 2020/21 à la prévision 2026/27, sans à-coups (couleurs et barres changent) ; on peut glisser le doigt sur sa piste ou toucher une année. Toucher une région ouvre directement sa page. La feuille du bas montre le pays : les régions où agir maintenant (priorité 1, score, sur quoi agir), ce qui change entre 2025/26 et la prévision 2026/27, trois chiffres du pays, et le facteur dominant de chaque région. Sur la page d'une région, le score s'anime année par année jusqu'à la prévision 2026/27 (« Rejouer les années »). |
-| **Régions** | La matrice de priorité et la liste des régions, avec des filtres. Chaque région ouvre sa fiche, dans cet ordre : le score global, le facteur dominant avec l'action à mener, puis les détails (prévision, achèvement, violence, facteurs, constats, leviers, fiche PDF). |
+| **Régions** | La matrice de priorité et la liste des régions, avec des filtres. Chaque région ouvre sa page, dans cet ordre : le score global et sa décomposition, le score année par année jusqu'à la prévision, le facteur dominant avec l'action à mener, puis l'achèvement, la violence, les élèves attendus (si une saisie existe), les leviers et la fiche PDF. |
 | **Alertes** | Le calendrier d'alerte, les saisies d'écoles ouvertes, l'alerte de septembre. |
-| **Plus** | État de la synchronisation, apparence (clair, sombre), installation, méthode et sources. |
+| **Plus** | État de la synchronisation, apparence (clair par défaut, sombre ou automatique), installation, méthode et sources. |
 
 Ce qui la rend proche d'une application installée :
 - **gestes** : la carte se pince et se déplace au doigt. La feuille du bas se tire au doigt. Un écran se ferme en glissant depuis le bord gauche ;
@@ -128,7 +128,7 @@ Les phrases et les leviers de chaque région viennent de la même fonction que l
 
 | Commande | Ce qu'elle garantit |
 | --- | --- |
-| `npm run verif:aller-retour` | Les 1 425 valeurs relues dans la base sont celles du fichier exporté. Vu en échec quand une valeur est modifiée en base. |
+| `npm run verif:aller-retour` | Les 1 772 valeurs relues dans la base sont celles du fichier exporté. Vu en échec quand une valeur est modifiée en base. |
 | `npm run verif:hors-ligne` | Sur un écran d'iPhone, serveur arrêté, les points suivants sont vérifiés. Vu en échec avec le service worker bloqué. <ul><li>l'application s'ouvre sur une région par son adresse et dit qu'elle est hors ligne ;</li><li>le retour, un lien vers une autre région et les quatre onglets fonctionnent ;</li><li>la fiche PDF est servie ;</li><li>une saisie est gardée et comptée ;</li><li>au retour du serveur, la saisie arrive dans la base, une seule fois.</li></ul> |
 | `npm run verif:ecran` | Sur un téléphone de 360 px, au toucher, les points suivants sont vérifiés. Vu en échec, point par point, avec `VERIF_SABOTAGE=1`. <ul><li>rien ne dépasse de l'écran, sur les quatre onglets ;</li><li>les noms de la carte ne se chevauchent pas ;</li><li>le retour du téléphone ferme une région sans quitter l'application ;</li><li>un glissement depuis le bord ferme l'écran ;</li><li>la feuille du bas se pose à une hauteur de repos ;</li><li>aucune erreur dans la console.</li></ul> |
 
