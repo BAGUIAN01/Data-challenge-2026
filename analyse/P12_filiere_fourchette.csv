@@ -1,0 +1,8 @@
+annee,bas,central,haut,reel,dans_fourchette,sens_annonce,sens_reel
+18/19,423937,423937,439994,418152.0,False,hausse,hausse
+19/20,437053,437053,459883,449700.0,True,hausse,hausse
+20/21,438801,451498,461721,454979.0,True,hausse,hausse
+21/22,446356,462813,469671,437037.0,False,hausse,baisse
+22/23,423990,423990,455650,380078.0,False,baisse,baisse
+23/24,330776,330776,396545,371022.0,True,baisse,baisse
+24/25,336241,377152,403097,354272.0,True,hausse,baisse

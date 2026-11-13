@@ -1,0 +1,1 @@
+# Source : Enquête démographique et de santé 2021 (INSD / The DHS Program), indicateurs régionaux, HDX « dhs-subnational-data-for-burkina-faso ». « Centre » = ligne « Centre (including Ouagadougou) ». « meres_sans_instruction_pct » = femmes de 15-49 ans sans instruction. Limite : la collecte n'a pas couvert toutes les zones d'insécurité (Sahel, Est notamment).

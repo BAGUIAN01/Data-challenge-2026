@@ -1,0 +1,7 @@
+modele,AUC,Brier
+Violence,0.815,0.166
+Violence + faim,0.763,0.191
+Violence + fond,0.806,0.17
+Violence + faim + fond,0.758,0.194
+Fond seul,0.669,0.182
+Aucun modèle (taux de base),0.5,0.178

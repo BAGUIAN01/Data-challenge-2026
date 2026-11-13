@@ -1,0 +1,6 @@
+modele,AUC,Brier,alertes,baisses_annoncees,precision_%,rappel_%
+Règle d'escalade (D7),0.681,,14,7,50.0,50.0
+"Logistique, violence seule",0.829,0.166,23,9,39.13,64.286
+"Logistique, toutes variables",0.751,0.204,19,8,42.105,57.143
+Forêt aléatoire,0.777,0.179,20,9,45.0,64.286
+Aucun modèle (taux de base),0.5,0.169,0,0,,0.0

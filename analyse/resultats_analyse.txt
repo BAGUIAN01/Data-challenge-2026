@@ -1,0 +1,99 @@
+
+=== A. Tendances nationales (primaire) ===
+       eleves_primaire  ecoles_primaires  nouveaux_CP1  TBS_%  TAP_%  TAP_garcons_%  TAP_filles_%  reussite_CEP_%
+15/16        2873049.0           14655.0      605085.0   86.1   58.2           55.3          61.3            62.1
+16/17        3040802.0           15330.0      634548.0   88.5   60.3           56.6          64.3            73.7
+17/18        3206019.0           15756.0      661578.0   90.7   63.0           58.8          67.6            65.8
+18/19        3233784.0           15345.0      632117.0   88.8   61.7           57.4          66.3            55.2
+19/20        3240347.0           14863.0      625589.0   86.6   60.3           56.0          64.9            66.0
+20/21        3289736.0           15077.0      655449.0   86.1   62.4           57.3          67.7            60.0
+21/22        3174946.0           14427.0      635757.0   85.8   62.0           57.5          66.5            63.3
+22/23        2835544.0           12780.0      581521.0   74.4   54.6           49.5          59.8            71.5
+23/24        3067940.0           13558.0      707257.0   78.2   54.5           49.3          59.9            82.0
+24/25        3308096.0           14276.0      768940.0   78.7   51.6           47.7          55.5            89.2
+
+=== B. Choc et reprise par région (primaire) ===
+                   eleves_max annee_max  eleves_2024_25  pire_chute_% annee_pire_chute  2024_25_vs_max_%  ecoles_max  ecoles_2024_25  ecoles_vs_max_%  TAP_15_16  TAP_21_22  TAP_24_25  TAP_ecart_pts
+region                                                                                                                                                                                               
+EST                    212553     17/18          132740         -57.1            22/23             -37.5        1267             516            -59.3       40.2       26.7       16.5          -23.7
+NORD                   352908     24/25          352908         -17.7            22/23               0.0        1654            1546             -6.5       66.9       59.5       46.4          -20.5
+CENTRE-NORD            267607     18/19          235754         -29.9            22/23             -11.9        1375             868            -36.9       45.9       46.4       27.7          -18.2
+BOUCLE DU MOUHOUN      318066     18/19          243411         -51.9            22/23             -23.5        1438             954            -33.7       55.1       53.4       37.2          -17.9
+SAHEL                  132337     17/18           62399         -72.8            22/23             -52.8        1037             187            -82.0       24.5       11.9       11.1          -13.4
+CENTRE-EST             270665     24/25          270665         -10.6            22/23               0.0        1289            1143            -11.3       61.4       58.5       48.7          -12.7
+CASCADES               138258     20/21          135550         -11.8            23/24              -2.0         714             705             -1.3       57.0       62.6       49.4           -7.6
+PLATEAU CENTRAL        202566     24/25          202566          -2.0            20/21               0.0        1093            1086             -0.6       65.7       73.9       67.2            1.5
+SUD-OUEST              144196     24/25          144196          -7.4            22/23               0.0         906             877             -3.2       52.0       59.9       53.5            1.5
+CENTRE-SUD             159920     19/20          154812          -5.6            22/23              -3.2         796             796              0.0       72.5       87.3       75.5            3.0
+CENTRE-OUEST           344679     24/25          344679          -5.2            22/23               0.0        1479            1479              0.0       72.8       88.4       75.9            3.1
+HAUTS-BASSINS          428978     21/22          420861         -11.0            22/23              -1.9        1807            1722             -4.7       62.1       78.7       68.8            6.7
+CENTRE                 607555     24/25          607555           0.0            15/16               0.0        2397            2397              0.0       75.0       91.4       87.5           12.5
+
+=== C. Sorties apparentes (% des élèves d'une année absents l'année suivante, hors nouveaux CP1) ===
+    inclut les fins de CM2 normales, les abandons et les départs nets vers d'autres régions
+                   15/16→16/17  16/17→17/18  17/18→18/19  18/19→19/20  19/20→20/21  20/21→21/22  21/22→22/23  22/23→23/24  23/24→24/25
+region                                                                                                                                
+BOUCLE DU MOUHOUN         15.6         15.4         15.6         25.2         15.4         31.8         52.6          3.1          9.9
+CASCADES                  15.3         15.1         14.9         14.3         16.5         24.1         22.7         23.9         16.9
+CENTRE                    14.1         17.9         13.0         13.9         15.9         16.3         15.2         16.0         15.4
+CENTRE-EST                16.9         16.4         20.3         18.6         20.5         20.9         29.1         21.5         16.9
+CENTRE-NORD               17.4         15.7         18.9         32.3         12.4         23.6         43.6         19.3         16.0
+CENTRE-OUEST              15.3         16.3         15.8         14.6         17.4         19.4         22.4         16.5         18.2
+CENTRE-SUD                16.0         14.7         15.6         15.6         18.8         20.2         21.3         19.9         18.5
+EST                       18.0         15.4         22.8         24.1         28.4         41.7         45.3          9.5         20.4
+HAUTS-BASSINS             14.8         14.5         14.9         15.2         17.0         16.6         27.7         15.7         18.5
+NORD                      15.6         16.1         20.3         19.8         20.9         26.0         32.9         17.1         18.4
+PLATEAU CENTRAL           15.8         16.5         17.7         16.0         20.8         19.4         20.9         20.8         20.1
+SAHEL                     24.7         22.4         59.9         32.1         42.8         40.3         47.8          0.6         24.4
+SUD-OUEST                 19.5         17.9         18.4         17.1         19.6         23.5         24.9         20.0         18.4
+NATIONAL                  16.2         16.3         18.9         19.1         18.7         22.8         29.0         16.7         17.2
+
+=== D. Passages apparents d'un niveau au suivant, national (effectif niveau+1 l'année t+1 / effectif niveau l'année t, en %) ===
+sexe passage  16/17  17/18  18/19  19/20  20/21  21/22  22/23  23/24  24/25
+   T CP1→CP2   94.5   94.6   91.6   91.7   92.7   89.1   81.9   97.3   94.3
+   T CP2→CE1   96.2   97.5   93.9   93.6   95.9   92.2   85.0  101.6  100.9
+   T CE1→CE2   92.4   94.8   91.1   90.4   93.2   87.7   80.1   93.4   92.5
+   T CE2→CM1   94.4   96.0   91.6   91.3   92.4   86.5   81.6   94.4   93.8
+   T CM1→CM2   98.1   94.5   93.2   95.9   96.6   91.3   81.8   91.8   86.2
+
+Survie apparente CP1 -> CM2 cinq ans plus tard (effectif CM2 / effectif CP1) :
+cohorte_CP1 CM2_en  survie_apparente_G_%  survie_apparente_F_%  survie_apparente_T_%
+      15/16  20/21                  65.3                  83.7                  74.1
+      16/17  21/22                  59.0                  77.2                  67.7
+      17/18  22/23                  48.7                  65.3                  56.6
+      18/19  23/24                  50.0                  66.3                  57.8
+      19/20  24/25                  49.2                  62.7                  55.7
+
+=== E. Parité filles/garçons de l'achèvement (IPS du TAP : >1 = filles devant) ===
+                   TAP_garcons_24_25  TAP_filles_24_25  IPS_TAP_15_16  IPS_TAP_24_25
+region                                                                              
+SAHEL                           11.5              10.8           0.91           0.94
+CASCADES                        48.5              50.3           1.04           1.04
+SUD-OUEST                       52.6              54.6           1.06           1.04
+CENTRE                          82.9              91.9           1.19           1.11
+BOUCLE DU MOUHOUN               35.0              39.4           1.13           1.12
+CENTRE-SUD                      70.7              80.4           1.11           1.14
+NATIONAL                        47.7              55.5           1.11           1.16
+CENTRE-EST                      44.9              52.7           1.04           1.17
+EST                             15.1              17.9           1.09           1.18
+HAUTS-BASSINS                   63.2              74.5           1.13           1.18
+PLATEAU CENTRAL                 61.0              73.3           1.12           1.20
+CENTRE-OUEST                    69.0              82.5           1.13           1.20
+NORD                            41.4              51.5           1.14           1.25
+CENTRE-NORD                     24.0              31.2           1.03           1.30
+
+=== F. Écoles en moins et élèves en moins (variations annuelles, 13 régions x 9 années) ===
+pente = 0.78 (1 % d'écoles en moins va avec 0.78 % d'élèves en moins), R² = 0.87, n = 117
+
+=== G. Règle « comme l'an passé » appliquée au TAP régional : erreur absolue (points) ===
+annee_predite  erreur_moyenne_pts  erreur_max_pts region_erreur_max
+        16/17                2.92             6.0     HAUTS-BASSINS
+        17/18                3.15             9.5      CENTRE-OUEST
+        18/19                2.97             9.0             SAHEL
+        19/20                3.52             8.3       CENTRE-NORD
+        20/21                3.65             6.7     HAUTS-BASSINS
+        21/22                4.50            14.5        CENTRE-SUD
+        22/23                7.24            21.5 BOUCLE DU MOUHOUN
+        23/24                2.42             6.0          CASCADES
+        24/25                3.36             9.6      CENTRE-OUEST
+erreur moyenne sur toutes les années : 3.75 points

@@ -1,0 +1,50 @@
+Observations utilisables : 104 (13 régions × 8 années) ; années testées : 19/20 à 23/24 (prédiction de l'année suivante)
+
+=== 1. Variation du taux d'achèvement l'année suivante : erreur absolue moyenne (points) ===
+annee_predite  Comme l'an passé  Ridge (linéaire régularisé)  Forêt aléatoire  Gradient boosting
+        20/21              3.65                         3.69             3.80               4.02
+        21/22              4.50                         4.23             4.29               4.37
+        22/23              7.24                         6.91             6.63               6.56
+        23/24              2.42                         3.47             4.36               5.30
+        24/25              3.36                         4.58             3.64               3.72
+      moyenne              4.23                         4.58             4.54               4.79
+  Ridge (linéaire régularisé)    gain par rapport à « comme l'an passé » : -8 %
+  Forêt aléatoire                gain par rapport à « comme l'an passé » : -7 %
+  Gradient boosting              gain par rapport à « comme l'an passé » : -13 %
+
+Importance des variables (forêt aléatoire, permutation sur les années testées ; points d'erreur gagnés quand la variable est connue) :
+                          variable  importance_points
+  Variation du TAP (année écoulée)              0.148
+Sorties apparentes (année écoulée)              0.061
+      Variation des entrées en CP1              0.010
+             Taux brut d'admission              0.006
+           Variation des effectifs              0.006
+         Part des écoles publiques              0.004
+                     Pauvreté 2021             -0.002
+      Variation du nombre d'écoles             -0.007
+
+=== 2. Baisse des effectifs de plus de 5 % l'année suivante (65 prédictions hors échantillon, 14 baisses réelles) ===
+                      modele   AUC  Brier  alertes  baisses_annoncees  precision_%  rappel_%
+       Règle d'escalade (D7) 0.681    NaN       14                  7       50.000    50.000
+  Logistique, violence seule 0.829  0.166       23                  9       39.130    64.286
+Logistique, toutes variables 0.751  0.204       19                  8       42.105    57.143
+             Forêt aléatoire 0.777  0.179       20                  9       45.000    64.286
+ Aucun modèle (taux de base) 0.500  0.169        0                  0          NaN     0.000
+AUC : 0,5 = hasard, 1 = parfait. Brier : plus bas = probabilités plus justes. Seuil d'alerte des modèles : 50 %.
+
+Probabilité d'une baisse des effectifs de plus de 5 % (logistique, violence seule, entraînée sur 2015-2025) :
+periode                  rentrée 2025/26  rentrée 2026/27
+region_2025                                              
+Yaadga                              29.0             55.0
+Goulmou + Sirba + Tapoa             42.0             49.0
+Koulsé                              32.0             48.0
+Bankui + Sourou                     45.0             41.0
+Liptako + Soum                      32.0             41.0
+Nakambé                             32.0             26.0
+Guiriko                              3.0             15.0
+Nazinon                              0.0              6.0
+Djôrô                               10.0              4.0
+Nando                                0.0              4.0
+Tannounyan                          10.0              3.0
+Kadiogo                              0.0              1.0
+Oubri                                0.0              0.0

@@ -1,0 +1,9 @@
+variante,AUC,gain_AUC,IC90_gain,erreur_effectifs_%
+"Référence : violence (niveau, escalade)",0.8291,0.0,[+0.000 ; +0.000],11.8906
+F1 + étendue,0.7913,-0.0378,[-0.097 ; +0.013],11.4568
+F2 + juillet-septembre,0.8515,0.0224,[+0.005 ; +0.043],11.56
+F3 + rentrée (oct.-déc.),0.881,0.0518,[+0.002 ; +0.108],11.337
+F4 civils (au lieu de tout),0.8473,0.0182,[-0.013 ; +0.053],11.8467
+F5 + voisins,0.8053,-0.0238,[-0.061 ; +0.008],10.9656
+« Comme l'an passé » (effectifs),,,,9.3714
+"F6 combinaison (moitié modèle, moitié « comme l'an passé »)",,,,10.0796

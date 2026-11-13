@@ -1,0 +1,14 @@
+cle,region,region_2025,TAP_24_25,prevision_25_26,fourchette_basse,fourchette_haute,enfants_11_ans_approx,enfants_hors_CM2_estimes,incidents_24_25,alerte_2025_26,incidents_25_26,alerte_2026_27,profil
+SAHEL,SAHEL,Liptako + Soum,11.1,11.1,4.6,15.5,31757.8,28200.0,223,False,235,False,Effondrement
+EST,EST,Goulmou + Sirba + Tapoa,16.5,16.5,10.0,20.9,60565.6,50600.0,261,False,298,False,Effondrement
+CENTRENORD,CENTRE-NORD,Koulsé,27.7,27.7,21.2,32.1,58060.2,42000.0,182,False,248,False,Choc puis reprise partielle
+BOUCLEDUMOUHOUN,BOUCLE DU MOUHOUN,Bankui + Sourou,37.2,37.2,30.7,41.6,56269.6,35300.0,261,False,250,False,Choc puis reprise partielle
+NORD,NORD,Yaadga,46.4,46.4,39.9,50.8,53306.4,28600.0,131,False,250,True,Érosion
+CENTREEST,CENTRE-EST,Nakambé,48.7,48.7,42.2,53.1,48948.8,25100.0,156,False,136,False,Érosion
+CASCADES,CASCADES,Tannounyan,49.4,49.4,42.9,53.8,25284.4,12800.0,40,False,19,False,Érosion
+SUDOUEST,SUD-OUEST,Djôrô,53.5,53.5,47.0,57.9,25356.8,11800.0,23,False,16,False,Stabilité / accueil
+PLATEAUCENTRAL,PLATEAU CENTRAL,Oubri,67.2,67.2,60.7,71.6,28932.2,9500.0,0,False,0,False,Stabilité / accueil
+HAUTSBASSINS,HAUTS-BASSINS,Guiriko,68.8,68.8,62.3,73.2,65306.6,20400.0,24,False,39,True,Stabilité / accueil
+CENTRESUD,CENTRE-SUD,Nazinon,75.5,75.5,69.0,79.9,22525.0,5500.0,0,False,4,False,Stabilité / accueil
+CENTREOUEST,CENTRE-OUEST,Nando,75.9,75.9,69.4,80.3,49431.8,11900.0,0,False,3,False,Stabilité / accueil
+CENTRE,CENTRE,Kadiogo,87.5,87.5,81.0,91.9,79413.0,9900.0,1,False,2,False,Stabilité / accueil

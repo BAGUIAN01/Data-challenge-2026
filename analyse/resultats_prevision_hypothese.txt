@@ -1,0 +1,85 @@
+=== A. Prévision du TAP 2025/26 : « comme l'an passé » avec fourchette à 80 % ===
+annee_predite  n_passe  bas  haut  couverture_%
+        19/20       39 -5.0   4.8            77
+        20/21       52 -5.5   4.5            62
+        21/22       65 -5.6   5.7            69
+        22/23       78 -5.6   6.1            46
+        23/24       91 -6.6   5.3           100
+        24/25      104 -6.3   4.9            85
+Couverture moyenne : 73 % (attendu : 80 %)
+Fourchette appliquée : -6.5 à +4.4 points autour du TAP 2024/25
+
+=== B. Alerte d'escalade (incidents ≥ 1,5 × l'année d'avant, et ≥ 30) ===
+Historique (104 régions-années) : 22 alertes ; baisse d'effectifs de plus de 5 % l'année suivante dans 12 cas sur 22 (55 %), contre 9 % sans alerte.
+Baisses de plus de 5 % précédées d'une alerte : 12 sur 19
+           region     annee  inc_prev  incidents  variation_eleves_pct
+BOUCLE DU MOUHOUN 2018-2019       7.0         32                  -7.6
+BOUCLE DU MOUHOUN 2019-2020      32.0         51                   4.9
+BOUCLE DU MOUHOUN 2021-2022      47.0        161                 -41.3
+         CASCADES 2021-2022      30.0         78                  -3.8
+       CENTRE-EST 2021-2022       8.0         66                  -9.6
+       CENTRE-EST 2022-2023      66.0        162                   4.0
+      CENTRE-NORD 2018-2019       4.0         97                 -15.0
+      CENTRE-NORD 2021-2022     125.0        241                 -26.5
+     CENTRE-OUEST 2022-2023       4.0         41                   5.0
+              EST 2017-2018       1.0         32                  -2.2
+              EST 2018-2019      32.0         84                  -5.7
+              EST 2019-2020      84.0        147                  -8.7
+              EST 2020-2021     147.0        236                 -26.4
+              EST 2021-2022     236.0        396                 -30.7
+    HAUTS-BASSINS 2022-2023      26.0         72                   6.2
+             NORD 2018-2019       8.0         37                   1.2
+             NORD 2019-2020      37.0         80                   0.1
+             NORD 2021-2022      92.0        209                 -12.5
+            SAHEL 2016-2017       7.0         52                   5.0
+            SAHEL 2017-2018      52.0         79                 -47.4
+            SAHEL 2018-2019      79.0        244                  -7.8
+        SUD-OUEST 2021-2022       7.0         41                  -3.8
+
+--- Tableau de prévision et d'alerte ---
+                             region_2025  TAP_24_25  prevision_25_26  fourchette_basse  fourchette_haute  enfants_hors_CM2_estimes  incidents_24_25  alerte_2025_26  incidents_25_26  alerte_2026_27                       profil
+cle                                                                                                                                                                                                                              
+SAHEL                     Liptako + Soum       11.1             11.1               4.6              15.5                   28200.0              223           False              235           False                 Effondrement
+EST              Goulmou + Sirba + Tapoa       16.5             16.5              10.0              20.9                   50600.0              261           False              298           False                 Effondrement
+CENTRENORD                        Koulsé       27.7             27.7              21.2              32.1                   42000.0              182           False              248           False  Choc puis reprise partielle
+BOUCLEDUMOUHOUN          Bankui + Sourou       37.2             37.2              30.7              41.6                   35300.0              261           False              250           False  Choc puis reprise partielle
+NORD                              Yaadga       46.4             46.4              39.9              50.8                   28600.0              131           False              250            True                      Érosion
+CENTREEST                        Nakambé       48.7             48.7              42.2              53.1                   25100.0              156           False              136           False                      Érosion
+CASCADES                      Tannounyan       49.4             49.4              42.9              53.8                   12800.0               40           False               19           False                      Érosion
+SUDOUEST                           Djôrô       53.5             53.5              47.0              57.9                   11800.0               23           False               16           False          Stabilité / accueil
+PLATEAUCENTRAL                     Oubri       67.2             67.2              60.7              71.6                    9500.0                0           False                0           False          Stabilité / accueil
+HAUTSBASSINS                     Guiriko       68.8             68.8              62.3              73.2                   20400.0               24           False               39            True          Stabilité / accueil
+CENTRESUD                        Nazinon       75.5             75.5              69.0              79.9                    5500.0                0           False                4           False          Stabilité / accueil
+CENTREOUEST                        Nando       75.9             75.9              69.4              80.3                   11900.0                0           False                3           False          Stabilité / accueil
+CENTRE                           Kadiogo       87.5             87.5              81.0              91.9                    9900.0                1           False                2           False          Stabilité / accueil
+
+=== C. Hypothèse : l'insécurité pèse-t-elle plus là où la pauvreté est forte ? ===
+Modèle avec interaction, variation du TAP l'année suivante (points) :
+  constante                               -0.88   IC 95 % [-1.18 ; -0.49]
+  insécurité (log incidents, centré)      -1.01   IC 95 % [-1.41 ; -0.62]
+  pauvreté (par 10 points)                -0.18   IC 95 % [-0.56 ; +0.33]
+  insécurité × pauvreté                   +0.14   IC 95 % [-0.38 ; +0.25]
+Erreur moyenne sur années non vues (points) : {'additif': 4.24, "comme l'an passé": 4.11, 'interaction': 4.46}
+
+Vue transversale 2021/22 → 2024/25 :
+                   2021-2022  2024-2025  variation_TAP  incidents_21_24  pauvrete_2021
+region                                                                                
+CENTRE-NORD             46.4       27.7          -18.7              702           49.6
+BOUCLE DU MOUHOUN       53.4       37.2          -16.2              568           56.1
+CASCADES                62.6       49.4          -13.2              197           36.9
+NORD                    59.5       46.4          -13.1              543           67.5
+CENTRE-OUEST            88.4       75.9          -12.5               59           44.6
+CENTRE-SUD              87.3       75.5          -11.8               17           44.4
+EST                     26.7       16.5          -10.2              934           53.9
+HAUTS-BASSINS           78.7       68.8           -9.9              155           37.4
+CENTRE-EST              58.5       48.7           -9.8              372           34.7
+PLATEAU CENTRAL         73.9       67.2           -6.7                1           45.5
+SUD-OUEST               59.9       53.5           -6.4               77           43.5
+CENTRE                  91.4       87.5           -3.9               25            8.0
+SAHEL                   11.9       11.1           -0.8             1194           76.1
+r(variation TAP, pauvreté) = -0.10 ; r(variation TAP, log incidents) = -0.26 (n = 13)
+
+=== D. Attaques contre l'éducation (Insecurity Insight) ===
+188 incidents ; région non renseignée : 0
+  r(log attaques_education d'une année, variation des écoles l'année suivante) = -0.23 (n = 104)
+  r(log incidents d'une année, variation des écoles l'année suivante) = -0.32 (n = 104)
