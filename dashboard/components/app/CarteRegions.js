@@ -19,11 +19,12 @@ function el(tag, attrs, parent) {
   return e;
 }
 
-export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir, commande, marges }) {
+export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir, commande, marges, barres = null }) {
   const svgRef = useRef(null);
   const etat = useRef({ classe, valeur, selection, onChoisir, marges });
   etat.current.classe = classe;
   etat.current.valeur = valeur;
+  etat.current.barres = barres;
   etat.current.selection = selection;
   etat.current.onChoisir = onChoisir;
   etat.current.marges = marges;
@@ -33,7 +34,8 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
     const svg = svgRef.current, { largeur: L, hauteur: Hc, regions: GEO } = jeu.carte;
     const R = jeu.regions, s = etat.current;
     svg.innerHTML = "";
-    const gReg = el("g", {}, svg), gSel = el("g", { "pointer-events": "none" }, svg), gLab = el("g", { "pointer-events": "none" }, svg);
+    const gReg = el("g", {}, svg), gSel = el("g", { "pointer-events": "none" }, svg), gLab = el("g", { "pointer-events": "none" }, svg), gBar = el("g", { "pointer-events": "none" }, svg);
+    let pousse = 1; // growth of the bars, 0 -> 1 when the bar view opens
     let vb = { x: 0, y: 0, w: L, h: Hc }, glisse = false, anim = 0;
     for (const r of R) {
       const p = el("path", { d: GEO[r.cle].d, "stroke-linejoin": "round", "data-cle": r.cle, tabindex: 0, role: "button", "aria-label": `${r.nom} : ouvrir l'aperçu` }, gReg);
@@ -49,6 +51,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       if (!W) return;
       svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
       const k = vb.w / W, sel = s.selection;
+      const enBarres = Boolean(s.barres);
       for (const p of gReg.children) {
         p.setAttribute("fill", `var(--c${s.classe(R.find((r) => r.cle === p.dataset.cle))})`);
         p.setAttribute("stroke", "var(--land)");
@@ -56,7 +59,32 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       }
       gSel.innerHTML = "";
       if (sel) el("path", { d: GEO[sel].d, fill: "none", stroke: "var(--fg)", "stroke-width": 2.5 * k, "stroke-linejoin": "round" }, gSel);
-      gLab.innerHTML = "";
+      gLab.innerHTML = ""; gBar.innerHTML = "";
+      if (enBarres) {
+        // One bar per region, standing on its label point; height = the value (0-100), front bars last.
+        const etiquettes = [];
+        const w = (W < 600 ? 13 : 16) * k, Hm = (W < 600 ? 72 : 110) * k; // shorter on a phone, under the controls
+        for (const r of [...R].sort((a, b) => GEO[a.cle].ly - GEO[b.cle].ly)) {
+          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.barres(r) ?? 0, h = Math.max(2 * k, (v / 100) * Hm * pousse);
+          const x0 = f.lx + dx, y0 = f.ly + dy;
+          el("ellipse", { cx: x0, cy: y0, rx: w * 0.75, ry: w * 0.28, fill: "rgba(0,0,0,.25)" }, gBar);
+          el("rect", { x: x0 - w / 2, y: y0 - h, width: w, height: h, rx: w * 0.25, fill: `var(--c${s.classe(r)})`, stroke: "#fff", "stroke-width": 2 * k }, gBar);
+          if (pousse > 0.95) etiquettes.push({ x: x0, y: y0 - h - 6 * k, v, cle: r.cle });
+        }
+        // Values are drawn last, over every bar: the selected region first, then the tallest bars;
+        // a value that would overlap one already placed is left out (its bar still shows it).
+        const fs = 12 * k, pris = [];
+        etiquettes.sort((a, b) => (b.cle === sel) - (a.cle === sel) || b.v - a.v);
+        for (const e of etiquettes) {
+          const txt = `${e.v} %`, lw = txt.length * fs * 0.6, bx = [e.x - lw / 2 - 2 * k, e.y - fs, e.x + lw / 2 + 2 * k, e.y + 2 * k];
+          if (pris.some((q) => bx[0] < q[2] && bx[2] > q[0] && bx[1] < q[3] && bx[3] > q[1])) continue;
+          pris.push(bx);
+          const tx = el("text", { x: e.x, y: e.y, "text-anchor": "middle" }, gBar);
+          tx.style.cssText = `font-size:${fs}px;fill:var(--fg);stroke:#fff;stroke-width:${3.5 * k}px`;
+          tx.textContent = txt;
+        }
+        return;
+      }
       const t = 12 * k, m = 3 * k, places = [];
       for (const r of [...ordre].sort((a, b) => (b.cle === sel) - (a.cle === sel))) {
         const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.valeur?.(r), l = v ? [...lignesNom(r.nom), v] : lignesNom(r.nom), c = s.classe(r);
@@ -162,6 +190,11 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       pays: () => aller(cible([0, 0, L, Hc])),
       region: (cle) => aller(cible(boites[cle], 1.6)),
       immediat: () => { vb = cible([0, 0, L, Hc]); render(); },
+      pousser: () => {
+        const t0 = performance.now();
+        const pas = (t) => { pousse = Math.min(1, (t - t0) / 700); pousse = 1 - Math.pow(1 - pousse, 3); render(); if (pousse < 1) requestAnimationFrame(pas); };
+        pousse = 0; requestAnimationFrame(pas);
+      },
     };
     requestAnimationFrame(() => api.current?.immediat());
     return () => {
@@ -177,6 +210,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
   }, [jeu]);
 
   useEffect(() => { api.current?.render(); }, [classe, valeur, selection]);
+  useEffect(() => { if (barres) api.current?.pousser(); else api.current?.render(); }, [barres]);
   useEffect(() => {
     if (!commande?.n) return;
     if (commande.type === "region") api.current?.region(commande.cle);

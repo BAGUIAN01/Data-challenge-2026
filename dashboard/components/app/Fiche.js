@@ -2,7 +2,7 @@
 // The region screen, written as an analyst's brief, in the order of the challenge: the prediction
 // first (risk of a drop in 2026/27, completion forecast 2025/26, expected pupils), then the situation
 // placed among the 13 regions, then what drives the risk, the findings and the levers.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Colonnes, Courbe, Fourchette } from "./Graphes";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
@@ -103,9 +103,18 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
   const n = jeu.annees.length - 1, nat = jeu.national;
   const [luTap, setLuTap] = useState(null);
   const [luInc, setLuInc] = useState(null);
-  const pv = r.prevision_2025_26, prevue = luTap === n + 1, iT = luTap ?? n;
+  // Opening animation, year by year (2015/16 onwards): both charts draw themselves; « Rejouer » restarts.
+  const nV = r.incidents.length - 1, [pas, setPas] = useState(0), [tour, setTour] = useState(0);
+  useEffect(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { setPas(nV); return undefined; }
+    setPas(0);
+    const t = setInterval(() => setPas((p) => { if (p >= nV) { clearInterval(t); return p; } return p + 1; }), 280);
+    return () => clearInterval(t);
+  }, [tour, nV]);
+  const anime = pas < nV;
+  const pv = r.prevision_2025_26, prevue = !anime && luTap === n + 1, iT = anime ? Math.min(pas, n) : luTap ?? n;
   const lectureTap = prevue ? `2025/26 prévu · ${fr(pv.basse, 1)} à ${pct(pv.haute)}` : `${jeu.annees[iT]} · ${pct(r.tap[iT])} · pays ${pct(nat.tap[iT])}`;
-  const iI = luInc ?? r.incidents.length - 1;
+  const iI = anime ? pas : luInc ?? r.incidents.length - 1;
   const saisie = saisies.filter((s) => s.cle === r.cle).sort((a, b) => String(b.saisi_le).localeCompare(String(a.saisi_le)))[0];
   const est = saisie && estimerEffectifs({ region: r, nowcast: jeu.nowcast, annee: saisie.annee, ecolesOuvertes: saisie.ecoles_ouvertes });
   const leviers = r.leviers.concat(r.leviers_facteurs).slice(0, 3);
@@ -119,14 +128,15 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
       <section className="sec">
         <h2>Achèvement<span className="num">{lectureTap}</span></h2>
         <Courbe annees={jeu.annees} series={[{ v: nat.tap, c: "var(--nat)" }, { v: r.tap, c: "var(--fg)" }]} y0={0} y1={100} fmt={(x) => pct(x)}
-          prev={pv} lu={luTap} onLire={setLuTap} label={`Taux d'achèvement de ${r.nom} et du pays, et prévision 2025/26`} />
+          prev={pv} lu={anime ? null : luTap} onLire={anime ? undefined : setLuTap} jusqua={anime ? pas : null} label={`Taux d'achèvement de ${r.nom} et du pays, et prévision 2025/26`} />
         <div className="lg"><span><i style={{ "--c": "var(--fg)" }} />{r.nom}</span><span><i style={{ "--c": "var(--nat)" }} />Pays</span>
           <span><i className="bx" style={{ "--c": "var(--band2)" }} />Prévision</span></div>
       </section>
 
       <section className="sec">
         <h2>Violence<span className="num">{jeu.annees_violence[iI]} · {fr(r.incidents[iI])} incidents</span></h2>
-        <Colonnes valeurs={r.incidents} annees={jeu.annees_violence} lu={luInc} onLire={setLuInc} label={`Incidents de sécurité par année scolaire, ${r.nom}`} />
+        <Colonnes valeurs={r.incidents} annees={jeu.annees_violence} lu={anime ? null : luInc} onLire={anime ? undefined : setLuInc} jusqua={anime ? pas : null} label={`Incidents de sécurité par année scolaire, ${r.nom}`} />
+        <button className="rejouer" onClick={() => setTour((x) => x + 1)}>{anime ? `Année ${jeu.annees_violence[pas]}…` : "Rejouer les années"}</button>
       </section>
 
       {est && (

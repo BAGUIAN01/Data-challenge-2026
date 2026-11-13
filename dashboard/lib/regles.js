@@ -35,7 +35,7 @@ export function couches(jeu) {
   const seuils = jeu.seuils;
   const nat = seuils.tap_national.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const score = jeu.score_global
-    ? { score: { nom: "Score", valeur: (r) => `${scoreGlobal(jeu, r)} %`, classe: (r) => { const s = scoreGlobal(jeu, r) ?? 0; return s >= 50 ? 1 : s >= 25 ? 2 : 3; }, legende: ["Score de 50 et plus", "25 à 49", "Moins de 25"] } }
+    ? { score: { nom: "Score", valeur: (r) => `${scoreGlobal(jeu, r)} %`, classe: (r) => { const s = scoreGlobal(jeu, r) ?? 0; return s >= 50 ? 1 : s >= 25 ? 2 : 3; }, legende: ["50 et plus", "25 à 49", "moins de 25"] } }
     : {};
   return {
     ...score,
@@ -46,11 +46,20 @@ export function couches(jeu) {
       legende: ["Risque élevé", "Moyen", "Faible"],
     },
     priorite: { nom: "Priorité", valeur: (r) => `P${r.priorite}`, classe: (r) => r.priorite, legende: ["Priorité 1, agir maintenant", "Priorité 2", "Priorité 3"] },
+    // Layers with a history take the year's index i (default: the last year); the app animates them.
     achevement: {
       nom: "Achèvement",
-      valeur: (r) => `${Math.round(r.tap.at(-1))} %`,
-      classe: (r) => (r.tap.at(-1) < 35 ? 1 : r.tap.at(-1) < seuils.tap_national ? 2 : 3),
+      annees: jeu.annees,
+      valeur: (r, i = r.tap.length - 1) => (r.tap[i] === null || r.tap[i] === undefined ? "" : `${Math.round(r.tap[i])} %`),
+      classe: (r, i = r.tap.length - 1) => (r.tap[i] < 35 ? 1 : r.tap[i] < seuils.tap_national ? 2 : 3),
       legende: ["Achèvement sous 35 %", `35 à ${nat} %`, `${nat} % et plus`],
+    },
+    violence: {
+      nom: "Violence",
+      annees: jeu.annees_violence,
+      valeur: (r, i = r.incidents.length - 1) => `${r.incidents[i]}`,
+      classe: (r, i = r.incidents.length - 1) => (r.incidents[i] >= 200 ? 1 : r.incidents[i] >= 50 ? 2 : 3),
+      legende: ["200 incidents et plus", "50 à 199", "Moins de 50"],
     },
   };
 }

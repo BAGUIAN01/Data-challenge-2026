@@ -2,7 +2,7 @@
 // Content of the screens: the country summary (sheet over the map), the region preview, the tab
 // roots (Régions, Alertes, Plus) and the pushed screens (region, method, sources, pending entries).
 import { useEffect, useRef, useState } from "react";
-import { BlocEstimation, CarteActions, CarteBande, CarteCalendrier, CarteElevesPays, CarteMatrice, CartePriorites, CarteScore, CarteTapPays } from "./Cartes";
+import { BlocEstimation, CarteActions, CarteCalendrier, CarteMatrice, CartePays, CarteScore } from "./Cartes";
 import { Chevron, IconeApp } from "./icones";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { ANNEES_SAISIE, estimerEffectifs } from "@/lib/prevision-effectifs";
@@ -60,12 +60,7 @@ export function ResumePays({ jeu, saisies, nav }) {
     <>
       <CarteScore jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <CarteActions jeu={jeu} onOuvrir={nav.ouvrirRegion} />
-      <CarteBande jeu={jeu} onOuvrir={nav.ouvrirRegion} />
-      <CartePriorites jeu={jeu} onFiltre={(f) => nav.ongletRegions(f)} />
-      <CarteElevesPays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
-      <CarteTapPays jeu={jeu} />
-      <div className="sh">Régions<span>de la plus urgente à la moins urgente</span></div>
-      <div className="group">{trierRegions(jeu.regions, jeu).map((r) => <LigneRegion key={r.cle} jeu={jeu} r={r} onOuvrir={nav.ouvrirRegion} />)}</div>
+      <CartePays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
     </>
   );
 }

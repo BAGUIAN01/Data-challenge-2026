@@ -2,55 +2,46 @@
 // The figure cards. Each one carries its context: a scale, a comparison, a range or a history.
 // Colour only where it means something (the blue ramp, a decline); text stays in text colours.
 import { useState } from "react";
-import { Bande, Courbe, Fourchette, Matrice, Pile } from "./Graphes";
+import { Fourchette, Matrice } from "./Graphes";
 import { Chevron } from "./icones";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { centaine, couches, facteurDominant, PRIORITES, risque, scoreGlobal, signe, ZONES_SCORE } from "@/lib/regles";
+import { centaine, couches, facteurDominant, risque, scoreGlobal, signe } from "@/lib/regles";
 
 const pctFr = (v, d = 1) => `${fr(v, d)} %`;
 
-export function CartePriorites({ jeu, onFiltre }) {
-  const c = [1, 2, 3].map((p) => jeu.regions.filter((r) => r.priorite === p).length), v = jeu.validation;
-  return (
-    <section className="card" aria-label="Où agir en premier">
-      <div className="ch"><b>Où agir en premier</b><span>13 régions</span></div>
-      <div className="kpi"><b className="num">{c[0]}</b><span className="u">régions en priorité 1</span></div>
-      <Pile parts={c.map((n, i) => ({ n, c: `var(--c${i + 1})` }))} label={c.map((n, i) => `priorité ${i + 1} : ${n}`).join(", ")} />
-      <div className="leg">
-        {c.map((n, i) => (
-          <button key={i} onClick={() => onFiltre(`p${i + 1}`)}>
-            <i className="m" style={{ "--c": `var(--c${i + 1})` }} />{PRIORITES[i + 1].libelle}, {PRIORITES[i + 1].sous}<b className="num">{n}</b><Chevron />
-          </button>
-        ))}
-      </div>
-      <p className="foot">
-        Priorité 1 : achèvement sous la moyenne du pays ({pctFr(jeu.seuils.tap_national)}) et risque élevé. Rejouée sur le passé, elle désignait
-        {" "}{v.matrice_regions_pct} % des régions et contenait {v.matrice_baisses_pct} % des fortes baisses.
-      </p>
-    </section>
-  );
-}
-
-// The global score of the 13 regions on one strip. It sums up both forms of dropout; the priority
-// stays the rule for targeting (it did better on the past, and the card says so).
+// The global score of the 13 regions, ranked. It sums up both forms of dropout; the priority
+// stays the rule for targeting (it did better on the past, shown on the Régions tab).
 export function CarteScore({ jeu, onOuvrir }) {
-  const [lu, setLu] = useState(null);
   if (!jeu.score_global) return null;
   const C = couches(jeu).score, n = jeu.regions.filter((r) => (scoreGlobal(jeu, r) ?? 0) >= 50).length;
-  const r = lu && jeu.regions.find((x) => x.cle === lu);
+  const rangs = [...jeu.regions].sort((a, b) => (scoreGlobal(jeu, b) ?? 0) - (scoreGlobal(jeu, a) ?? 0));
   return (
     <section className="card" aria-label="Score global de décrochage">
-      <div className="ch"><b>Score global de décrochage</b><span>{r ? `${r.nom} · ${scoreGlobal(jeu, r)}/100` : "Toucher un point"}</span></div>
-      <div className="kpi"><b className="num">{n}</b><span className="u">régions à 50 ou plus, sur 100</span></div>
-      <Bande points={jeu.regions.map((x) => ({ id: x.cle, nom: x.nom, v: scoreGlobal(jeu, x) ?? 0, c: `var(--c${C.classe(x)})` }))}
-        seuils={jeu.seuils} zones={ZONES_SCORE} lu={lu} onLire={setLu} onOuvrir={onOuvrir} />
-      <p className="foot">Moitié risque de chute des effectifs (la violence), moitié part d'enfants qui n'achèvent pas le primaire : le brutal et le lent.</p>
+      <div className="ch"><b>Score global de décrochage</b><span>sur 100</span></div>
+      <div className="kpi"><b className="num">{n}</b><span className="u">régions sur 13 à 50 ou plus</span></div>
+      {/* Ranked bars: one row per region, the whole row opens it. Ticks at 25 and 50 mark the tiers. */}
+      <ol className="rang" aria-label="Les 13 régions, du score le plus haut au plus bas">
+        {rangs.map((r) => {
+          const v = scoreGlobal(jeu, r) ?? 0;
+          return (
+            <li key={r.cle}>
+              <button onClick={() => onOuvrir(r.cle)} aria-label={`${r.nom}, score ${v} sur 100`}>
+                <span className="rang-nom">{r.nom}</span>
+                <span className="rang-piste"><i style={{ width: `${v}%`, background: `var(--c${C.classe(r)})` }} /></span>
+                <b className="num">{v}</b>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="foot">Moitié risque de chute des effectifs, moitié part d'enfants qui n'achèvent pas le primaire.</p>
     </section>
   );
 }
 
 // What to act on, across the country: the regions grouped by their dominant background factor.
+// The lever itself is on each region's page; here, only the factor and its regions.
 export function CarteActions({ jeu, onOuvrir }) {
   if (!jeu.facteur_dominant) return null;
   const groupes = new Map();
@@ -63,13 +54,12 @@ export function CarteActions({ jeu, onOuvrir }) {
   const def = (id) => jeu.facteurs_def.find((d) => d.id === id);
   return (
     <section className="card" aria-label="Sur quoi agir">
-      <div className="ch"><b>Sur quoi agir</b><span>facteur dominant de chaque région</span></div>
-      <div className="actions-liste">
+      <div className="ch"><b>Sur quoi agir</b><span>facteur dominant</span></div>
+      <div className="agir">
         {ordre.map(([k, rs]) => (
-          <div key={k}>
-            <b>{k === "aucun" ? "Aucun facteur au-dessus de la moyenne" : def(k)?.libelle}</b>
-            {k !== "aucun" && def(k)?.levier && <p>{def(k).levier}</p>}
-            <span className="noms">{rs.map((r, i) => <span key={r.cle}><button className="lien" onClick={() => onOuvrir(r.cle)}>{r.nom}</button>{i < rs.length - 1 ? ", " : ""}</span>)}</span>
+          <div key={k} className="agir-l">
+            <b>{k === "aucun" ? "Rien ne ressort" : def(k)?.libelle}</b>
+            <span className="puces">{rs.map((r) => <button key={r.cle} className="puce" onClick={() => onOuvrir(r.cle)}>{r.nom}</button>)}</span>
           </div>
         ))}
       </div>
@@ -77,45 +67,17 @@ export function CarteActions({ jeu, onOuvrir }) {
   );
 }
 
-export function CarteBande({ jeu, onOuvrir }) {
-  const [lu, setLu] = useState(null);
-  const C = couches(jeu).risque, n = jeu.regions.filter((r) => risque(r) >= jeu.seuils.risque_eleve).length;
-  const r = lu && jeu.regions.find((x) => x.cle === lu);
+// The country in two figures, no chart: the charts live on each region's page.
+export function CartePays({ jeu, nbSaisies, onSaisies }) {
+  const e = jeu.national.eleves, tap = jeu.national.tap, n = e.length - 1, d = (e[n] / e[n - 1] - 1) * 100;
   return (
-    <section className="card" aria-label="Où le risque monte">
-      <div className="ch"><b>Où le risque monte</b><span>{r ? `${r.nom} · ${risque(r)} %` : "Toucher un point"}</span></div>
-      <div className="kpi"><b className="num">{n}</b><span className="u">régions en risque élevé</span></div>
-      <Bande points={jeu.regions.map((x) => ({ id: x.cle, nom: x.nom, v: risque(x), c: `var(--c${C.classe(x)})` }))}
-        seuils={jeu.seuils} lu={lu} onLire={setLu} onOuvrir={onOuvrir} />
-      <p className="foot">Chaque point est une région, placée selon sa probabilité de baisse en 2026/27.</p>
-    </section>
-  );
-}
-
-export function CarteElevesPays({ jeu, nbSaisies, onSaisies }) {
-  const [lu, setLu] = useState(null);
-  const v = jeu.national.eleves, n = v.length - 1, i = lu ?? n, d = (v[n] / v[n - 1] - 1) * 100;
-  return (
-    <section className="card">
-      <div className="ch"><b>Combien d'élèves</b><span>{jeu.annees[i]}</span></div>
-      <div className="kpi"><b className="num">{fr(v[i])}</b><span className="u">au primaire</span>
-        <span className="d num">{signe(d)}{fr(Math.abs(d), 1)} % sur un an</span></div>
-      <Courbe annees={jeu.annees} series={[{ v, c: "var(--fg)" }]} fmt={(x) => fr(x)} bas lu={lu} onLire={setLu} label="Élèves du primaire, de 2015/16 à 2024/25" />
+    <section className="card" aria-label="Le pays">
+      <div className="ch"><b>Le pays</b><span>{jeu.annees[n]}</span></div>
+      <div className="duo">
+        <div><b className="num">{fr(e[n])}</b><span>élèves au primaire</span><em className="num">{signe(d)}{fr(Math.abs(d), 1)} % sur un an</em></div>
+        <div><b className="num">{pctFr(tap[n])}</b><span>achèvent le primaire</span><em className="num down">{signe(tap[n] - tap[0])}{fr(Math.abs(tap[n] - tap[0]), 1)} pts depuis {jeu.annees[0]}</em></div>
+      </div>
       <button className="inrow" onClick={onSaisies}>Écoles ouvertes saisies<b>{nbSaisies} région{nbSaisies > 1 ? "s" : ""} sur 13</b><Chevron /></button>
-    </section>
-  );
-}
-
-export function CarteTapPays({ jeu }) {
-  const [lu, setLu] = useState(null);
-  const v = jeu.national.tap, n = v.length - 1, i = lu ?? n, tot = jeu.regions.reduce((s, r) => s + r.enfants_hors_cm2, 0);
-  return (
-    <section className="card">
-      <div className="ch"><b>Achèvement du primaire</b><span>{jeu.annees[i]}</span></div>
-      <div className="kpi"><b className="num">{pctFr(v[i])}</b><span className="u">au pays</span>
-        <span className="d num down">{signe(v[n] - v[0])}{fr(Math.abs(v[n] - v[0]), 1)} pts depuis {jeu.annees[0]}</span></div>
-      <Courbe annees={jeu.annees} series={[{ v, c: "var(--fg)" }]} y0={0} y1={100} fmt={(x) => pctFr(x)} lu={lu} onLire={setLu} label="Taux d'achèvement du pays" />
-      <p className="foot">Enfants qui n'atteignent pas le CM2 : environ {fr(tot)}, en additionnant les 13 régions (estimation 2024/25, ordre de grandeur).</p>
     </section>
   );
 }

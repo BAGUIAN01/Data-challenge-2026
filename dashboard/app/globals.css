@@ -350,13 +350,30 @@ button.row:active, a.row:active { background: var(--press); }
 .contrib .axe { position: relative; height: 10px; }
 .contrib .axe::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--edge); }
 .contrib .axe i { position: absolute; top: 0; height: 100%; border-radius: 3px; }
-.actions-liste { display: grid; margin-top: 6px; }
-.actions-liste > div { padding: 10px 0; }
-.actions-liste > div + div { border-top: 1px solid var(--line); }
-.actions-liste b { display: block; font-size: 15px; font-weight: 600; }
-.actions-liste p { margin: 2px 0 0; font-size: 13.5px; color: var(--fg-2); }
-.actions-liste .noms { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-3); }
-.actions-liste .lien { font-weight: 500; color: var(--fg-2); }
+/* Ranked score bars: the whole row is the touch target (44 px). */
+.rang { list-style: none; margin: 12px 0 4px; padding: 0; display: grid; }
+.rang button { width: 100%; min-height: 36px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 2em; align-items: center; gap: 10px; padding: 4px 0; background: none; border: 0; font: inherit; color: inherit; text-align: left; }
+.rang-nom { font-size: 13.5px; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rang-piste { position: relative; height: 10px; border-radius: 5px; background: var(--fill); }
+.rang-piste::before, .rang-piste::after { content: ""; position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--edge); }
+.rang-piste::before { left: 25%; } .rang-piste::after { left: 50%; }
+.rang-piste i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; z-index: 1; }
+.rang b { font-size: 14px; font-weight: 600; text-align: right; }
+@media (hover: hover) { .rang button:hover .rang-nom { color: var(--fg); text-decoration: underline; } }
+/* What to act on: the factor, then its regions as chips. */
+.agir { display: grid; margin-top: 4px; }
+.agir-l { padding: 10px 0; display: grid; gap: 6px; }
+.agir-l + .agir-l { border-top: 1px solid var(--line); }
+.agir-l > b { font-size: 14.5px; font-weight: 600; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.puce { min-height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); font: inherit; font-size: 13px; color: var(--fg); }
+/* The country in two figures. */
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 6px; }
+.duo > div { display: grid; gap: 2px; }
+.duo b { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+.duo span { font-size: 13px; color: var(--fg-2); }
+.duo em { font-style: normal; font-size: 12.5px; color: var(--fg-3); }
+.duo em.down { color: var(--bad-txt); }
 .apercu-action { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--fg-2); }
 .apercu-action b { font-weight: 600; color: var(--fg); }
 /* A region tapped on the map is outlined by the selection; the focus box would draw a rectangle. */
@@ -367,3 +384,16 @@ button.row:active, a.row:active { background: var(--press); }
 .decomp { height: 12px; border-radius: 6px; }
 .contrib > div { grid-template-columns: 140px minmax(0, 1fr); }
 .contrib .axe { height: 12px; }
+.frise { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 420px; padding: 6px 10px 6px 6px; border-radius: 12px; background: color-mix(in oklab, var(--card) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+.frise .lire { flex: none; height: 32px; padding: 0 12px; border-radius: 9px; background: var(--fg); color: var(--card); font-size: 13.5px; font-weight: 600; }
+.frise input { flex: 1; min-width: 0; accent-color: var(--fg); }
+.frise b { flex: none; min-width: 44px; font-size: 14px; font-weight: 600; text-align: right; }
+.carte-svg path[data-cle] { transition: fill .35s ease; }
+.seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.seg::-webkit-scrollbar { display: none; }
+.seg button { flex: none; }
+.ftop { grid-template-columns: minmax(0, 1fr); }
+.ctrl { min-width: 0; }
+.frise { width: 100%; }
+.rejouer { margin-top: 12px; height: 36px; padding: 0 14px; border-radius: 18px; background: var(--fill); font-size: 13.5px; font-weight: 600; color: var(--fg-2); }
+.mleg b { font-weight: 600; color: var(--fg); }

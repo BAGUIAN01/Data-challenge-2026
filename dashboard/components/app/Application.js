@@ -12,7 +12,7 @@ import FicheRegion from "./Fiche";
 import { IcAlertes, IcCarte, IconeApp, IcPlus, IcRegions } from "./icones";
 import { ApercuRegion, CorpsAttente, CorpsMethode, CorpsSources, FormSaisie, ResumePays, VueAlertes, VuePlus, VueRegions } from "./Vues";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
-import { couches, PRIORITES } from "@/lib/regles";
+import { couches, PRIORITES, risque, scoreGlobal } from "@/lib/regles";
 
 const ONGLETS = [["carte", "Carte", IcCarte], ["regions", "Régions", IcRegions], ["alertes", "Alertes", IcAlertes], ["plus", "Plus", IcPlus]];
 const TITRES = { carte: "Carte", regions: "Régions", alertes: "Alertes", plus: "Plus" };
@@ -54,7 +54,8 @@ function Coque({ donnees }) {
   const [piles, setPiles] = useState({ carte: [], regions: [], alertes: [], plus: [] });
   const [modal, setModal] = useState(null);
   const [snack, setSnack] = useState(null);
-  const [couche, setCouche] = useState(() => (jeu.score_global ? "score" : "risque"));
+  const [vueBarres, setVueBarres] = useState(false);
+  const [couche] = useState(() => (jeu.score_global ? "score" : "risque"));
   const [apercu, setApercu] = useState(null);
   const [cran, setCran] = useState("bas");
   const [filtre, setFiltre] = useState("toutes");
@@ -64,7 +65,7 @@ function Coque({ donnees }) {
   const [installer, setInstaller] = useState(null);
   const [envoye, setEnvoye] = useState(false);
   const etat = useRef({});
-  etat.current = { ...etat.current, onglet, modal, cran };
+  etat.current = { ...etat.current, onglet, modal, cran, vueBarres };
   if (!etat.current.piles) etat.current.piles = piles;
   const ignorer = useRef(0), compteur = useRef(0), tabsRef = useRef(null), barreRef = useRef(null), zoneRef = useRef(null), envoiAvant = useRef(false);
   const COUCHES = useMemo(() => couches(jeu), [jeu]);
@@ -157,10 +158,14 @@ function Coque({ donnees }) {
 
   // Visible part of the map, for framing: between the floating controls and the sheet + tab bar.
   const marges = useCallback(() => {
-    if (matchMedia("(min-width: 900px)").matches) return { haut: 140, bas: 16 };
+    // The floating controls grow when the year timeline is shown: measured, not assumed.
+    const haut = (document.querySelector(".ftop")?.getBoundingClientRect().bottom ?? 140) - (document.querySelector(".zone-carte")?.getBoundingClientRect().top ?? 0) + 8
+      + (etat.current.vueBarres ? 90 : 0); // room for the tallest bar and its value
+    if (matchMedia("(min-width: 900px)").matches) return { haut, bas: 16 };
     const H = tabsRef.current?.clientHeight ?? 600, barre = barreRef.current?.offsetHeight ?? 54;
-    return { haut: 140, bas: hauteurCran(etat.current.cran, H) + barre + 8 };
+    return { haut, bas: hauteurCran(etat.current.cran, H) + barre + 8 };
   }, []);
+
 
   // ---------- Theme, installation, deep link, send feedback ----------
   useEffect(() => {
@@ -216,6 +221,11 @@ function Coque({ donnees }) {
   }, [envoi, enAttente]);
 
   const bandeau = etatBandeau(donnees, envoye);
+  const basculerBarres = (v) => {
+    etat.current.vueBarres = v; setVueBarres(v);
+    if (!apercu) setCommande((x) => ({ n: x.n + 1, type: "pays" }));
+  };
+  const barresScore = useCallback((r) => scoreGlobal(jeu, r) ?? risque(r), [jeu]);
 
   const titreDe = (e) => (e.type === "region" ? jeu.regions.find((r) => r.cle === e.params.cle)?.nom ?? "Région" : TITRES_ECRANS[e.type]);
   const regionApercu = apercu && jeu.regions.find((r) => r.cle === apercu);
@@ -260,7 +270,7 @@ function Coque({ donnees }) {
       </button>
       <div className="zone" ref={zoneRef}>
         <div className="zone-carte">
-          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} valeur={COUCHES[couche].valeur} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
+          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} valeur={COUCHES[couche].valeur} barres={vueBarres ? barresScore : null} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
           <div className="ftop">
             <label className="search">
               <IconeApp />
@@ -276,10 +286,11 @@ function Coque({ donnees }) {
               </div>
             )}
             <div className="ctrl">
-              <div className="seg" role="group" aria-label="Couche de la carte">
-                {Object.entries(COUCHES).map(([k, c]) => <button key={k} aria-pressed={couche === k} onClick={() => setCouche(k)}>{c.nom}</button>)}
+              <div className="seg" role="group" aria-label="Vue de la carte">
+                <button aria-pressed={!vueBarres} onClick={() => basculerBarres(false)}>Couleurs</button>
+                <button aria-pressed={vueBarres} onClick={() => basculerBarres(true)}>Barres</button>
               </div>
-              <div className="mleg">{COUCHES[couche].legende.map((l, i) => <span key={l}><i className="m" style={{ "--c": `var(--c${i + 1})` }} />{l}</span>)}</div>
+              <div className="mleg"><b>Score de risque</b>{COUCHES[couche].legende.map((l, k) => <span key={l}><i className="m" style={{ "--c": `var(--c${k + 1})` }} />{l.replace("Score de ", "")}</span>)}</div>
             </div>
           </div>
         </div>

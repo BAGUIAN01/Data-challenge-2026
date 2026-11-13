@@ -26,7 +26,7 @@ function useLecture(n, x, onLire) {
 // Line chart. series: [{ v: [...], c: css colour }], the LAST series is the main one.
 // y0/y1: fixed scale (percentages); otherwise fitted to the data. prev: {centrale, basse, haute}
 // drawn one step after the last year. bas: label the lowest point of the main series.
-export function Courbe({ annees, series, y0, y1, fmt, prev, bas, lu, onLire, label }) {
+export function Courbe({ annees, series, y0, y1, fmt, prev, bas, lu, onLire, label, jusqua = null }) {
   const ref = useRef(null);
   const W = useLargeur(ref, 300);
   const H = 128, pr = 50, pt = 8, pb = 20, last = annees.length - 1, n = annees.length + (prev ? 1 : 0);
@@ -36,13 +36,15 @@ export function Courbe({ annees, series, y0, y1, fmt, prev, bas, lu, onLire, lab
   const x = (i) => (i * (W - pr)) / (n - 1), y = (v) => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
   const chemin = (vs) => vs.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join("");
   const principale = series.at(-1).v;
-  const fins = series.map((s) => ({ y: y(s.v[last]), t: fmt(s.v[last]), fort: s === series.at(-1) }));
+  // jusqua: the year reached by the opening animation; the lines are drawn up to it.
+  const k = jusqua === null ? last : Math.min(jusqua, last), fini = k === last;
+  const fins = series.map((s) => ({ y: y(s.v[k]), t: fmt(s.v[k]), fort: s === series.at(-1) }));
   if (fins.length === 2 && Math.abs(fins[0].y - fins[1].y) < 16) {
     const m = (fins[0].y + fins[1].y) / 2, s = fins[1].y >= fins[0].y ? 1 : -1;
     fins[1].y = m + 8 * s; fins[0].y = m - 8 * s;
   }
-  const xe = prev ? x(n - 1) : x(last);
-  const iMin = bas ? principale.indexOf(Math.min(...principale)) : -1;
+  const xe = fini ? (prev ? x(n - 1) : x(last)) : x(k);
+  const iMin = bas && fini ? principale.indexOf(Math.min(...principale)) : -1;
   const lecture = useLecture(n, x, onLire);
   return (
     <div className="chart" ref={ref}>
@@ -50,15 +52,15 @@ export function Courbe({ annees, series, y0, y1, fmt, prev, bas, lu, onLire, lab
         {y0 !== undefined
           ? [0, 50, 100].map((g) => <line key={g} className="gl" x1="0" x2={W - pr} y1={y(g)} y2={y(g)} />)
           : <line className="gl" x1="0" x2={W - pr} y1={H - pb} y2={H - pb} />}
-        {prev && (
+        {prev && fini && (
           <>
             <rect x={x(n - 1) - 7} y={y(prev.haute)} width="14" height={y(prev.basse) - y(prev.haute)} rx="7" fill="var(--band2)" />
             <line x1={x(last)} y1={y(principale[last])} x2={x(n - 1)} y2={y(prev.centrale)} stroke="var(--fg)" strokeWidth="1.5" strokeDasharray="3 3" />
             <circle cx={x(n - 1)} cy={y(prev.centrale)} r="3.5" fill="var(--card)" stroke="var(--fg)" strokeWidth="1.5" />
           </>
         )}
-        {series.map((s, i) => <path key={i} className="ln" stroke={s.c} d={chemin(s.v)} />)}
-        <circle cx={x(last)} cy={y(principale[last])} r="3.5" fill="var(--fg)" />
+        {series.map((s, i) => <path key={i} className="ln" stroke={s.c} d={chemin(s.v.slice(0, k + 1))} />)}
+        <circle cx={x(k)} cy={y(principale[k])} r="3.5" fill="var(--fg)" />
         {iMin >= 0 && iMin !== last && (
           <>
             <circle cx={x(iMin)} cy={y(principale[iMin])} r="3" fill="var(--fg)" />
@@ -77,23 +79,24 @@ export function Courbe({ annees, series, y0, y1, fmt, prev, bas, lu, onLire, lab
 }
 
 // Column chart (incidents per school year); the last year is the dark column.
-export function Colonnes({ valeurs, annees, lu, onLire, label }) {
+export function Colonnes({ valeurs, annees, lu, onLire, label, jusqua = null }) {
   const ref = useRef(null);
   const W = useLargeur(ref, 300);
   const H = 118, pb = 20, pt = 18, n = valeurs.length, max = Math.max(...valeurs, 1), gap = 2, bw = (W - gap * (n - 1)) / n;
-  const h = (v) => ((H - pt - pb) * v) / max, im = valeurs.indexOf(max), cx = (i) => i * (bw + gap) + bw / 2;
+  const h = (v) => ((H - pt - pb) * v) / max, cx = (i) => i * (bw + gap) + bw / 2;
+  const k = jusqua === null ? n - 1 : Math.min(jusqua, n - 1), vus = valeurs.slice(0, k + 1), im = vus.indexOf(Math.max(...vus));
   const lecture = useLecture(n, cx, onLire);
   return (
     <div className="chart" ref={ref}>
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
-        {valeurs.map((v, i) => {
+        {vus.map((v, i) => {
           const hh = Math.max(1.5, h(v)), X = i * (bw + gap), r = Math.min(3, hh, bw / 2);
           return <path key={i} d={`M${X} ${H - pb}V${H - pb - hh + r}q0 ${-r} ${r} ${-r}h${bw - 2 * r}q${r} 0 ${r} ${r}V${H - pb}z`}
-            fill={i === n - 1 ? "var(--fg)" : "var(--z3)"} />;
+            fill={i === k ? "var(--fg)" : "var(--z3)"} />;
         })}
         <line className="gl" x1="0" x2={W} y1={H - pb} y2={H - pb} />
-        {im !== n - 1 && <text className="ax" x={cx(im)} y={H - pb - h(max) - 5} textAnchor="middle">{fr(max)}</text>}
-        <text className="el" x={cx(n - 1)} y={H - pb - h(valeurs[n - 1]) - 5} textAnchor="middle" style={{ fill: "var(--fg)" }}>{fr(valeurs[n - 1])}</text>
+        {im !== k && <text className="ax" x={cx(im)} y={H - pb - h(vus[im]) - 5} textAnchor="middle">{fr(vus[im])}</text>}
+        <text className="el" x={cx(k)} y={H - pb - h(valeurs[k]) - 5} textAnchor="middle" style={{ fill: "var(--fg)" }}>{fr(valeurs[k])}</text>
         <text className="ax" x="0" y={H - 3}>{annees[0]}</text>
         <text className="ax" x={W} y={H - 3} textAnchor="end">{annees[n - 1]}</text>
         {lu !== null && lu !== undefined && <line className="sl" x1={cx(lu)} x2={cx(lu)} y1={pt} y2={H - pb} />}
