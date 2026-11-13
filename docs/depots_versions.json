@@ -183,6 +183,10 @@
   "signature": "91ea3e72c6bd30ec4b488215eb6d68c3",
   "version": 1
  },
+ "04-scientist-facteur-dominant.py": {
+  "signature": "e979e0803b67f0833b74a66c2a58c7d6",
+  "version": 1
+ },
  "04-scientist-facteurs-decrochage.md": {
   "signature": "d392fc805548fa5074deef291f152c5f",
   "version": 1
@@ -203,9 +207,13 @@
   "signature": "704cdd9852e4ae92dcb60efb5c2c284c",
   "version": 1
  },
+ "04-scientist-formule-risque-calcul.py": {
+  "signature": "2942d9f10986c63618b8f7a58ee7dd61",
+  "version": 1
+ },
  "04-scientist-formule-risque.md": {
-  "signature": "4151a299a6750790b61d5f95edb3ff5c",
-  "version": 2
+  "signature": "61b4495cfc4f5cb2ef844bb8dcb8e028",
+  "version": 3
  },
  "04-scientist-journal-decisions.md": {
   "signature": "8122465b38dde5e9c97c6d3e8f54928d",
@@ -220,8 +228,12 @@
   "version": 1
  },
  "04-scientist-resultats-modeles.xlsx": {
-  "signature": "df211721acc676ba4307710b5205b88f",
-  "version": 3
+  "signature": "dd25d72a3a276d41863096c40b21e8f5",
+  "version": 4
+ },
+ "04-scientist-score-global.py": {
+  "signature": "89e8f46bfc65846592b8b84c77a672ba",
+  "version": 1
  },
  "04-scientist-solution-prevision.py": {
   "signature": "0b11fa3beec7f2ab3df799f75941a325",
@@ -240,20 +252,20 @@
   "version": 1
  },
  "05-analyst-donnees-tableau-de-bord.json": {
-  "signature": "dfdec9a80e745032da273957d98ea419",
-  "version": 3
+  "signature": "d40ba9f50c66018843a64ab860e5427b",
+  "version": 4
  },
  "05-analyst-export-tableau-de-bord.py": {
-  "signature": "ea1444b85a9674becccf3961daf7e0ed",
-  "version": 3
+  "signature": "d58638a7db0c072e37d2bd08728a383b",
+  "version": 4
  },
  "05-analyst-fiches-regionales-13.pdf": {
-  "signature": "36ca576f15843e4a4c470bf471305abb",
-  "version": 1
+  "signature": "88edef3d8d44674c19f9cd500e8730fb",
+  "version": 2
  },
  "05-analyst-fiches-regionales.py": {
-  "signature": "b42a9c72f5e20209ff6846e54b962643",
-  "version": 2
+  "signature": "4c809a3ee40c9565974b5c969d696cf9",
+  "version": 3
  },
  "05-analyst-figures-solution.py": {
   "signature": "9b85f11e1d39048990fba6099ef99780",
@@ -276,8 +288,8 @@
   "version": 1
  },
  "05-analyst-tableau-de-bord-local-first.zip": {
-  "signature": "1a45c590e748669158a5c6c8d857841c02385ad9",
-  "version": 4
+  "signature": "45de71001b86deb3c7896c029214223a13c1fa50",
+  "version": 5
  },
  "05-scientist-alertes-calendrier.csv": {
   "signature": "f5fcf1758c61b3d2a6179a8dddaf8e75",
@@ -292,8 +304,8 @@
   "version": 1
  },
  "05-scientist-projet-complet-relancable.zip": {
-  "signature": "f10adba12e11e8166a432d140b53895c",
-  "version": 5
+  "signature": "94c186795f95422f991ca5880ca6959d",
+  "version": 6
  },
  "05-scientist-risque-2026-27.png": {
   "signature": "2a079a3eeaa86c512b3983a43e438a65",
