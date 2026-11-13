@@ -18,6 +18,7 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -191,7 +192,9 @@ def signature(src):
         for f in arg:
             h.update(Path("analyse", f).read_bytes())
     elif kind == "archive":
-        return git("rev-parse", "HEAD^{tree}")
+        # Every tracked file except the version registry itself, which changes at each build.
+        arbre = [l for l in git("ls-tree", "-r", "HEAD").splitlines() if not l.endswith(f"\t{REGISTRE.as_posix()}")]
+        h.update("\n".join(arbre).encode())
     elif kind == "archive_dir":
         return git("rev-parse", f"HEAD:{arg}")
     return h.hexdigest()
@@ -298,6 +301,18 @@ def main():
     tmp = shutil.make_archive(f"{TEAM}_{DEFI}_depots_v{files.version.max()}", "zip", root_dir=OUT, base_dir=".")
     z = shutil.move(tmp, OUT / Path(tmp).name)
     files.to_csv(OUT / "inventaire.csv", index=False)
+    # Update archive: only the new or changed files, with the LISEZ-MOI of their folders and the root one.
+    maj = files[files.nouveau]
+    if not maj.empty and len(maj) < len(files):
+        nom_maj = OUT / f"{TEAM}_{DEFI}_mise-a-jour_v{files.version.max()}.zip"
+        with zipfile.ZipFile(nom_maj, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.write(OUT / "LISEZ-MOI.txt", "LISEZ-MOI.txt")
+            for step in sorted(set(maj.step)):
+                dossier = STEPS[step][0]
+                zf.write(OUT / dossier / "LISEZ-MOI.txt", f"{dossier}/LISEZ-MOI.txt")
+                for fichier in maj[maj.step == step].file:
+                    zf.write(OUT / dossier / fichier, f"{dossier}/{fichier}")
+        print(f"Archive de mise à jour ({len(maj)} fichiers) : {nom_maj}")
     print(files.groupby(["step", "role"]).size().to_string())
     print("Nouveaux ou modifiés depuis la construction précédente :")
     print("\n".join(f"  {f}" for f in files[files.nouveau].file) or "  aucun")
