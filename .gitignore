@@ -9,3 +9,4 @@ __pycache__/
 *.bundle
 depots/
 soumission/
+.noms_interdits

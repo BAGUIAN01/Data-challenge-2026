@@ -10,8 +10,9 @@ import pandas as pd
 
 RACINE = Path(__file__).resolve().parent.parent
 OUT = RACINE / "soumission"
-INTERDIT = re.compile(r"(?i)biiga|baguian|harouna|kalantigui|@gmail")
-LIEN = "https://kalantigui-decrochage.vercel.app"
+# Words that must not appear anywhere (team, members, brand): one per line in a local, git-ignored file.
+_MOTS = RACINE / ".noms_interdits"
+INTERDIT = re.compile("(?i)" + "|".join(re.escape(m.strip()) for m in _MOTS.read_text().splitlines() if m.strip())) if _MOTS.exists() else None
 
 TABLES = [
     ("A_tendances_nationales", "Tendances nationales 2015/16-2024/25"),
@@ -153,6 +154,9 @@ def main():
     for p in fichiers:
         print(f"  {p.relative_to(OUT)}  {p.stat().st_size / 1e6:.2f} Mo")
     assert len(fichiers) <= 20 and all(p.stat().st_size < 50e6 for p in fichiers)
+    if INTERDIT is None:
+        print("liste .noms_interdits absente : contrôle d'anonymat non fait")
+        return
     traces = []
     for p in fichiers:
         textes = []
