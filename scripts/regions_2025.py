@@ -32,7 +32,7 @@ def main():
     unknown = sorted(set(d.region[~k.isin(groups.index)]))
     if unknown:
         raise SystemExit(f"Régions absentes de la table de correspondance : {unknown}")
-    d = d.join(groups, on=k)
+    d = d.assign(_cle=k).join(groups, on="_cle").drop(columns="_cle")  # a Series key would leave a stray key_0 column
     pos = d.columns.get_loc("region") + 1
     for i, col in enumerate(["region_2025", "codes_2025", "type_2025"]):
         d.insert(pos + i, col, d.pop(col))
