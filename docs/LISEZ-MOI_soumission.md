@@ -46,10 +46,9 @@ Les cahiers sont **déjà exécutés** : les résultats et les figures se lisent
 | `04-analyse_D1_scientist_resultats-analyse_v1.xlsx` | Tous les tableaux de résultats (A à G, P1 à P19), une feuille par tableau ; la feuille `lisez-moi` dit ce que contient chacune |
 | `05-interpretation_D1_analyst_donnees-tableau-de-bord_v1.json` | Tout ce qu'affiche le tableau de bord, en un fichier |
 | `03-transformation_D1_engineer_donnees-transformees_v1.zip` | Le panel région × année (la table de base des modèles), la violence par région et année, les correspondances 13/17 régions et 45/47 provinces, la carte des 13 régions, le dictionnaire des variables |
-| `02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip` | Les données du challenge en tableau propre, le résultat des contrôles de cohérence, les sources externes nettoyées (pauvreté, faim, EDS, déplacés), chacune avec sa source |
-| `01-collecte_D1_engineer_donnees-collectees_v1.zip` | Les sources externes brutes (population 2024, Cadre harmonisé, déplacés CONASUR, limites IGB 2025) et la liste des sources avec leurs licences |
+| `02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip` | Les données du challenge en tableau propre, le résultat des contrôles de cohérence, les sources externes nettoyées (pauvreté, faim, EDS, déplacés), chacune avec sa source, et la liste de toutes les sources (producteur, publication, année, licence) |
 
-Les données brutes d'ACLED ne sont pas redistribuées, conformément à leurs conditions ; seul notre agrégat par région et par année est fourni.
+Seules les données traitées sont fournies. Les données brutes viennent du challenge ou de sources publiques, toutes citées dans la liste des sources ; celles d'ACLED ne sont pas redistribuables, et notre agrégat par région et par année est fourni.
 
 ## Pour tout relancer
 

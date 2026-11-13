@@ -82,8 +82,7 @@ NOMS = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rapport',
     'donnees/resultats_analyse.xlsx': '04-analyse_D1_scientist_resultats-analyse',
     'donnees/donnees_tableau_de_bord.json': '05-interpretation_D1_analyst_donnees-tableau-de-bord',
     'donnees/donnees_transformees.zip': '03-transformation_D1_engineer_donnees-transformees',
-    'donnees/donnees_nettoyees.zip': '02-nettoyage_D1_engineer_donnees-nettoyees',
-    'donnees/donnees_collectees.zip': '01-collecte_D1_engineer_donnees-collectees'}
+    'donnees/donnees_nettoyees.zip': '02-nettoyage_D1_engineer_donnees-nettoyees'}
 NOM_ACTION = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
               "meres": "l'instruction des mères", "grossesses": "les grossesses précoces", "prescolaire": "le préscolaire"}
 
@@ -135,16 +134,10 @@ def main():
     priorites(jeu).to_csv(D / "priorites_2026_27.csv", index=False)
     shutil.copy2(RACINE / "dashboard/public/data/tableau_de_bord.json", D / "donnees_tableau_de_bord.json")
     classeur(D / "resultats_analyse.xlsx")
-    zipper(D / "donnees_collectees.zip", [
-        ("docs/sources_donnees.csv", "sources_donnees.csv"),
-        ("data/raw/externe/hdx_cod_ps/bfa_admpop_adm2_2024.csv", "population_provinces_2024.csv"),
-        ("data/raw/externe/hdx_cadre_harmonise/cadre_harmonise_caf_ipc_mars26.xlsx", "cadre_harmonise_provinces.xlsx"),
-        ("data/raw/externe/hdx_pdi_conasur/situation_pdi_31122022.xlsx", "deplaces_conasur_2022.xlsx"),
-        ("data/raw/externe/hdx_cod_ab/bfa_admin_boundaries.xlsx", "limites_igb_2025.xlsx"),
-    ])
     zipper(D / "donnees_nettoyees.zip", [
         ("data/tidy/presco_tidy.csv", "donnees_challenge_propres.csv"),
         ("analyse/controles_qualite.txt", "controles_qualite.txt"),
+        ("docs/sources_donnees.csv", "sources_donnees.csv"),
     ] + [(f"data/externe_propre/{p.name}", p.name) for p in sorted((RACINE / "data/externe_propre").iterdir())])
     zipper(D / "donnees_transformees.zip", [
         ("analyse/panel_region_annee_2025.csv", "panel_region_annee.csv"),
