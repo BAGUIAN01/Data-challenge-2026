@@ -10,7 +10,6 @@ Usage: python export_tableau_de_bord.py (from the project root, after all analys
 import hashlib
 import json
 import math
-import shutil
 import sys
 from pathlib import Path
 
@@ -135,12 +134,9 @@ def main():
     tap_nat = float(nat.TAP_T.iloc[-1])
 
     regions = []
-    Path("dashboard/public/fiches").mkdir(parents=True, exist_ok=True)
     for cle in keys:
         c = fiches.contenu(cle, data)
         r, f, name = c["r"], c["f"], c["name25"]
-        # The one-page PDF fiche, offered for download in the dashboard (kept offline too).
-        shutil.copy2(f"analyse/fiches/fiche_{fiches.key(name).lower()}.pdf", f"dashboard/public/fiches/{cle}.pdf")
         pr, pf, ca = prio.loc[name], prof.loc[name], cal.loc[name]
         inc = acled[acled.cle == cle].set_index("annee").incidents.reindex(sy)
         facteurs = {fid: {"valeur": num(pf["incidents_moy"] if fid == "violence" else pf[fid]),

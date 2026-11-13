@@ -81,19 +81,19 @@ python scripts/anticipation_fine.py
 python scripts/figures_approches.py
 ```
 
-**6. Fiches régionales**
+**6. Tableau de bord** (jeu de données, puis base Neon et application : voir `dashboard/README.md`)
+
+```bash
+python scripts/export_tableau_de_bord.py
+```
+
+**7. Fiches régionales** (après le jeu de données : la fiche le lit, elle dit donc les mêmes chiffres que l'application)
 
 ```bash
 python scripts/fiches_regionales.py
 ```
 
 Chaque script décrit en tête ce qu'il fait, ce qu'il lit et ce qu'il écrit.
-
-**7. Tableau de bord** (jeu de données, puis base Neon et application : voir `dashboard/README.md`)
-
-```bash
-python scripts/export_tableau_de_bord.py
-```
 
 **8. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
 

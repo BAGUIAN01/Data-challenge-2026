@@ -90,6 +90,7 @@ WB_SCIENTIST = [
     ("P16_signaux_fins", "Signaux fins de violence : six variantes testées"),
     ("P17_formule_risque", "La formule du risque : coefficients en unités d'origine, vérifiés contre les probabilités affichées"),
     ("P18_score_global_rejoue", "Score global rejoué sur le passé, contre le risque seul, l'achèvement seul et la matrice"),
+    ("P18_score_global_trajectoire", "Score de chaque région année par année (chaque année avec sa seule information), jusqu'à 2026/27"),
     ("P19_facteur_dominant", "Facteur dominant de chaque région : poids de chaque facteur")
 ]
 RAW_ANALYST = ["resultats_analyse.txt", "resultats_pistes.txt"]

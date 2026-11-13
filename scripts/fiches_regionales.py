@@ -4,8 +4,11 @@ Every figure comes from the analysis tables of analyse/; the text is built by
 fixed rules from those figures (no free text, no language model), so each
 sentence can be traced back to a number.
 
-Usage: python fiches_regionales.py [CLE ...]   e.g. NORD ; no argument = all 13 regions.
-Writes analyse/fiches/fiche_<nom>.pdf and .png.
+The page is drawn like the region page of the dashboard and reads the dashboard data set, so run it
+after scripts/export_tableau_de_bord.py. contenu() (facts and levers) is used by that export.
+
+Usage: python fiches_regionales.py [CLE ...]   e.g. NORD ; no argument = all 13 regions and the booklet.
+Writes analyse/fiches/fiche_<nom>.pdf and .png, analyse/fiches_regionales_13.pdf, dashboard/public/fiches/<CLE>.pdf.
 """
 import os
 import sys
@@ -149,116 +152,231 @@ def contenu(cle, data):
     return {k: v for k, v in locals().items() if k in ('r', 'n', 'name25', 'old', 'f', 'e', 't', 'profile', 'pr26', 'level', 'inc', 'poverty', 'tap0', 'tap1', 'tap21', 'el_max', 'el_now', 'ec_worst', 'g', 'fgl', 'inc24', 'inc25', 'facts', 'levers')}
 
 
-def make(cle, data, out):
-    c = contenu(cle, data)
-    (r, n, name25, old, f, e, t, profile, pr26, level, inc, poverty, tap0, tap1, tap21, el_max, el_now, ec_worst, g, fgl, inc24, inc25, facts, levers) = (c[k] for k in ('r', 'n', 'name25', 'old', 'f', 'e', 't', 'profile', 'pr26', 'level', 'inc', 'poverty', 'tap0', 'tap1', 'tap21', 'el_max', 'el_now', 'ec_worst', 'g', 'fgl', 'inc24', 'inc25', 'facts', 'levers'))
+# ---------- The PDF page, drawn like the app ----------
+# Same order as the region page of the dashboard: the global score, what to act on, the score year by
+# year up to the forecast, then completion and violence, and the levers. Same blue ramp, same type
+# (Inter). Every number is read from the dashboard data set (dashboard/public/data/tableau_de_bord.json),
+# so the page and the app cannot disagree.
+C1, C2, C3 = "#104281", "#3987e5", "#86b6ef"
+FG, FG2, FG3, LINE, EDGE, CARD, BAD, NATC = "#0f172a", "#475569", "#7d8799", "#e3e7ed", "#cfd5de", "#f4f6f9", "#b42318", "#b9c2cf"
+Z2, Z3 = "#dfe4eb", "#c3cbd7"
+PRIO = {1: ("Priorité 1", "agir maintenant"), 2: ("Priorité 2", "veille renforcée"), 3: ("Priorité 3", "consolider")}
+NOM_ACTION = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
+              "meres": "l'instruction des mères", "grossesses": "les grossesses précoces", "prescolaire": "le préscolaire"}
+
+
+def _style():
+    plt.rcParams.update({"font.family": ["Inter"], "font.size": 9, "axes.edgecolor": EDGE,
+                         "axes.labelcolor": FG2, "xtick.color": FG3, "ytick.color": FG3, "pdf.fonttype": 42})
+
+
+def _carte(fig, x, y, w, h):
+    fig.patches.append(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.012",
+                                      transform=fig.transFigure, facecolor=CARD, edgecolor="none", zorder=-5))
+
+
+def _axes_propres(ax):
+    for s in ["top", "right", "left"]:
+        ax.spines[s].set_visible(False)
+    ax.spines["bottom"].set_color(LINE)
+    ax.tick_params(length=0, labelsize=7.5)
+    ax.set_facecolor("none")
+
+
+def classe(v):
+    return C1 if v >= 50 else (C2 if v >= 25 else C3)
+
+
+def make(cle, jeu, out):
+    _style()
+    import textwrap
+    R = {r["cle"]: r for r in jeu["regions"]}
+    r, sg, fdj = R[cle], jeu["score_global"], jeu["facteur_dominant"]["par_region"][cle]
+    defs = {d["id"]: d for d in jeu["facteurs_def"]}
+    dom = fdj["dominant"]
+    s = sg["par_region"][cle]
+    p = r["probabilites"]["ref_2026_27"]
+    tap = r["tap"][-1]
+    rang = 1 + sum(1 for k, v in sg["par_region"].items() if v > s)
+    brutal, lent = 50 * p / 100, 50 * (1 - tap / 100)
+    niveau = "élevé" if s >= 50 else ("moyen" if s >= 25 else "faible")
 
     fig = plt.figure(figsize=(8.27, 11.69))
-    fig.patch.set_facecolor(SURFACE)
-    fig.text(0.06, 0.965, "FICHE RÉGIONALE · DÉCROCHAGE SCOLAIRE AU PRIMAIRE", fontsize=8, color=MUTED, va="top")
-    fig.text(0.06, 0.945, name25, fontsize=24, fontweight="bold", color=INK, va="top")
-    fig.text(0.06, 0.902, f"Ancienne région : {old}   ·   Profil 2015-2025 : {profile}", fontsize=9.5, color=INK2, va="top")
-    col, icon = RISK[level]
-    fig.patches.append(FancyBboxPatch((0.62, 0.903), 0.32, 0.05, boxstyle="round,pad=0,rounding_size=0.01",
-                                      transform=fig.transFigure, facecolor="none", edgecolor=col, linewidth=2))
-    fig.text(0.635, 0.94, f"{icon}  Risque 2026/27 : {level.upper()}", fontsize=10.5, fontweight="bold", color=INK, va="top")
-    fig.text(0.635, 0.919, f"Baisse des effectifs > 5 % : {fr(pr26)} % (indicatif)", fontsize=7,
-             color=INK2, va="top")
+    fig.patch.set_facecolor("white")
+    L, W = 0.06, 0.88
 
-    tw, gap_ = 0.205, 0.0167
-    tiles = [
-        (f"{fr(tap1, 1)} %", "Taux d'achèvement 2024/25", f"{pts(tap1 - tap0)} depuis 2015/16"),
-        (f"≈ {fr(f.enfants_hors_CM2_estimes)}", "Enfants ≈ 11 ans hors CM2", "estimation, population INSD 2024"),
-        (f"{fr(el_now)}", "Élèves du primaire 2024/25",
-         "au plus haut depuis 2015/16" if el_now >= el_max else f"{fr((el_now / el_max - 1) * 100, 0, True)} % par rapport au maximum"),
-        (f"{fr(e.cumul_17_18_a_23_24)}", "Sorties en excès 2017-2025", "élèves sortis plus que d'habitude")
-        if e.cumul_17_18_a_23_24 >= 0 else
-        (f"{fr(-e.cumul_17_18_a_23_24)}", "Élèves reçus en plus 2017-2025", "région d'accueil : moins de sorties que d'habitude"),
-    ]
-    for i, (v, l, s) in enumerate(tiles):
-        tile(fig, 0.06 + i * (tw + gap_), 0.785, tw, 0.095, v, l, s)
+    # Header.
+    fig.text(L, 0.968, "FICHE RÉGIONALE · RISQUE DE DÉCROCHAGE AU PRIMAIRE · RENTRÉE 2026/27", fontsize=7.5, color=FG3, va="top", fontweight="bold")
+    fig.text(L, 0.950, r["nom"], fontsize=25, fontweight="bold", color=FG, va="top")
+    lib, sous = PRIO[r["priorite"]]
+    fig.patches.append(FancyBboxPatch((L, 0.9035), 0.012, 0.0085, boxstyle="round,pad=0,rounding_size=0.002",
+                                      transform=fig.transFigure, facecolor=[C1, C2, C3][r["priorite"] - 1], edgecolor="none"))
+    fig.text(L + 0.018, 0.912, f"{lib} · {sous} · ancienne région {r['ancienne']}", fontsize=9.5, color=FG2, va="top")
 
-    ax = fig.add_axes([0.08, 0.56, 0.52, 0.19])
-    x = np.arange(10)
-    ax.plot(x, n.TAP_T.values, color=NAT, linewidth=1.8, label="Burkina Faso")
-    ax.plot(x, r.TAP_T.values, color=BLUE, linewidth=2.2, marker="o", markersize=3.5, label=name25)
-    ax.vlines(10, f.fourchette_basse, f.fourchette_haute, color=BAND, linewidth=8)
-    ax.scatter([10], [f.prevision_25_26], color=BLUE, s=22, zorder=3, edgecolor=SURFACE)
-    ax.annotate(f"2025/26 (prévision)\n{fr(f.fourchette_basse)}–{fr(f.fourchette_haute)} %", (10, f.fourchette_haute),
-                xytext=(0, 6), textcoords="offset points", ha="center", fontsize=6.8, color=INK2)
-    ax.set_xticks(list(x) + [10])
-    ax.set_xticklabels(SHORT + ["25/26"], fontsize=6.5, rotation=0)
-    ax.set_ylim(0, max(100, f.fourchette_haute + 12))
-    ax.set_title("Taux d'achèvement du primaire (%)", fontsize=9.5, loc="left", fontweight="bold")
-    for a in [ax]:
-        a.grid(color=GRID, linewidth=0.6)
-        a.set_axisbelow(True)
-        for s in ["top", "right"]:
-            a.spines[s].set_visible(False)
-        a.tick_params(colors=MUTED, labelsize=7)
-    ax.legend(loc="lower left", fontsize=7, frameon=False)
+    # 1. Global score.
+    y0, h0 = 0.745, 0.145
+    _carte(fig, L, y0, W, h0)
+    fig.text(L + 0.025, y0 + h0 - 0.02, "Score global de risque", fontsize=10.5, fontweight="bold", color=FG, va="top")
+    fig.text(L + W - 0.025, y0 + h0 - 0.02, f"{rang}{'re' if rang == 1 else 'e'} sur 13 · {niveau}", fontsize=8.5, color=FG3, va="top", ha="right")
+    fig.text(L + 0.025, y0 + 0.058, f"{s}", fontsize=40, fontweight="bold", color=classe(s), va="baseline")
+    fig.text(L + 0.025 + 0.041 * len(str(s)) + 0.012, y0 + 0.058, "/ 100", fontsize=13, color=FG3, va="baseline")
+    bx, bw, by = L + 0.30, W - 0.325, y0 + 0.075
+    fig.patches.append(FancyBboxPatch((bx, by), bw, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor="white", edgecolor="none"))
+    fig.patches.append(FancyBboxPatch((bx, by), bw * brutal / 100, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor=FG, edgecolor="none"))
+    fig.patches.append(FancyBboxPatch((bx + bw * brutal / 100, by), bw * lent / 100, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor=Z3, edgecolor="none"))
+    for yq, col in [(by - 0.0195, FG), (by - 0.0365, Z3)]:
+        fig.patches.append(FancyBboxPatch((bx, yq), 0.009, 0.0065, boxstyle="round,pad=0,rounding_size=0.0015",
+                                          transform=fig.transFigure, facecolor=col, edgecolor="none"))
+    fig.text(bx + 0.016, by - 0.012, f"Chute des effectifs (violence) : {fr(brutal)}", fontsize=8.2, color=FG, va="top")
+    fig.text(bx + 0.016, by - 0.029, f"Enfants qui n'achèvent pas le primaire : {fr(lent)}", fontsize=8.2, color="#8a94a5", va="top")
+    fig.text(L + 0.025, y0 + 0.018, f"Moitié risque de chute des effectifs ({fr(p)} %), moitié part d'enfants qui n'achèvent pas ({fr(100 - tap, 1)} %).",
+             fontsize=7.8, color=FG3)
 
-    ax2 = fig.add_axes([0.68, 0.56, 0.26, 0.19])
-    yrs = [f"{y}-{y + 1}" for y in range(2015, 2026)]
-    vals = [inc.get(y, 0) for y in yrs]
-    ax2.bar(range(len(yrs)), vals, color=[BLUE if y != "2025-2026" else INK for y in yrs], width=0.7)
-    ax2.set_xticks(range(0, len(yrs), 2))
-    ax2.set_xticklabels([yrs[i][2:4] + "/" + yrs[i][7:] for i in range(0, len(yrs), 2)], fontsize=6.5)
-    ax2.set_title("Incidents sécuritaires (ACLED)\nd'octobre à septembre", fontsize=9, loc="left", fontweight="bold")
-    ax2.annotate(fr(vals[-1]), (len(yrs) - 1, vals[-1]), xytext=(0, 3), textcoords="offset points", ha="center",
-                 fontsize=7, color=INK)
-    ax2.grid(axis="y", color=GRID, linewidth=0.6)
-    ax2.set_axisbelow(True)
-    for s in ["top", "right"]:
-        ax2.spines[s].set_visible(False)
-    ax2.tick_params(colors=MUTED, labelsize=7)
+    # 2. What to act on.
+    y1, h1 = 0.585, 0.145
+    _carte(fig, L, y1, W, h1)
+    fig.text(L + 0.025, y1 + h1 - 0.02, "Sur quoi agir", fontsize=10.5, fontweight="bold", color=FG, va="top")
+    if dom:
+        fig.text(L + W - 0.025, y1 + h1 - 0.02, "poids de chaque facteur", fontsize=8.5, color=FG3, va="top", ha="right")
+    if dom:
+        fig.text(L + 0.025, y1 + h1 - 0.047, f"Agir sur {NOM_ACTION[dom]}", fontsize=14, fontweight="bold", color=FG, va="top")
+        lev = textwrap.wrap(defs[dom]["levier"], 52)
+        for i, ln in enumerate(lev[:3]):
+            fig.text(L + 0.025, y1 + h1 - 0.075 - i * 0.016, ln, fontsize=9, color=FG2, va="top")
+        if fdj["second"]:
+            fig.text(L + 0.025, y1 + 0.018, f"Ensuite : {NOM_ACTION[fdj['second']]}", fontsize=8.5, color=FG3)
+    else:
+        fig.text(L + 0.025, y1 + h1 - 0.047, "Aucun facteur au-dessus de la moyenne", fontsize=13, fontweight="bold", color=FG, va="top")
+        fig.text(L + 0.025, y1 + h1 - 0.075, "Consolider ce qui marche.", fontsize=9, color=FG2, va="top")
+    top = sorted(fdj["contributions"].items(), key=lambda kv: -kv[1])[:4] if dom else []
+    mx = max(abs(v) for _, v in fdj["contributions"].items()) or 1
+    for i, (fid, v) in enumerate(top):
+        yy = y1 + h1 - 0.052 - i * 0.022
+        fig.text(L + 0.49, yy, defs[fid]["libelle"], fontsize=8.2, color=FG2, va="center")
+        fig.patches.append(FancyBboxPatch((L + 0.68, yy - 0.004), 0.15, 0.008, boxstyle="round,pad=0,rounding_size=0.003", transform=fig.transFigure, facecolor="white", edgecolor="none"))
+        if v > 0:
+            fig.patches.append(FancyBboxPatch((L + 0.68, yy - 0.004), 0.15 * v / mx, 0.008, boxstyle="round,pad=0,rounding_size=0.003",
+                                              transform=fig.transFigure, facecolor=FG if fid == dom else C3, edgecolor="none"))
 
-    import textwrap
+    # 3. Score year by year, up to the forecast.
+    tr = sg["trajectoire"]
+    ann, sc, ch = tr["annees"], tr["par_region"][cle]["score"], tr["par_region"][cle]["chute"]
+    y2, h2 = 0.375, 0.19
+    _carte(fig, L, y2, W, h2)
+    fig.text(L + 0.025, y2 + h2 - 0.02, "Le score, année par année", fontsize=10.5, fontweight="bold", color=FG, va="top")
+    fig.text(L + W - 0.025, y2 + h2 - 0.02, f"{ann[-1]} prévu : {sc[-1]}", fontsize=9, color=C1, va="top", ha="right", fontweight="bold")
+    ax = fig.add_axes([L + 0.04, y2 + 0.062, W - 0.10, h2 - 0.105])
+    n = len(ann)
+    ax.axhspan(50, 100, color=Z3, alpha=.45, lw=0)
+    ax.axhspan(25, 50, color=Z2, alpha=.45, lw=0)
+    ax.plot(range(n - 1), sc[:-1], color=FG, lw=2, solid_capstyle="round", zorder=3)
+    ax.plot([n - 2, n - 1], sc[-2:], color=FG, lw=2, ls=(0, (3, 3)), zorder=3)
+    for i in range(n - 1):
+        if ch[i] == 1:
+            ax.scatter(i, sc[i], s=70, facecolor="white", edgecolor=BAD, linewidth=2, zorder=4)
+        else:
+            ax.scatter(i, sc[i], s=14, color=FG, zorder=4)
+    ax.scatter(n - 1, sc[-1], s=200, color=C1, alpha=.18, lw=0, zorder=3)
+    ax.scatter(n - 1, sc[-1], s=60, facecolor="white", edgecolor=C1, linewidth=2.2, zorder=5)
+    ax.annotate(f"{sc[-1]}", (n - 1, sc[-1]), xytext=(0, 9), textcoords="offset points", ha="center", fontsize=10, fontweight="bold", color=C1)
+    ax.set_xlim(-0.3, n - 0.7)
+    ax.set_ylim(0, 100)
+    ax.set_yticks([25, 50])
+    ax.set_xticks(range(n))
+    ax.set_xticklabels(ann[:-1] + [f"{ann[-1]}\nprévu"], fontsize=7.5)
+    ax.get_xticklabels()[-1].set_color(C1)
+    ax.get_xticklabels()[-1].set_fontweight("bold")
+    _axes_propres(ax)
+    fig.text(L + 0.025, y2 + 0.013, "Cercle rouge : chute des effectifs de plus de 5 % observée cette année-là   ·   chaque point est calculé avec ce qu'on savait cette année-là",
+             fontsize=7.3, color=FG3)
 
-    def block(y_top, title, lines):
-        """Draw a titled box sized to its wrapped lines; return the y where the next block can start."""
-        wrapped = [textwrap.wrap(ln, 112) for ln in lines]
-        n_rows = sum(len(w) for w in wrapped)
-        height = 0.048 + n_rows * 0.0165 + len(lines) * 0.004
-        fig.patches.append(FancyBboxPatch((0.06, y_top - height), 0.88, height, boxstyle="round,pad=0,rounding_size=0.008",
-                                          transform=fig.transFigure, facecolor=TILE, edgecolor="none"))
-        fig.text(0.08, y_top - 0.014, title, fontsize=10, fontweight="bold", color=INK, va="top")
-        yy = y_top - 0.042
-        for wl in wrapped:
-            for j, w in enumerate(wl):
-                fig.text(0.085 if j == 0 else 0.1, yy, ("•  " if j == 0 else "") + w, fontsize=8.4, color=INK, va="top")
-                yy -= 0.0165
-            yy -= 0.004
-        return y_top - height - 0.015
+    # 4. Completion and violence, side by side.
+    y3, h3 = 0.185, 0.17
+    wl = 0.52
+    _carte(fig, L, y3, wl, h3)
+    _carte(fig, L + wl + 0.015, y3, W - wl - 0.015, h3)
+    fig.text(L + 0.025, y3 + h3 - 0.02, "Achèvement du primaire", fontsize=10, fontweight="bold", color=FG, va="top")
+    fig.text(L + wl - 0.02, y3 + h3 - 0.02, f"{fr(tap, 1)} % en 24/25", fontsize=8.5, color=FG3, va="top", ha="right")
+    for xl, col, nom in [(L + 0.025, FG, r["nom"]), (L + 0.30, NATC, "Pays")]:
+        fig.patches.append(FancyBboxPatch((xl, y3 + h3 - 0.0465), 0.02, 0.0022, boxstyle="round,pad=0,rounding_size=0.001",
+                                          transform=fig.transFigure, facecolor=col, edgecolor="none"))
+        fig.text(xl + 0.026, y3 + h3 - 0.04, nom, fontsize=7.8, color=FG2, va="top")
+    ax = fig.add_axes([L + 0.035, y3 + 0.035, wl - 0.10, h3 - 0.095])
+    xs = range(len(jeu["annees"]))
+    ax.plot(xs, jeu["national"]["tap"], color=NATC, lw=1.8, label="Pays")
+    ax.plot(xs, r["tap"], color=FG, lw=2.2, label=r["nom"])
+    pv = r["prevision_2025_26"]
+    k = len(jeu["annees"])
+    ax.vlines(k, pv["basse"], pv["haute"], color=Z3, lw=7)
+    ax.plot([k - 1, k], [r["tap"][-1], pv["centrale"]], color=FG, lw=1.5, ls=(0, (3, 3)))
+    ax.scatter(k, pv["centrale"], s=26, facecolor="white", edgecolor=FG, lw=1.5, zorder=4)
+    ax.set_ylim(0, 100)
+    ax.set_yticks([0, 50, 100])
+    ax.set_xticks([0, k - 1, k])
+    ax.set_xticklabels([jeu["annees"][0], jeu["annees"][-1], "25/26\nprévu"], fontsize=7.5)
+    ax.grid(axis="y", color=LINE, lw=.6)
+    _axes_propres(ax)
+    xv = L + wl + 0.015
+    fig.text(xv + 0.02, y3 + h3 - 0.02, "Violence", fontsize=10, fontweight="bold", color=FG, va="top")
+    fig.text(L + W - 0.02, y3 + h3 - 0.02, "incidents / an", fontsize=8.5, color=FG3, va="top", ha="right")
+    ax = fig.add_axes([xv + 0.02, y3 + 0.03, W - wl - 0.055, h3 - 0.09])
+    inc = r["incidents"]
+    ax.bar(range(len(inc)), inc, color=[C3] * (len(inc) - 1) + [FG], width=.72)
+    ax.annotate(fr(inc[-1]), (len(inc) - 1, inc[-1]), xytext=(0, 3), textcoords="offset points", ha="center", fontsize=8, fontweight="bold", color=FG)
+    ax.set_xticks([0, len(inc) - 1])
+    ax.set_xticklabels([jeu["annees_violence"][0], jeu["annees_violence"][-1]], fontsize=7.5)
+    ax.set_yticks([])
+    _axes_propres(ax)
 
-    y_next = block(0.505, "Ce qu'il faut retenir", facts)
-    y_next = block(y_next, "Leviers proposés", levers)
-    assert y_next > 0.125, f"la fiche {name25} déborde : réduire le texte"
-    notes = [f"Pauvreté 2021 : {fr(poverty, 1)} % de la population sous le seuil (INSD, EHCVM 2021).",
-             "La prévision 2025/26 reprend le taux 2024/25 ; sa fourchette à 80 % a couvert 73 % des cas passés.",
-             "Le niveau de risque classe bien les régions (AUC 0,83 hors échantillon) ; la probabilité est indicative."]
-    if "+" in name25:
-        notes.insert(0, f"Région coupée en 2025 ({name25}) : les données ne permettent pas de séparer ses parties.")
-    yy = min(0.12, y_next)
+    # 5. Levers.
+    y4 = 0.168
+    fig.text(L, y4, "Leviers", fontsize=10.5, fontweight="bold", color=FG, va="top")
+    leviers = (r["leviers"] + r["leviers_facteurs"])[:3]
+    yy = y4 - 0.022
+    for i, lv in enumerate(leviers):
+        lines = textwrap.wrap(lv, 105)
+        fig.text(L, yy, f"{i + 1}", fontsize=9, fontweight="bold", color=C1, va="top")
+        for j, ln in enumerate(lines[:2]):
+            fig.text(L + 0.02, yy - j * 0.0145, ln, fontsize=8.6, color=FG, va="top")
+        yy -= 0.0145 * min(2, len(lines)) + 0.006
+    notes = ["Score = 100 × (0,5 × probabilité de chute des effectifs + 0,5 × part d'enfants qui n'achèvent pas). "
+             "Il résume ; la priorité de la matrice reste la règle pour cibler."]
+    if "+" in r["nom"]:
+        notes.append(f"Région coupée en 2025 ({r['nom']}) : les données ne permettent pas de séparer ses parties.")
+    yy = min(yy - 0.004, 0.058)
     for ln in notes:
-        fig.text(0.06, yy, ln, fontsize=7, color=INK2, va="top")
-        yy -= 0.015
-    fig.text(0.06, 0.035, "Sources : DGESS (données du Data Challenge Burkina) ; ACLED, INSD et IGB via HDX ; INSD, EHCVM 2021. "
-             "Calculs de l'équipe, novembre 2026.", fontsize=6.5, color=MUTED)
-    slug = key(name25).lower()
+        fig.text(L, yy, ln, fontsize=6.8, color=FG3, va="top")
+        yy -= 0.012
+    fig.text(L, 0.025, "Sources : DGESS (données du Data Challenge Burkina) ; ACLED, INSD et IGB via HDX ; INSD, EHCVM 2021. "
+             "Calculs de l'équipe, novembre 2026.", fontsize=6.5, color=FG3)
+    assert yy > 0.03, f"la fiche {r['nom']} déborde : réduire le texte"
+    slug = key(r["nom"]).lower()
     fig.savefig(f"{out}/fiche_{slug}.pdf")
     fig.savefig(f"{out}/fiche_{slug}.png", dpi=110)
     plt.close(fig)
-    return slug
+    return slug, r["nom"]
 
 
 def main():
+    """Run after scripts/export_tableau_de_bord.py: the page reads the dashboard data set. Writes
+    analyse/fiches/, the booklet analyse/fiches_regionales_13.pdf, and the copies served by the app."""
+    import json
+    import shutil
+    from pypdf import PdfWriter
     out = "analyse/fiches"
     os.makedirs(out, exist_ok=True)
-    data = load()
-    keys = sys.argv[1:] or sorted(data[0][data[0].region != "NATIONAL"].cle.unique())
+    jeu = json.load(open("dashboard/public/data/tableau_de_bord.json", encoding="utf-8"))
+    keys = sys.argv[1:] or [r["cle"] for r in sorted(jeu["regions"], key=lambda r: -jeu["score_global"]["par_region"][r["cle"]])]
+    os.makedirs("dashboard/public/fiches", exist_ok=True)
+    livret = PdfWriter()
     for k in keys:
-        print("fiche :", make(k, data, out))
+        slug, nom = make(k, jeu, out)
+        shutil.copy2(f"{out}/fiche_{slug}.pdf", f"dashboard/public/fiches/{k}.pdf")
+        livret.append(f"{out}/fiche_{slug}.pdf")
+        print("fiche :", nom)
+    if not sys.argv[1:]:
+        livret.write("analyse/fiches_regionales_13.pdf")
+        print("livret : analyse/fiches_regionales_13.pdf (régions de la plus urgente à la moins urgente)")
 
 
 if __name__ == "__main__":
