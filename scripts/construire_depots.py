@@ -89,6 +89,8 @@ WB_SCIENTIST = [
     ("P15_TAP_trois_ans", "... et à trois ans ?"),
     ("P16_signaux_fins", "Signaux fins de violence : six variantes testées"),
     ("P17_formule_risque", "La formule du risque : coefficients en unités d'origine, vérifiés contre les probabilités affichées"),
+    ("P18_score_global_rejoue", "Score global rejoué sur le passé, contre le risque seul, l'achèvement seul et la matrice"),
+    ("P19_facteur_dominant", "Facteur dominant de chaque région : poids de chaque facteur")
 ]
 RAW_ANALYST = ["resultats_analyse.txt", "resultats_pistes.txt"]
 RAW_SCIENTIST = ["resultats_acled.txt", "resultats_prevision_hypothese.txt", "resultats_machine_learning.txt",
@@ -141,9 +143,9 @@ MANIFEST = [
     ("04", "analyst", "analyse-descriptive", "scripts/analyse_presco.py", "Script d'analyse descriptive (analyse_presco.py)", "Équipe"),
     ("04", "analyst", "analyse-pistes", "scripts/analyse_pistes.py", "Script des pistes P1 à P7 ; construit aussi le panel (analyse_pistes.py)", "Équipe"),
     ("04", "analyst", "figures-pistes", "scripts/figures_pistes.py", "Script des figures 01 à 07 (figures_pistes.py)", "Équipe"),
-    ("04", "scientist", "resultats-modeles", ("workbook", WB_SCIENTIST), "Classeur des résultats des modèles (P8 à P17), une feuille par tableau", "scripts du Data Scientist"),
-    ("04", "scientist", "journal-decisions", "docs/journal_decisions.md", "Les 19 décisions : ce qui a été décidé, pourquoi, et ce qu'on en écarte", "Équipe"),
-    ("04", "scientist", "formule-risque", "analyse/formule_risque.md", "La formule du risque de baisse des effectifs, ses coefficients, un exemple calculé à la main, sa vérification", "formule-risque"),
+    ("04", "scientist", "resultats-modeles", ("workbook", WB_SCIENTIST), "Classeur des résultats des modèles (P8 à P19), une feuille par tableau", "scripts du Data Scientist"),
+    ("04", "scientist", "journal-decisions", "docs/journal_decisions.md", "Les 21 décisions : ce qui a été décidé, pourquoi, et ce qu'on en écarte", "Équipe"),
+    ("04", "scientist", "formule-risque", "analyse/formule_risque.md", "La formule du risque, le score global et le facteur dominant : coefficients, exemples calculés à la main, vérifications", "formule-risque"),
     ("04", "scientist", "anticipation-et-hypothese", "analyse/anticipation_et_hypothese.md", "Prévision prudente, alerte d'escalade, test de l'hypothèse", "Équipe"),
     ("04", "scientist", "apprentissage-automatique", "analyse/machine_learning.md", "Apprentissage automatique contre règles simples", "Équipe"),
     ("04", "scientist", "autres-approches-prevision", "analyse/autres_approches_prevision.md", "Écoles ouvertes à la rentrée ; filière des cohortes", "Équipe"),
