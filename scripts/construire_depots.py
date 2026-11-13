@@ -166,7 +166,7 @@ MANIFEST = [
     ("05", "analyst", "matrice-priorite-2026-27", "analyse/P13_matrice_priorite_2026_27.csv", "Matrice de priorité 2026/27 : taux d'achèvement, probabilité de baisse, enfants hors CM2, priorité", "solution-prevision (04)"),
     ("05", "analyst", "profil-facteurs-regions", FIG + "16_profil_facteurs.png", "Profil des facteurs de chaque région", "figures-solution"),
     ("05", "analyst", "profil-facteurs-regions", "analyse/P14_profil_facteurs.csv", "Valeurs et niveaux d'exposition par facteur et par région", "facteurs-decrochage (04)"),
-    ("05", "analyst", "tableau-de-bord-local-first", ("archive_dir", "dashboard"), "Le tableau de bord : application Next.js qui fonctionne sans réseau (carte, priorités, alertes, fiches, saisie des écoles ouvertes), base Neon. Lire son README.md", "Équipe"),
+    ("05", "analyst", "tableau-de-bord-local-first", ("archive_dir", "dashboard"), "Le tableau de bord : application de téléphone Next.js qui fonctionne sans réseau, au niveau des 13 régions (carte, régions, alertes, fiches, saisie des écoles ouvertes), base Neon. Lire son README.md", "Équipe"),
     ("05", "analyst", "donnees-tableau-de-bord", "dashboard/public/data/tableau_de_bord.json", "Le jeu de données du tableau de bord (aussi chargé dans la base Neon)", "export-tableau-de-bord"),
     ("05", "analyst", "export-tableau-de-bord", "scripts/export_tableau_de_bord.py", "Script qui prépare les données du tableau de bord (export_tableau_de_bord.py)", "Équipe"),
     ("05", "analyst", "fiches-regionales", "scripts/fiches_regionales.py", "Script des fiches régionales (fiches_regionales.py)", "Équipe"),
