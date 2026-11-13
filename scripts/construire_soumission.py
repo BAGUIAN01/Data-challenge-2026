@@ -65,6 +65,25 @@ TABLES = [
     ("P18_score_global_trajectoire", "Score de chaque région année par année"),
     ("P19_facteur_dominant", "Facteur dominant de chaque région"),
 ]
+# Challenge naming rule without the team part (blind review): ETAPE_DEFI_ROLE_description_vN.
+VERSION = 1
+NOMS = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rapport',
+    'documentation/fiches_regionales.pdf': '05-interpretation_D1_analyst_fiches-regionales',
+    'documentation/formule_du_risque.md': '04-analyse_D1_scientist_formule-risque',
+    'documentation/journal_des_decisions.md': '04-analyse_D1_scientist_journal-decisions',
+    'code/cahier_02_nettoyage.ipynb': '02-nettoyage_D1_engineer_cahier-nettoyage',
+    'code/cahier_03_transformation.ipynb': '03-transformation_D1_architect_cahier-transformation',
+    'code/cahier_04a_analyse_descriptive.ipynb': '04-analyse_D1_analyst_cahier-analyse-descriptive',
+    'code/cahier_04b_modeles.ipynb': '04-analyse_D1_scientist_cahier-modeles',
+    'code/cahier_05_interpretation.ipynb': '05-interpretation_D1_analyst_cahier-interpretation',
+    'code/tableau_de_bord.zip': '05-interpretation_D1_analyst_tableau-de-bord',
+    'code/projet_complet.zip': '05-interpretation_D1_scientist_projet-complet',
+    'donnees/priorites_2026_27.csv': '05-interpretation_D1_analyst_priorites-2026-27',
+    'donnees/resultats_analyse.xlsx': '04-analyse_D1_scientist_resultats-analyse',
+    'donnees/donnees_tableau_de_bord.json': '05-interpretation_D1_analyst_donnees-tableau-de-bord',
+    'donnees/donnees_transformees.zip': '03-transformation_D1_engineer_donnees-transformees',
+    'donnees/donnees_nettoyees.zip': '02-nettoyage_D1_engineer_donnees-nettoyees',
+    'donnees/donnees_collectees.zip': '01-collecte_D1_engineer_donnees-collectees'}
 NOM_ACTION = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
               "meres": "l'instruction des mères", "grossesses": "les grossesses précoces", "prescolaire": "le préscolaire"}
 
@@ -149,7 +168,12 @@ def main():
     shutil.copy2(RACINE / "docs/journal_decisions.md", T / "journal_des_decisions.md")
     shutil.copy2(RACINE / "docs/LISEZ-MOI_soumission.md", T / "LISEZ-MOI.md")
 
+    for ancien, nom in NOMS.items():
+        f = OUT / ancien
+        f.rename(f.with_name(f"{nom}_v{VERSION}{f.suffix}"))
     fichiers = sorted(p for p in OUT.rglob("*") if p.is_file())
+    if (RACINE / "fiche_de_la_solution.md").exists():
+        shutil.copy2(RACINE / "fiche_de_la_solution.md", OUT / "fiche_de_la_solution.md")
     print(f"{len(fichiers)} fichiers (20 au plus), {sum(p.stat().st_size for p in fichiers) / 1e6:.1f} Mo")
     for p in fichiers:
         print(f"  {p.relative_to(OUT)}  {p.stat().st_size / 1e6:.2f} Mo")
