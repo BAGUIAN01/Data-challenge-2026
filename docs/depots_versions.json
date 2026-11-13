@@ -84,8 +84,8 @@
   "version": 1
  },
  "03-architect-parcours-donnees.md": {
-  "signature": "fd4cd3c9341bd5d49ed865dfd5203822",
-  "version": 1
+  "signature": "9fde4ae64057bbfb398ddc5a27edc8e9",
+  "version": 2
  },
  "03-architect-referentiel-officiel.py": {
   "signature": "bbf4151c10b8c116f022947247060794",
@@ -93,6 +93,10 @@
  },
  "03-architect-regions-2025.py": {
   "signature": "f5a28d6495f27f20f3df005eb3352b73",
+  "version": 1
+ },
+ "03-architect-schema-base-neon.sql": {
+  "signature": "ff549a3f24c5e0e9127954eb9ee167b1",
   "version": 1
  },
  "03-engineer-panel-region-annee-2025.csv": {
@@ -200,8 +204,8 @@
   "version": 1
  },
  "04-scientist-journal-decisions.md": {
-  "signature": "6af918b3a727d2ad1399b98e902d5558",
-  "version": 1
+  "signature": "705e374c0405968c44ef969ac99829da",
+  "version": 2
  },
  "04-scientist-prevision-facteurs.py": {
   "signature": "972598ee6371478de978d2fdd6cc9a48",
@@ -231,13 +235,21 @@
   "signature": "956ff70eeb0e6345521e49671d8c837d",
   "version": 1
  },
+ "05-analyst-donnees-tableau-de-bord.json": {
+  "signature": "3949a4dad5928ead90e8c4295fdf23aa",
+  "version": 1
+ },
+ "05-analyst-export-tableau-de-bord.py": {
+  "signature": "c877dd933a8c1fa686dff2e913a188dd",
+  "version": 1
+ },
  "05-analyst-fiches-regionales-13.pdf": {
   "signature": "36ca576f15843e4a4c470bf471305abb",
   "version": 1
  },
  "05-analyst-fiches-regionales.py": {
-  "signature": "23eb351a6624030fa37e3ec68ae9ca1f",
-  "version": 1
+  "signature": "b42a9c72f5e20209ff6846e54b962643",
+  "version": 2
  },
  "05-analyst-figures-solution.py": {
   "signature": "9b85f11e1d39048990fba6099ef99780",
@@ -259,6 +271,10 @@
   "signature": "bd2c1c1b5611049297fefc5db4d11bc2",
   "version": 1
  },
+ "05-analyst-tableau-de-bord-local-first.zip": {
+  "signature": "ffa5e35ec34d1398a9a002e49582d089ed830b39",
+  "version": 1
+ },
  "05-scientist-alertes-calendrier.csv": {
   "signature": "f5fcf1758c61b3d2a6179a8dddaf8e75",
   "version": 1
@@ -272,8 +288,8 @@
   "version": 1
  },
  "05-scientist-projet-complet-relancable.zip": {
-  "signature": "b1192acb546699ada27284aa1198843b",
-  "version": 1
+  "signature": "b6d74f7e47c44db163bcc521d220cfcf",
+  "version": 2
  },
  "05-scientist-risque-2026-27.png": {
   "signature": "2a079a3eeaa86c512b3983a43e438a65",
