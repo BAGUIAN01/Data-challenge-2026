@@ -93,7 +93,7 @@ def construire(fichier, titre, chapo, etapes):
     nb = nbformat.v4.new_notebook()
     nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
     nb.cells.append(nbformat.v4.new_markdown_cell(
-        f"# {titre}\n\n{chapo}\n\nÀ lancer dans le projet complet (archive `projet-complet-relancable`), "
+        f"# {titre}\n\n{chapo}\n\nÀ lancer dans le projet complet (archive `05-interpretation_D1_scientist_projet-complet_v1.zip`), "
         "avec les données brutes placées comme le dit `data/raw/LISEZ-MOI.md`."))
     nb.cells.append(nbformat.v4.new_code_cell(DEPART))
     vus = set()
