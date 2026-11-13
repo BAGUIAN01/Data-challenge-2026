@@ -35,7 +35,9 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
     const R = jeu.regions, s = etat.current;
     svg.innerHTML = "";
     const gReg = el("g", {}, svg), gSel = el("g", { "pointer-events": "none" }, svg), gLab = el("g", { "pointer-events": "none" }, svg), gBar = el("g", { "pointer-events": "none" }, svg);
-    let pousse = 1; // growth of the bars, 0 -> 1 when the bar view opens
+    // Bar heights move from what is shown to the new values (growth from 0 at first, then year to year).
+    let depart = {}, arrivee = {}, avance = 1, pousseAnim = 0;
+    const montre = (r) => { const b = arrivee[r.cle] ?? s.barres(r) ?? 0, a = depart[r.cle] ?? b; return a + (b - a) * avance; };
     let vb = { x: 0, y: 0, w: L, h: Hc }, glisse = false, anim = 0;
     for (const r of R) {
       const p = el("path", { d: GEO[r.cle].d, "stroke-linejoin": "round", "data-cle": r.cle, tabindex: 0, role: "button", "aria-label": `${r.nom} : ouvrir l'aperçu` }, gReg);
@@ -53,7 +55,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       const k = vb.w / W, sel = s.selection;
       const enBarres = Boolean(s.barres);
       for (const p of gReg.children) {
-        p.setAttribute("fill", `var(--c${s.classe(R.find((r) => r.cle === p.dataset.cle))})`);
+        p.style.fill = `var(--c${s.classe(R.find((r) => r.cle === p.dataset.cle))})`;
         p.setAttribute("stroke", "var(--land)");
         p.setAttribute("stroke-width", 1.5 * k);
       }
@@ -65,11 +67,11 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
         const etiquettes = [];
         const w = (W < 600 ? 13 : 16) * k, Hm = (W < 600 ? 72 : 110) * k; // shorter on a phone, under the controls
         for (const r of [...R].sort((a, b) => GEO[a.cle].ly - GEO[b.cle].ly)) {
-          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.barres(r) ?? 0, h = Math.max(2 * k, (v / 100) * Hm * pousse);
+          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = Math.round(montre(r)), h = Math.max(2 * k, (montre(r) / 100) * Hm);
           const x0 = f.lx + dx, y0 = f.ly + dy;
           el("ellipse", { cx: x0, cy: y0, rx: w * 0.75, ry: w * 0.28, fill: "rgba(0,0,0,.25)" }, gBar);
           el("rect", { x: x0 - w / 2, y: y0 - h, width: w, height: h, rx: w * 0.25, fill: `var(--c${s.classe(r)})`, stroke: "#fff", "stroke-width": 2 * k }, gBar);
-          if (pousse > 0.95) etiquettes.push({ x: x0, y: y0 - h - 6 * k, v, cle: r.cle });
+          if (montre(r) > 1) etiquettes.push({ x: x0, y: y0 - h - 6 * k, v, cle: r.cle });
         }
         // Values are drawn last, over every bar: the selected region first, then the tallest bars;
         // a value that would overlap one already placed is left out (its bar still shows it).
@@ -82,6 +84,22 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
           const tx = el("text", { x: e.x, y: e.y, "text-anchor": "middle" }, gBar);
           tx.style.cssText = `font-size:${fs}px;fill:var(--fg);stroke:#fff;stroke-width:${3.5 * k}px`;
           tx.textContent = txt;
+        }
+        // Region names, as on the colour map, written just under the foot of each bar. The full-height
+        // bars and their values are reserved first; a name that would cross one of them, or another
+        // name, is left out (biggest regions first, the selected one always).
+        const tn = 11.5 * k, mn = 2 * k, pris2 = [];
+        for (const r of R) {
+          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.barres(r) ?? 0, hp = Math.max(2 * k, (v / 100) * Hm);
+          pris2.push([f.lx + dx - w / 2, f.ly + dy - hp - 6 * k - fs, f.lx + dx + w / 2, f.ly + dy]);
+        }
+        for (const r of [...ordre].sort((a, b) => (b.cle === sel) - (a.cle === sel))) {
+          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], c = s.classe(r), l = lignesNom(r.nom);
+          const tx = el("text", { x: f.lx + dx, y: f.ly + dy + w * 0.35 + tn, "text-anchor": "middle", "data-etiquette": r.cle }, gLab);
+          tx.style.cssText = `font-size:${tn}px;font-weight:600;fill:var(--c${c}-t);stroke:var(--c${c});stroke-width:${2.5 * k}px`;
+          l.forEach((x, i) => { const ts = el("tspan", { x: f.lx + dx, dy: i ? tn * 1.12 : 0 }, tx); ts.textContent = x; });
+          const bb = tx.getBBox(), q = [bb.x - mn, bb.y - mn, bb.x + bb.width + mn, bb.y + bb.height + mn];
+          if (r.cle !== sel && pris2.some((p) => q[0] < p[2] && q[2] > p[0] && q[1] < p[3] && q[3] > p[1])) tx.remove(); else pris2.push(q);
         }
         return;
       }
@@ -190,10 +208,16 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       pays: () => aller(cible([0, 0, L, Hc])),
       region: (cle) => aller(cible(boites[cle], 1.6)),
       immediat: () => { vb = cible([0, 0, L, Hc]); render(); },
+      // Bars move to the current values: from 0 the first time, from what is shown afterwards.
       pousser: () => {
-        const t0 = performance.now();
-        const pas = (t) => { pousse = Math.min(1, (t - t0) / 700); pousse = 1 - Math.pow(1 - pousse, 3); render(); if (pousse < 1) requestAnimationFrame(pas); };
-        pousse = 0; requestAnimationFrame(pas);
+        const premier = !Object.keys(arrivee).length;
+        depart = Object.fromEntries(R.map((r) => [r.cle, premier ? 0 : montre(r)]));
+        arrivee = Object.fromEntries(R.map((r) => [r.cle, s.barres(r) ?? 0]));
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) { avance = 1; render(); return; }
+        const t0 = performance.now(), ms = premier ? 700 : 450;
+        cancelAnimationFrame(pousseAnim);
+        const pas = (t) => { const u = Math.min(1, (t - t0) / ms); avance = 1 - Math.pow(1 - u, 3); render(); if (u < 1) pousseAnim = requestAnimationFrame(pas); };
+        avance = 0; pousseAnim = requestAnimationFrame(pas);
       },
     };
     requestAnimationFrame(() => api.current?.immediat());
