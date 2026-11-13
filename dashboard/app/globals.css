@@ -418,12 +418,29 @@ button.row:active, a.row:active { background: var(--press); }
 /* Sub-heading inside a section (score trajectory): same layout as the section title, smaller. */
 .sec > .sous-titre { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 22px 0 0; font-size: 14px; font-weight: 600; }
 .sec > .sous-titre span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12.5px; font-weight: 400; color: var(--fg-3); }
-/* Years of the map: a named play button, then one pill per year; the forecast year stands out. */
-.annees { display: flex; align-items: center; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: none; padding: 3px; border-radius: 12px; background: color-mix(in oklab, var(--card) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 1px 2px rgba(15, 23, 42, .08), 0 4px 14px rgba(15, 23, 42, .08); }
-.annees::-webkit-scrollbar { display: none; }
-.annees button { flex: none; height: 34px; padding: 0 10px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--fg-2); font-variant-numeric: tabular-nums; }
-.annees .jouer { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; background: var(--fg); color: var(--card); font-weight: 600; }
-.annees .jouer svg { width: 12px; height: 12px; fill: currentColor; }
-.annees button[aria-pressed="true"] { background: var(--fill); color: var(--fg); font-weight: 700; }
-.annees .prevue { color: var(--c1); font-weight: 700; }
-.annees .prevue[aria-pressed="true"] { background: var(--c1); color: #fff; }
+.btns > :only-child { grid-column: 1 / -1; }
+/* Year player: a discreet pill, top right of the map (under the search bar on a phone). */
+.lect-zone { position: absolute; z-index: 3; right: 12px; top: 66px; }
+@media (min-width: 900px) { .lect-zone { top: 10px; } }
+.lecteur { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 4px; border-radius: 20px; background: color-mix(in oklab, var(--card) 90%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 2px rgba(15, 23, 42, .08), 0 4px 14px rgba(15, 23, 42, .08); }
+.lect-jouer { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--card); transition: transform .12s; }
+.lect-jouer:active { transform: scale(.92); }
+.lect-jouer svg { width: 12px; height: 12px; fill: currentColor; }
+.lect-an { min-width: 3.1em; font-size: 14px; font-weight: 700; color: var(--fg); white-space: nowrap; }
+.lect-an em { margin-left: 4px; font-style: normal; font-size: 11px; font-weight: 600; color: var(--c1); }
+.est-prevu .lect-an { color: var(--c1); }
+.lect-piste { position: relative; flex: none; width: 112px; height: 40px; touch-action: none; cursor: pointer; outline: none; }
+.lect-piste:focus-visible .lect-bouton { box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 40%, transparent); }
+.lect-rail { position: absolute; left: 0; right: 0; top: 19px; height: 2px; border-radius: 1px; background: var(--edge); }
+.lect-passe { position: absolute; left: 0; top: 0; bottom: 0; background: var(--fg); }
+.lect-futur { position: absolute; right: 0; top: 0; bottom: 0; background: repeating-linear-gradient(90deg, var(--c1) 0 3px, transparent 3px 6px); }
+.lect-cran { position: absolute; top: 17px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--edge); padding: 0; }
+.lect-cran::after { content: ""; position: absolute; inset: -17px -7px; } /* finger-sized target */
+.lect-cran.vu { background: var(--fg); }
+.lect-cran.fin { background: var(--c1); }
+.lect-bouton { position: absolute; top: 13px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--fg); border: 2px solid var(--card); box-shadow: 0 1px 3px rgba(15, 23, 42, .3); pointer-events: none; }
+.est-prevu .lect-bouton { background: var(--c1); }
+/* On a phone the legend stacks on the left, the player stays on the right. */
+@media (max-width: 899px) {
+  .ftop .mleg { flex-direction: column; align-items: flex-start; gap: 3px; padding: 6px 10px; justify-self: start; }
+}

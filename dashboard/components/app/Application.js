@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDonnees } from "../DonneesProvider";
 import CarteRegions from "./CarteRegions";
+import Lecteur from "./Lecteur";
 import Ecran from "./Ecran";
 import Feuille, { hauteurCran } from "./Feuille";
 import FicheRegion from "./Fiche";
@@ -163,8 +164,9 @@ function Coque({ donnees }) {
   // Visible part of the map, for framing: between the floating controls and the sheet + tab bar.
   const marges = useCallback(() => {
     // The floating controls grow when the year timeline is shown: measured, not assumed.
-    const haut = (document.querySelector(".ftop")?.getBoundingClientRect().bottom ?? 140) - (document.querySelector(".zone-carte")?.getBoundingClientRect().top ?? 0) + 8
-      + 90; // room for the tallest bar and its value
+    const bas = (sel) => document.querySelector(sel)?.getBoundingClientRect().bottom ?? 0;
+    const haut = Math.max(bas(".ftop") || 140, bas(".lect-zone")) - (document.querySelector(".zone-carte")?.getBoundingClientRect().top ?? 0) + 8
+      + (innerWidth < 600 ? 60 : 90); // room for the tallest bar and its value
     if (matchMedia("(min-width: 900px)").matches) return { haut, bas: 16 };
     const H = tabsRef.current?.clientHeight ?? 600, barre = barreRef.current?.offsetHeight ?? 54;
     return { haut, bas: hauteurCran(etat.current.cran, H) + barre + 8 };
@@ -225,36 +227,9 @@ function Coque({ donnees }) {
   }, [envoi, enAttente]);
 
   const bandeau = etatBandeau(donnees, envoye);
-  // Map years: the score of each region year by year (each computed with its own year's information),
-  // the last one being the forecast. « Animer » plays them in turn; a pill picks one.
-  const traj = jeu.score_global?.trajectoire ?? null, nAn = traj ? traj.annees.length : 0;
-  const [iAn, setIAn] = useState(null), [joue, setJoue] = useState(false), anneesRef = useRef(null);
-  const iVu = iAn ?? nAn - 1;
-  const scoreVu = useCallback((r) => (traj && iAn !== null ? traj.par_region[r.cle]?.score[iAn] : null) ?? scoreGlobal(jeu, r) ?? risque(r), [jeu, traj, iAn]);
-  const classeVu = useCallback((r) => { const v = scoreVu(r); return v >= 50 ? 1 : v >= 25 ? 2 : 3; }, [scoreVu]);
-  useEffect(() => {
-    if (!joue) return undefined;
-    const t = setInterval(() => setIAn((i) => {
-      const j = (i ?? -1) + 1;
-      if (j >= nAn - 1) { setJoue(false); return null; } // back on the forecast, and stop
-      return j;
-    }), 900);
-    return () => clearInterval(t);
-  }, [joue, nAn]);
-  useEffect(() => { // keep the current year's pill in view (scrollLeft, never scrollIntoView)
-    const box = anneesRef.current, b = box?.querySelector('[aria-pressed="true"]');
-    if (box && b) box.scrollLeft = b.offsetLeft - box.clientWidth / 2 + b.offsetWidth / 2;
-  }, [iVu]);
-  // First visit of the session: play the years once, so the forecast is seen arriving.
-  useEffect(() => {
-    if (!traj) return undefined;
-    let deja = false;
-    try { deja = sessionStorage.getItem("annees-vues") === "1"; sessionStorage.setItem("annees-vues", "1"); } catch { /* private mode */ }
-    if (deja) return undefined;
-    const t = setTimeout(() => { setIAn(0); setJoue(true); }, 1400);
-    return () => clearTimeout(t);
-  }, [traj]);
-  const barresScore = scoreVu;
+  // Map years: the player drives the map directly (carteApi), the app does not re-render per frame.
+  const traj = jeu.score_global?.trajectoire ?? null, carteApi = useRef(null);
+  const barresScore = useCallback((r) => scoreGlobal(jeu, r) ?? risque(r), [jeu]);
 
   const titreDe = (e) => (e.type === "region" ? jeu.regions.find((r) => r.cle === e.params.cle)?.nom ?? "Région" : TITRES_ECRANS[e.type]);
   // On a large screen the map stays visible: it outlines the region open in the panel.
@@ -278,8 +253,7 @@ function Coque({ donnees }) {
       return (
         <Ecran {...commun} className="doc" barre={
           <div className="btns">
-            <button className="btn" onClick={() => saisir(cle)}>Saisir les écoles</button>
-            <a className="btn2" href={`/fiches/${cle}.pdf`} target="_blank" rel="noopener">Ouvrir la fiche</a>
+            <a className="btn" href={`/fiches/${cle}.pdf`} target="_blank" rel="noopener">Ouvrir la fiche</a>
           </div>}>
           <FicheRegion jeu={jeu} r={jeu.regions.find((r) => r.cle === cle)} saisies={saisies} onMethode={() => pousser("methode")} />
         </Ecran>
@@ -301,7 +275,7 @@ function Coque({ donnees }) {
       </button>
       <div className="zone" ref={zoneRef}>
         <div className="zone-carte">
-          <CarteRegions jeu={jeu} classe={classeVu} valeur={COUCHES[couche].valeur} barres={barresScore} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
+          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} valeur={COUCHES[couche].valeur} barres={barresScore} apiExterne={carteApi} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
           <div className="ftop">
             <label className="search">
               <IconeApp />
@@ -317,21 +291,10 @@ function Coque({ donnees }) {
               </div>
             )}
             <div className="ctrl">
-              {traj && (
-                <div className="annees" ref={anneesRef} role="group" aria-label="Année affichée sur la carte">
-                  <button className="jouer" onClick={() => { if (joue) { setJoue(false); return; } setIAn(0); setJoue(true); }}>
-                    {joue ? <svg viewBox="0 0 12 12"><rect x="2" y="1" width="3" height="10" /><rect x="7" y="1" width="3" height="10" /></svg>
-                      : <svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z" /></svg>}{joue ? "Pause" : "Animer"}
-                  </button>
-                  {traj.annees.map((a, i) => (
-                    <button key={a} className={i === nAn - 1 ? "prevue" : undefined} aria-pressed={i === iVu}
-                      onClick={() => { setJoue(false); setIAn(i === nAn - 1 ? null : i); }}>{i === nAn - 1 ? `${a} prévu` : a}</button>
-                  ))}
-                </div>
-              )}
-              <div className="mleg"><b>{iVu === nAn - 1 || !traj ? `Prévu ${traj?.annees.at(-1) ?? "26/27"}` : `Score ${traj.annees[iVu]}`}</b>{COUCHES[couche].legende.map((l, k) => <span key={l}><i className="m" style={{ "--c": `var(--c${k + 1})` }} />{l.replace("Score de ", "")}</span>)}</div>
+              <div className="mleg"><b>{traj ? "Score" : "Score de risque"}</b>{COUCHES[couche].legende.map((l, k) => <span key={l}><i className="m" style={{ "--c": `var(--c${k + 1})` }} />{l}</span>)}</div>
             </div>
           </div>
+          {traj && <div className="lect-zone"><Lecteur traj={traj} carte={carteApi} /></div>}
         </div>
         <div className="panneau">
           <div className="tabs" ref={tabsRef}>

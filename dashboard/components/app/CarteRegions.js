@@ -19,7 +19,7 @@ function el(tag, attrs, parent) {
   return e;
 }
 
-export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir, commande, marges, barres = null }) {
+export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir, commande, marges, barres = null, apiExterne = null }) {
   const svgRef = useRef(null);
   const etat = useRef({ classe, valeur, selection, onChoisir, marges });
   etat.current.classe = classe;
@@ -37,7 +37,10 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
     const gReg = el("g", {}, svg), gSel = el("g", { "pointer-events": "none" }, svg), gLab = el("g", { "pointer-events": "none" }, svg), gBar = el("g", { "pointer-events": "none" }, svg);
     // Bar heights move from what is shown to the new values (growth from 0 at first, then year to year).
     let depart = {}, arrivee = {}, avance = 1, pousseAnim = 0;
-    const montre = (r) => { const b = arrivee[r.cle] ?? s.barres(r) ?? 0, a = depart[r.cle] ?? b; return a + (b - a) * avance; };
+    // fixe: values set from outside frame by frame (the year player); they win over the tween.
+    let fixe = null;
+    const classeDe = (r) => { if (!fixe) return s.classe(r); const v = fixe(r); return v >= 50 ? 1 : v >= 25 ? 2 : 3; };
+    const montre = (r) => { if (fixe) { const v = fixe(r); return Number.isFinite(v) ? v : 0; } const b = arrivee[r.cle] ?? s.barres(r) ?? 0, a = depart[r.cle] ?? b; return a + (b - a) * avance; };
     let vb = { x: 0, y: 0, w: L, h: Hc }, glisse = false, anim = 0;
     for (const r of R) {
       const p = el("path", { d: GEO[r.cle].d, "stroke-linejoin": "round", "data-cle": r.cle, tabindex: 0, role: "button", "aria-label": `${r.nom} : ouvrir l'aperçu` }, gReg);
@@ -55,7 +58,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       const k = vb.w / W, sel = s.selection;
       const enBarres = Boolean(s.barres);
       for (const p of gReg.children) {
-        p.style.fill = `var(--c${s.classe(R.find((r) => r.cle === p.dataset.cle))})`;
+        p.style.fill = `var(--c${classeDe(R.find((r) => r.cle === p.dataset.cle))})`;
         p.setAttribute("stroke", "var(--land)");
         p.setAttribute("stroke-width", 1.5 * k);
       }
@@ -65,12 +68,12 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       if (enBarres) {
         // One bar per region, standing on its label point; height = the value (0-100), front bars last.
         const etiquettes = [];
-        const w = (W < 600 ? 13 : 16) * k, Hm = (W < 600 ? 72 : 110) * k; // shorter on a phone, under the controls
+        const w = (W < 600 ? 12 : 16) * k, Hm = (W < 600 ? 56 : 110) * k; // shorter on a phone, under the controls
         for (const r of [...R].sort((a, b) => GEO[a.cle].ly - GEO[b.cle].ly)) {
           const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = Math.round(montre(r)), h = Math.max(2 * k, (montre(r) / 100) * Hm);
           const x0 = f.lx + dx, y0 = f.ly + dy;
           el("ellipse", { cx: x0, cy: y0, rx: w * 0.75, ry: w * 0.28, fill: "rgba(0,0,0,.25)" }, gBar);
-          el("rect", { x: x0 - w / 2, y: y0 - h, width: w, height: h, rx: w * 0.25, fill: `var(--c${s.classe(r)})`, stroke: "#fff", "stroke-width": 2 * k }, gBar);
+          el("rect", { x: x0 - w / 2, y: y0 - h, width: w, height: h, rx: w * 0.25, fill: `var(--c${classeDe(r)})`, stroke: "#fff", "stroke-width": 2 * k }, gBar);
           if (montre(r) > 1) etiquettes.push({ x: x0, y: y0 - h - 6 * k, v, cle: r.cle });
         }
         // Values are drawn last, over every bar: the selected region first, then the tallest bars;
@@ -88,15 +91,16 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
         // Region names, as on the colour map, written just under the foot of each bar. The full-height
         // bars and their values are reserved first; a name that would cross one of them, or another
         // name, is left out (biggest regions first, the selected one always).
-        const tn = 11.5 * k, mn = 2 * k, pris2 = [];
+        const tn = (W < 600 ? 12.5 : 14) * k, mn = 2 * k, pris2 = [];
         for (const r of R) {
           const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.barres(r) ?? 0, hp = Math.max(2 * k, (v / 100) * Hm);
           pris2.push([f.lx + dx - w / 2, f.ly + dy - hp - 6 * k - fs, f.lx + dx + w / 2, f.ly + dy]);
         }
         for (const r of [...ordre].sort((a, b) => (b.cle === sel) - (a.cle === sel))) {
-          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], c = s.classe(r), l = lignesNom(r.nom);
+          const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], l = lignesNom(r.nom);
           const tx = el("text", { x: f.lx + dx, y: f.ly + dy + w * 0.35 + tn, "text-anchor": "middle", "data-etiquette": r.cle }, gLab);
-          tx.style.cssText = `font-size:${tn}px;font-weight:600;fill:var(--c${c}-t);stroke:var(--c${c});stroke-width:${2.5 * k}px`;
+          // Dark text on a white halo: readable on every class colour, light or dark.
+          tx.style.cssText = `font-size:${tn}px;font-weight:700;fill:var(--fg);stroke:var(--card);stroke-width:${3.5 * k}px;stroke-linejoin:round;paint-order:stroke`;
           l.forEach((x, i) => { const ts = el("tspan", { x: f.lx + dx, dy: i ? tn * 1.12 : 0 }, tx); ts.textContent = x; });
           const bb = tx.getBBox(), q = [bb.x - mn, bb.y - mn, bb.x + bb.width + mn, bb.y + bb.height + mn];
           if (r.cle !== sel && pris2.some((p) => q[0] < p[2] && q[2] > p[0] && q[1] < p[3] && q[3] > p[1])) tx.remove(); else pris2.push(q);
@@ -209,6 +213,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
       region: (cle) => aller(cible(boites[cle], 1.6)),
       immediat: () => { vb = cible([0, 0, L, Hc]); render(); },
       // Bars move to the current values: from 0 the first time, from what is shown afterwards.
+      fixer: (fn) => { fixe = fn; if (!fn) { depart = { ...arrivee }; avance = 1; } render(); },
       pousser: () => {
         const premier = !Object.keys(arrivee).length;
         depart = Object.fromEntries(R.map((r) => [r.cle, premier ? 0 : montre(r)]));
@@ -220,6 +225,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
         avance = 0; pousseAnim = requestAnimationFrame(pas);
       },
     };
+    if (apiExterne) apiExterne.current = api.current;
     requestAnimationFrame(() => api.current?.immediat());
     return () => {
       cancelAnimationFrame(anim);
