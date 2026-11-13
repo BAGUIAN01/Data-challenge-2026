@@ -2,7 +2,7 @@
 // Content of the screens: the country summary (sheet over the map), the region preview, the tab
 // roots (Régions, Alertes, Plus) and the pushed screens (region, method, sources, pending entries).
 import { useEffect, useRef, useState } from "react";
-import { BlocEstimation, CarteActions, CarteCalendrier, CarteMatrice, CartePays, CarteScore } from "./Cartes";
+import { BlocEstimation, CarteActions, CarteCalendrier, CarteMatrice, CartePays, CarteTendance, CarteUrgences } from "./Cartes";
 import { Chevron, IconeApp } from "./icones";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { ANNEES_SAISIE, estimerEffectifs } from "@/lib/prevision-effectifs";
@@ -58,29 +58,10 @@ export function ResumePays({ jeu, saisies, nav }) {
   const nb = new Set(saisies.map((s) => s.cle)).size;
   return (
     <>
-      <CarteScore jeu={jeu} onOuvrir={nav.ouvrirRegion} />
-      <CarteActions jeu={jeu} onOuvrir={nav.ouvrirRegion} />
+      <CarteUrgences jeu={jeu} onOuvrir={nav.ouvrirRegion} onToutes={() => nav.ongletRegions("toutes")} />
+      <CarteTendance jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <CartePays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
-    </>
-  );
-}
-
-export function ApercuRegion({ jeu, r, nav }) {
-  const s = scoreGlobal(jeu, r), fd = facteurDominant(jeu, r);
-  return (
-    <>
-      <section className="card">
-        <div className="kpi"><b className="num">{s ?? `${risque(r)} %`}</b>
-          <span className="u">{s === null ? "risque de baisse" : `/ 100 · score ${niveauScore(s)}`}</span>
-          <span className="d">risque de chute {risque(r)} % · achèvement {fr(r.tap.at(-1), 1)} %</span></div>
-        {fd && (fd.def
-          ? <p className="apercu-action"><b>Agir sur : {fd.def.libelle.toLowerCase()}.</b> {fd.def.levier}</p>
-          : <p className="apercu-action"><b>Aucun facteur ne ressort.</b> Consolider ce qui marche.</p>)}
-      </section>
-      <div className="btns">
-        <button className="btn" onClick={() => nav.ouvrirRegion(r.cle)}>Voir la région</button>
-        <button className="btn2" onClick={() => nav.saisir(r.cle)}>Saisir les écoles</button>
-      </div>
+      <CarteActions jeu={jeu} onOuvrir={nav.ouvrirRegion} />
     </>
   );
 }

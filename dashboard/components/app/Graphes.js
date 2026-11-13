@@ -213,3 +213,47 @@ export function Matrice({ regions, seuils, couleur, lu, onLire, onOuvrir }) {
     </div>
   );
 }
+
+// Score year by year, ending on the forecast. Past points were each computed with their own year's
+// information only; the last one is the forecast (dashed segment, open dot, its value written).
+// Tiers 25 and 50 are faint bands; a dark ring marks a year when pupils did drop by more than 5 %.
+export function Trajectoire({ annees, score, chute, lu, onLire, label, jusqua = null }) {
+  const ref = useRef(null);
+  const W = useLargeur(ref, 300);
+  const H = 150, pr = 44, pt = 14, pb = 20, n = annees.length, last = n - 1;
+  const x = (i) => 6 + (i * (W - pr - 6)) / (n - 1), y = (v) => pt + (1 - v / 100) * (H - pt - pb);
+  const k = jusqua === null ? last : Math.min(jusqua, last);
+  const lecture = useLecture(n, x, onLire);
+  if (k < 0) return <div className="chart" ref={ref}><svg width={W} height={H} role="img" aria-label={label} /></div>;
+  const passe = score.slice(0, Math.min(k, last - 1) + 1);
+  const d = passe.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join("");
+  const prevu = k === last;
+  return (
+    <div className="chart" ref={ref}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+        <rect x="0" y={y(100)} width={W - pr} height={y(50) - y(100)} fill="var(--z3)" opacity=".45" />
+        <rect x="0" y={y(50)} width={W - pr} height={y(25) - y(50)} fill="var(--z2)" opacity=".45" />
+        <text className="ax" x={W - pr + 6} y={y(50) + 4}>50</text>
+        <text className="ax" x={W - pr + 6} y={y(25) + 4}>25</text>
+        <line className="gl" x1="0" x2={W - pr} y1={y(0)} y2={y(0)} />
+        <path className="ln" stroke="var(--fg)" d={d} />
+        {passe.map((v, i) => (chute[i] === 1
+          ? <circle key={i} cx={x(i)} cy={y(v)} r="5.5" fill="var(--card)" stroke="var(--bad-txt)" strokeWidth="2" />
+          : <circle key={i} cx={x(i)} cy={y(v)} r="2.5" fill="var(--fg)" />))}
+        {prevu && (
+          <g className="prevu">
+            <line x1={x(last - 1)} y1={y(score[last - 1])} x2={x(last)} y2={y(score[last])} stroke="var(--fg)" strokeWidth="2" strokeDasharray="4 4" />
+            <circle className="pouls" cx={x(last)} cy={y(score[last])} r="9" fill="var(--c1)" opacity=".18" />
+            <circle cx={x(last)} cy={y(score[last])} r="5" fill="var(--card)" stroke="var(--fg)" strokeWidth="2" />
+            <text className="el" x={x(last)} y={y(score[last]) - 12} textAnchor="middle" style={{ fill: "var(--fg)" }}>{score[last]}</text>
+          </g>
+        )}
+        {!prevu && <text className="el" x={x(k) + 8} y={y(score[k]) + 4} style={{ fill: "var(--fg)" }}>{score[k]}</text>}
+        <text className="ax" x={x(0)} y={H - 3} textAnchor="start">{annees[0]}</text>
+        <text className="ax" x={x(last)} y={H - 3} textAnchor="middle" style={{ fontWeight: 600, fill: "var(--fg)" }}>{annees[last]} prévu</text>
+        {lu !== null && lu !== undefined && <line className="sl" x1={x(lu)} x2={x(lu)} y1={pt} y2={H - pb} />}
+        <rect x="-8" y="0" width={W - pr + 16} height={H} fill="transparent" {...lecture} />
+      </svg>
+    </div>
+  );
+}

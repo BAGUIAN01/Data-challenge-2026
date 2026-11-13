@@ -350,16 +350,27 @@ button.row:active, a.row:active { background: var(--press); }
 .contrib .axe { position: relative; height: 10px; }
 .contrib .axe::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--edge); }
 .contrib .axe i { position: absolute; top: 0; height: 100%; border-radius: 3px; }
-/* Ranked score bars: the whole row is the touch target (44 px). */
-.rang { list-style: none; margin: 12px 0 4px; padding: 0; display: grid; }
-.rang button { width: 100%; min-height: 36px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 2em; align-items: center; gap: 10px; padding: 4px 0; background: none; border: 0; font: inherit; color: inherit; text-align: left; }
-.rang-nom { font-size: 13.5px; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rang-piste { position: relative; height: 10px; border-radius: 5px; background: var(--fill); }
-.rang-piste::before, .rang-piste::after { content: ""; position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--edge); }
-.rang-piste::before { left: 25%; } .rang-piste::after { left: 50%; }
-.rang-piste i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; z-index: 1; }
-.rang b { font-size: 14px; font-weight: 600; text-align: right; }
-@media (hover: hover) { .rang button:hover .rang-nom { color: var(--fg); text-decoration: underline; } }
+/* Where to act now: big count, then the priority-1 regions as rows, the score on the right. */
+.urg-titre { display: flex; align-items: baseline; gap: 10px; margin: 6px 0 4px; }
+.urg-titre b { font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.urg-titre span { font-size: 16px; font-weight: 600; }
+.urg-liste { list-style: none; margin: 8px 0 0; padding: 0; }
+.urg-liste li + li { border-top: 1px solid var(--line); }
+.urg-liste button { width: 100%; min-height: 56px; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 8px 0; background: none; border: 0; font: inherit; color: inherit; text-align: left; }
+.urg-rang { font-size: 13px; color: var(--fg-3); }
+.urg-t { display: grid; gap: 1px; min-width: 0; }
+.urg-t b { font-size: 15.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.urg-t span { font-size: 13px; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.urg-s { min-width: 44px; height: 32px; padding: 0 8px; display: grid; place-items: center; border-radius: 9px; background: var(--c); color: #fff; font-weight: 700; font-size: 16px; }
+/* What changes: one line per region, old -> new score, and the change. */
+.tend-tete { margin: 12px 0 2px; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--fg-3); }
+.tend-l { width: 100%; min-height: 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto 4.2em; align-items: center; gap: 12px; padding: 4px 0; background: none; border: 0; border-bottom: 1px solid var(--line); font: inherit; color: inherit; text-align: left; }
+.tend-l:last-child { border-bottom: 0; }
+.tend-n { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tend-v { font-size: 13.5px; color: var(--fg-3); } .tend-v b { color: var(--fg); font-weight: 600; }
+.tend-d { justify-self: end; padding: 3px 8px; border-radius: 8px; font-size: 13px; font-weight: 700; }
+.tend-d.hausse { color: var(--bad-txt); background: color-mix(in srgb, var(--bad-txt) 12%, transparent); }
+.tend-d.baisse { color: var(--ok-txt); background: color-mix(in srgb, var(--ok-txt) 12%, transparent); }
 /* What to act on: the factor, then its regions as chips. */
 .agir { display: grid; margin-top: 4px; }
 .agir-l { padding: 10px 0; display: grid; gap: 6px; }
@@ -367,13 +378,15 @@ button.row:active, a.row:active { background: var(--press); }
 .agir-l > b { font-size: 14.5px; font-weight: 600; }
 .puces { display: flex; flex-wrap: wrap; gap: 6px; }
 .puce { min-height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); font: inherit; font-size: 13px; color: var(--fg); }
-/* The country in two figures. */
-.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 6px; }
-.duo > div { display: grid; gap: 2px; }
-.duo b { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
-.duo span { font-size: 13px; color: var(--fg-2); }
-.duo em { font-style: normal; font-size: 12.5px; color: var(--fg-3); }
-.duo em.down { color: var(--bad-txt); }
+/* The country in three figures: the first one across the card. */
+.trio { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; margin: 10px 0 6px; }
+.trio > div { display: grid; gap: 2px; align-content: start; }
+.trio-fort { grid-column: 1 / -1; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.trio b { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+.trio-fort b { font-size: 30px; }
+.trio span { font-size: 13px; color: var(--fg-2); }
+.trio em { font-style: normal; font-size: 12.5px; color: var(--fg-3); }
+.trio em.down { color: var(--bad-txt); }
 .apercu-action { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--fg-2); }
 .apercu-action b { font-weight: 600; color: var(--fg); }
 /* A region tapped on the map is outlined by the selection; the focus box would draw a rectangle. */
@@ -397,3 +410,10 @@ button.row:active, a.row:active { background: var(--press); }
 .frise { width: 100%; }
 .rejouer { margin-top: 12px; height: 36px; padding: 0 14px; border-radius: 18px; background: var(--fill); font-size: 13.5px; font-weight: 600; color: var(--fg-2); }
 .mleg b { font-weight: 600; color: var(--fg); }
+/* The forecast point breathes once it is reached, then rests (no motion when reduced). */
+.chart .pouls { transform-box: fill-box; transform-origin: center; animation: pouls 1.6s ease-out 2; }
+@keyframes pouls { from { transform: scale(.4); opacity: .5; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .chart .pouls { animation: none; } }
+/* Sub-heading inside a section (score trajectory): same layout as the section title, smaller. */
+.sec > .sous-titre { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 22px 0 0; font-size: 14px; font-weight: 600; }
+.sec > .sous-titre span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12.5px; font-weight: 400; color: var(--fg-3); }

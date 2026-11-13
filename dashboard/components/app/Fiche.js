@@ -3,7 +3,7 @@
 // first (risk of a drop in 2026/27, completion forecast 2025/26, expected pupils), then the situation
 // placed among the 13 regions, then what drives the risk, the findings and the levers.
 import { useEffect, useState } from "react";
-import { Colonnes, Courbe, Fourchette } from "./Graphes";
+import { Colonnes, Courbe, Fourchette, Trajectoire } from "./Graphes";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
 import { alerteSeptembre, centaine, EXPOSITION, facteurDominant, niveau, niveauScore, NOM_ACTION, PRIORITES, risque, scoreGlobal, signe } from "@/lib/regles";
@@ -51,8 +51,17 @@ function verdict(jeu, r) {
 }
 
 // 1. The global score: one number, its two halves, and where the region stands among the 13.
-function BlocScore({ jeu, r }) {
+function BlocScore({ jeu, r, annee, anime, onRejouer }) {
   const R = jeu.regions, s = scoreGlobal(jeu, r), w = jeu.score_global.poids_risque;
+  const tr = jeu.score_global.trajectoire, t = tr?.par_region?.[r.cle];
+  const [lu, setLu] = useState(null);
+  const iA = tr ? tr.annees.indexOf(annee) : -1;
+  // Before the first replayed year the curve is empty; after the last known year, it holds on the forecast.
+  const k = !anime ? null : iA >= 0 ? iA : annee < (tr?.annees[0] ?? "") ? -1 : null;
+  const iL = lu ?? (anime && iA >= 0 ? iA : null);
+  const lecture = !t ? "" : iL === null ? `${tr.annees.at(-1)} prévu : ${t.score.at(-1)}`
+    : iL === tr.annees.length - 1 ? `${tr.annees[iL]} prévu : ${t.score[iL]}`
+    : `${tr.annees[iL]} : ${t.score[iL]}${t.chute[iL] === 1 ? " · chute" : ""}`;
   const brutal = 100 * w * (risque(r) / 100), lent = 100 * (1 - w) * (1 - r.tap.at(-1) / 100);
   return (
     <section className="sec">
@@ -65,6 +74,17 @@ function BlocScore({ jeu, r }) {
         <span><i className="bx" style={{ "--c": "var(--fg)" }} />Chute des effectifs (violence) : {fr(brutal, 0)}</span>
         <span><i className="bx" style={{ "--c": "var(--z3)" }} />Enfants qui n'achèvent pas : {fr(lent, 0)}</span>
       </div>
+      {t && (
+        <>
+          <h3 className="sous-titre">Année par année<span className="num">{anime && iA < 0 ? `Année ${annee}…` : lecture}</span></h3>
+          <Trajectoire annees={tr.annees} score={t.score} chute={t.chute} jusqua={k} lu={anime ? null : lu} onLire={anime ? undefined : setLu}
+            label={`Score de ${r.nom} de ${tr.annees[0]} à ${tr.annees.at(-1)}, la dernière année est la prévision`} />
+          <div className="lg"><span><i className="bx" style={{ "--c": "var(--bad-txt)" }} />Chute des effectifs observée</span>
+            <span>Pointillé : prévision {tr.annees.at(-1)}</span></div>
+          <p className="foot">Chaque point est calculé avec ce qu'on savait cette année-là, sans les années suivantes.</p>
+        </>
+      )}
+      <button className="rejouer" onClick={onRejouer}>{anime ? `Année ${annee}…` : "Rejouer les années"}</button>
     </section>
   );
 }
@@ -104,17 +124,19 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
   const [luTap, setLuTap] = useState(null);
   const [luInc, setLuInc] = useState(null);
   // Opening animation, year by year (2015/16 onwards): both charts draw themselves; « Rejouer » restarts.
-  const nV = r.incidents.length - 1, [pas, setPas] = useState(0), [tour, setTour] = useState(0);
+  // One timeline for every chart: the violence years, then the forecast year.
+  const L = jeu.annees_violence.concat(jeu.score_global?.trajectoire ? [jeu.score_global.trajectoire.annees.at(-1)] : []);
+  const nV = L.length - 1, [pas, setPas] = useState(0), [tour, setTour] = useState(0);
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) { setPas(nV); return undefined; }
     setPas(0);
-    const t = setInterval(() => setPas((p) => { if (p >= nV) { clearInterval(t); return p; } return p + 1; }), 280);
+    const t = setInterval(() => setPas((p) => { if (p >= nV) { clearInterval(t); return p; } return p + 1; }), 380);
     return () => clearInterval(t);
   }, [tour, nV]);
   const anime = pas < nV;
   const pv = r.prevision_2025_26, prevue = !anime && luTap === n + 1, iT = anime ? Math.min(pas, n) : luTap ?? n;
   const lectureTap = prevue ? `2025/26 prévu · ${fr(pv.basse, 1)} à ${pct(pv.haute)}` : `${jeu.annees[iT]} · ${pct(r.tap[iT])} · pays ${pct(nat.tap[iT])}`;
-  const iI = anime ? pas : luInc ?? r.incidents.length - 1;
+  const pI = Math.min(pas, r.incidents.length - 1), iI = anime ? pI : luInc ?? r.incidents.length - 1;
   const saisie = saisies.filter((s) => s.cle === r.cle).sort((a, b) => String(b.saisi_le).localeCompare(String(a.saisi_le)))[0];
   const est = saisie && estimerEffectifs({ region: r, nowcast: jeu.nowcast, annee: saisie.annee, ecolesOuvertes: saisie.ecoles_ouvertes });
   const leviers = r.leviers.concat(r.leviers_facteurs).slice(0, 3);
@@ -122,7 +144,7 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
     <div className="fiche">
       <p className="sub"><i className="m" style={{ "--c": `var(--c${r.priorite})` }} />{PRIORITES[r.priorite].libelle} · {PRIORITES[r.priorite].sous} · ancienne {r.ancienne}</p>
 
-      {scoreGlobal(jeu, r) !== null && <BlocScore jeu={jeu} r={r} />}
+      {scoreGlobal(jeu, r) !== null && <BlocScore jeu={jeu} r={r} annee={L[pas]} anime={anime} onRejouer={() => setTour((x) => x + 1)} />}
       {facteurDominant(jeu, r) && <BlocAction jeu={jeu} r={r} />}
 
       <section className="sec">
@@ -135,8 +157,7 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
 
       <section className="sec">
         <h2>Violence<span className="num">{jeu.annees_violence[iI]} · {fr(r.incidents[iI])} incidents</span></h2>
-        <Colonnes valeurs={r.incidents} annees={jeu.annees_violence} lu={anime ? null : luInc} onLire={anime ? undefined : setLuInc} jusqua={anime ? pas : null} label={`Incidents de sécurité par année scolaire, ${r.nom}`} />
-        <button className="rejouer" onClick={() => setTour((x) => x + 1)}>{anime ? `Année ${jeu.annees_violence[pas]}…` : "Rejouer les années"}</button>
+        <Colonnes valeurs={r.incidents} annees={jeu.annees_violence} lu={anime ? null : luInc} onLire={anime ? undefined : setLuInc} jusqua={anime ? pI : null} label={`Incidents de sécurité par année scolaire, ${r.nom}`} />
       </section>
 
       {est && (

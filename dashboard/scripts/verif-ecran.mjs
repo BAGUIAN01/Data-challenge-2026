@@ -57,7 +57,7 @@ const debordement = () => page.evaluate(() => {
 });
 try {
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.getByText("Score global de décrochage").first().waitFor();
+  await page.getByText("Rentrée 2026/27").first().waitFor();
   await page.waitForTimeout(800);
   await saboter();
   await page.waitForTimeout(300);

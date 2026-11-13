@@ -90,7 +90,21 @@ def score_global():
                        "baisses_score_pct": round(float(rj.loc["Score global", "baisses_prises_%"])),
                        "baisses_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "baisses_prises_%"])),
                        "perdus_score_pct": round(float(rj.loc["Score global", "eleves_perdus_pris_%"])),
-                       "perdus_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "eleves_perdus_pris_%"]))}}
+                       "perdus_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "eleves_perdus_pris_%"]))},
+            "trajectoire": trajectoire({names[n]: int(v) for n, v in s.items()})}
+
+
+def trajectoire(final):
+    """Score year by year, each one computed with its own year's information only, then the 2026/27
+    forecast. chute: drop of more than 5 % observed that year (null when not known yet)."""
+    t = pd.read_csv("analyse/P18_score_global_trajectoire.csv")
+    annees = sorted(t.annee_cible.unique()) + ["26/27"]
+    par = {}
+    for cle, g in t.groupby("cle"):
+        g = g.set_index("annee_cible").reindex(annees[:-1])
+        par[cle] = {"score": [int(v) for v in g.score] + [final[cle]],
+                    "chute": [None if pd.isna(v) else int(v) for v in g.chute_observee] + [None]}
+    return {"annees": annees, "par_region": par}
 
 
 def facteur_dominant():

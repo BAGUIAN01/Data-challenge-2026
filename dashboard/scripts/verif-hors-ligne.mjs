@@ -54,7 +54,7 @@ try {
     await page.evaluate(() => navigator.serviceWorker.ready);
     await page.reload({ waitUntil: "networkidle" });
   }
-  await page.getByText("Score global de décrochage").first().waitFor();
+  await page.getByText("Rentrée 2026/27").first().waitFor();
   const jeuLocal = await page.evaluate(() => new Promise((res) => {
     const r = indexedDB.open("tableau-de-bord-decrochage");
     r.onsuccess = () => { const q = r.result.transaction("jeu").objectStore("jeu").get("courant"); q.onsuccess = () => res(q.result?.source ?? null); };

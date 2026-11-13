@@ -89,6 +89,8 @@ Pour comparer à égalité, on retient chaque année autant de régions que la m
 
 **Ce qu'on en retient : le score résume, il ne cible pas mieux.** Il est affiché comme résumé lisible. Pour cibler, la règle reste la priorité de la matrice : sur le passé, elle repère plus de fortes baisses et plus d'élèves perdus.
 
+**Le score année par année** (`analyse/P18_score_global_trajectoire.csv`) : pour chaque région, le score des rentrées 2020/21 à 2025/26, chacun calculé avec un modèle appris seulement sur les années d'avant, puis la prévision 2026/27. L'application l'anime sur la page de chaque région et marque les années où les effectifs ont vraiment chuté de plus de 5 %. L'écart entre 2025/26 et 2026/27 donne « ce qui change » sur l'accueil (Yaadga +13, Koulsé +8, Guiriko +6).
+
 Changer le poids du risque entre 0,3 et 0,7 fait varier l'AUC de 0,77 à 0,81. Ce test est donné pour information : il n'a pas servi à choisir le poids.
 
 ## Le facteur dominant : sur quoi agir

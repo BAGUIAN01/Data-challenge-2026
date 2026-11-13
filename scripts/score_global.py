@@ -75,6 +75,34 @@ def rejouer(p):
     print(pd.DataFrame(sens).round(3).to_string(index=False))
 
 
+def trajectoire(p):
+    """Score of each region year by year, each one computed with the information of its own year only
+    (model trained on the earlier years), labelled by the school year it forecasts. The last point,
+    2026/27, is the official forecast (score_2026). Observed: was there a drop of more than 5 % that
+    year (1/0, empty when not known yet)."""
+    nat = pd.read_csv("analyse/panel_region_annee.csv").query("region == 'NATIONAL'").set_index("annee").TAP_T
+    d = p.copy()
+    d["y_drop"] = np.where(d.y_eleves.isna(), np.nan, (d.y_eleves < np.log(0.95)).astype(float))
+    lab = d.dropna(subset=["l_inc", "d_l_inc", "y_eleves"])
+    years = sorted(d.annee.unique())
+    out = []
+    for ty in years:
+        tr = lab[lab.annee < ty]
+        te = d[(d.annee == ty)].dropna(subset=["l_inc", "d_l_inc", "TAP_T"])
+        if len(tr) < 30 or tr.y_drop.nunique() < 2 or te.empty:
+            continue
+        mdl = make_pipeline(StandardScaler(), LogisticRegression(C=1.0)).fit(tr[["l_inc", "d_l_inc"]], tr.y_drop)
+        prob = mdl.predict_proba(te[["l_inc", "d_l_inc"]])[:, 1]
+        y0 = int(ty[:4]) + 1
+        cible = SHORT[f"{y0}-{y0 + 1}"]
+        for (_, row), pr in zip(te.iterrows(), prob):
+            out.append({"cle": row.cle, "annee_cible": cible, "probabilite": round(pr, 3),
+                        "score": round(score(pr, row.TAP_T)), "chute_observee": row.y_drop})
+    t = pd.DataFrame(out)
+    print(f"\nTrajectoire : {t.annee_cible.nunique()} années rejouées ({', '.join(sorted(t.annee_cible.unique()))}), puis 2026/27.")
+    t.to_csv("analyse/P18_score_global_trajectoire.csv", index=False)
+
+
 def score_2026():
     m = pd.read_csv("analyse/P13_matrice_priorite_2026_27.csv").set_index("region_2025")
     cal = pd.read_csv("analyse/P16_alertes_calendrier.csv").set_index("region")
@@ -89,8 +117,10 @@ def score_2026():
 
 def main():
     pd.set_option("display.width", 200)
-    rejouer(build())
+    p = build()
+    rejouer(p)
     score_2026()
+    trajectoire(p)
 
 
 if __name__ == "__main__":

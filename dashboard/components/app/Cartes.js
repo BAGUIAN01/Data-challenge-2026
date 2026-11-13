@@ -6,36 +6,63 @@ import { Fourchette, Matrice } from "./Graphes";
 import { Chevron } from "./icones";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { centaine, couches, facteurDominant, risque, scoreGlobal, signe } from "@/lib/regles";
+import { centaine, couches, facteurDominant, NOM_ACTION, risque, scoreGlobal, signe, trierRegions } from "@/lib/regles";
 
 const pctFr = (v, d = 1) => `${fr(v, d)} %`;
 
-// The global score of the 13 regions, ranked. It sums up both forms of dropout; the priority
-// stays the rule for targeting (it did better on the past, shown on the Régions tab).
-export function CarteScore({ jeu, onOuvrir }) {
-  if (!jeu.score_global) return null;
-  const C = couches(jeu).score, n = jeu.regions.filter((r) => (scoreGlobal(jeu, r) ?? 0) >= 50).length;
-  const rangs = [...jeu.regions].sort((a, b) => (scoreGlobal(jeu, b) ?? 0) - (scoreGlobal(jeu, a) ?? 0));
+// The headline of the summary: the regions to act on now (priority 1), each with its score and what
+// to act on. The other regions are one tap away, on the Régions tab.
+export function CarteUrgences({ jeu, onOuvrir, onToutes }) {
+  const p1 = trierRegions(jeu.regions.filter((r) => r.priorite === 1), jeu);
+  const autres = jeu.regions.length - p1.length;
   return (
-    <section className="card" aria-label="Score global de décrochage">
-      <div className="ch"><b>Score global de décrochage</b><span>sur 100</span></div>
-      <div className="kpi"><b className="num">{n}</b><span className="u">régions sur 13 à 50 ou plus</span></div>
-      {/* Ranked bars: one row per region, the whole row opens it. Ticks at 25 and 50 mark the tiers. */}
-      <ol className="rang" aria-label="Les 13 régions, du score le plus haut au plus bas">
-        {rangs.map((r) => {
-          const v = scoreGlobal(jeu, r) ?? 0;
+    <section className="card urg" aria-label="Où agir maintenant">
+      <div className="ch"><b>Rentrée 2026/27</b><span>score sur 100</span></div>
+      <div className="urg-titre"><b className="num">{p1.length}</b><span>régions où agir maintenant</span></div>
+      <ol className="urg-liste">
+        {p1.map((r, i) => {
+          const fd = facteurDominant(jeu, r), s = scoreGlobal(jeu, r);
           return (
             <li key={r.cle}>
-              <button onClick={() => onOuvrir(r.cle)} aria-label={`${r.nom}, score ${v} sur 100`}>
-                <span className="rang-nom">{r.nom}</span>
-                <span className="rang-piste"><i style={{ width: `${v}%`, background: `var(--c${C.classe(r)})` }} /></span>
-                <b className="num">{v}</b>
+              <button onClick={() => onOuvrir(r.cle)}>
+                <span className="urg-rang num">{i + 1}</span>
+                <span className="urg-t"><b>{r.nom}</b><span>{fd?.dominant ? `agir sur ${NOM_ACTION[fd.dominant]}` : "aucun facteur ne ressort"}</span></span>
+                <span className="urg-s num" style={{ "--c": `var(--c${s >= 50 ? 1 : s >= 25 ? 2 : 3})` }}>{s ?? `${risque(r)} %`}</span>
+                <Chevron />
               </button>
             </li>
           );
         })}
       </ol>
-      <p className="foot">Moitié risque de chute des effectifs, moitié part d'enfants qui n'achèvent pas le primaire.</p>
+      <button className="inrow" onClick={onToutes}>Les {autres} autres régions<b /><Chevron /></button>
+    </section>
+  );
+}
+
+// What moves between this year and the forecast: the biggest rises first (they are the news), then
+// the biggest fall. Both scores come from the same model, each with its own year's information.
+export function CarteTendance({ jeu, onOuvrir }) {
+  const tr = jeu.score_global?.trajectoire;
+  if (!tr) return null;
+  const a = tr.annees.at(-2), b = tr.annees.at(-1);
+  const mv = jeu.regions.map((r) => { const s = tr.par_region[r.cle]?.score; return s ? { r, de: s.at(-2), a: s.at(-1), d: s.at(-1) - s.at(-2) } : null; }).filter(Boolean);
+  const hausses = mv.filter((m) => m.d >= 3).sort((x, y) => y.d - x.d).slice(0, 3);
+  const baisse = mv.filter((m) => m.d <= -3).sort((x, y) => x.d - y.d)[0];
+  if (!hausses.length && !baisse) return null;
+  const Ligne = ({ m }) => (
+    <button className="tend-l" onClick={() => onOuvrir(m.r.cle)}>
+      <span className="tend-n">{m.r.nom}</span>
+      <span className="tend-v num">{m.de} → <b>{m.a}</b></span>
+      <span className={`tend-d num ${m.d > 0 ? "hausse" : "baisse"}`}>{m.d > 0 ? "▲" : "▼"} {Math.abs(m.d)}</span>
+    </button>
+  );
+  return (
+    <section className="card" aria-label="Ce qui change">
+      <div className="ch"><b>Ce qui change</b><span>score {a} → {b}</span></div>
+      {hausses.length > 0 && <p className="tend-tete">Le risque monte</p>}
+      {hausses.map((m) => <Ligne key={m.r.cle} m={m} />)}
+      {baisse && <p className="tend-tete">Le risque recule le plus</p>}
+      {baisse && <Ligne m={baisse} />}
     </section>
   );
 }
@@ -67,15 +94,18 @@ export function CarteActions({ jeu, onOuvrir }) {
   );
 }
 
-// The country in two figures, no chart: the charts live on each region's page.
+// The country in three figures, the children who do not reach CM2 first: no chart, the charts live
+// on each region's page.
 export function CartePays({ jeu, nbSaisies, onSaisies }) {
   const e = jeu.national.eleves, tap = jeu.national.tap, n = e.length - 1, d = (e[n] / e[n - 1] - 1) * 100;
+  const hors = jeu.regions.reduce((s, r) => s + (r.enfants_hors_cm2 ?? 0), 0);
   return (
     <section className="card" aria-label="Le pays">
       <div className="ch"><b>Le pays</b><span>{jeu.annees[n]}</span></div>
-      <div className="duo">
-        <div><b className="num">{fr(e[n])}</b><span>élèves au primaire</span><em className="num">{signe(d)}{fr(Math.abs(d), 1)} % sur un an</em></div>
+      <div className="trio">
+        <div className="trio-fort"><b className="num">≈ {fr(centaine(hors))}</b><span>enfants n'atteignent pas le CM2</span></div>
         <div><b className="num">{pctFr(tap[n])}</b><span>achèvent le primaire</span><em className="num down">{signe(tap[n] - tap[0])}{fr(Math.abs(tap[n] - tap[0]), 1)} pts depuis {jeu.annees[0]}</em></div>
+        <div><b className="num">{fr(e[n])}</b><span>élèves au primaire</span><em className="num">{signe(d)}{fr(Math.abs(d), 1)} % sur un an</em></div>
       </div>
       <button className="inrow" onClick={onSaisies}>Écoles ouvertes saisies<b>{nbSaisies} région{nbSaisies > 1 ? "s" : ""} sur 13</b><Chevron /></button>
     </section>

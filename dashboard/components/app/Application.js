@@ -10,7 +10,7 @@ import Ecran from "./Ecran";
 import Feuille, { hauteurCran } from "./Feuille";
 import FicheRegion from "./Fiche";
 import { IcAlertes, IcCarte, IconeApp, IcPlus, IcRegions } from "./icones";
-import { ApercuRegion, CorpsAttente, CorpsMethode, CorpsSources, FormSaisie, ResumePays, VueAlertes, VuePlus, VueRegions } from "./Vues";
+import { CorpsAttente, CorpsMethode, CorpsSources, FormSaisie, ResumePays, VueAlertes, VuePlus, VueRegions } from "./Vues";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { couches, PRIORITES, risque, scoreGlobal } from "@/lib/regles";
 
@@ -54,9 +54,7 @@ function Coque({ donnees }) {
   const [piles, setPiles] = useState({ carte: [], regions: [], alertes: [], plus: [] });
   const [modal, setModal] = useState(null);
   const [snack, setSnack] = useState(null);
-  const [vueBarres, setVueBarres] = useState(false);
   const [couche] = useState(() => (jeu.score_global ? "score" : "risque"));
-  const [apercu, setApercu] = useState(null);
   const [cran, setCran] = useState("bas");
   const [filtre, setFiltre] = useState("toutes");
   const [commande, setCommande] = useState({ n: 0 });
@@ -65,7 +63,7 @@ function Coque({ donnees }) {
   const [installer, setInstaller] = useState(null);
   const [envoye, setEnvoye] = useState(false);
   const etat = useRef({});
-  etat.current = { ...etat.current, onglet, modal, cran, vueBarres };
+  etat.current = { ...etat.current, onglet, modal, cran };
   if (!etat.current.piles) etat.current.piles = piles;
   const ignorer = useRef(0), compteur = useRef(0), tabsRef = useRef(null), barreRef = useRef(null), zoneRef = useRef(null), envoiAvant = useRef(false);
   const COUCHES = useMemo(() => couches(jeu), [jeu]);
@@ -134,13 +132,19 @@ function Coque({ donnees }) {
     setSnack((s) => s && { ...s, visible: false });
   }, [viderPile]);
   const ouvrirRegion = useCallback((cle) => pousser("region", { cle }), [pousser]);
+  // A region tapped on the map or found by search opens its page straight away. When a screen is
+  // already open over the map (large screen), it is replaced, so back still leads to the map.
   const apercevoir = useCallback((cle) => {
     if (etat.current.onglet !== "carte") { etat.current.onglet = "carte"; setOnglet("carte"); }
-    viderPile("carte");
-    setApercu(cle); setCran("mi"); setQ("");
+    setQ("");
     setCommande((c) => ({ n: c.n + 1, type: "region", cle }));
-  }, [viderPile]);
-  const fermerApercu = useCallback(() => { setApercu(null); setCran("bas"); setCommande((c) => ({ n: c.n + 1, type: "pays" })); }, []);
+    const top = [...etat.current.piles.carte].reverse().find((e) => !e.sortant);
+    if (!top) { pousser("region", { cle }); return; }
+    if (top.type === "region" && top.params.cle === cle) return;
+    const id = ++compteur.current;
+    ecrirePiles((p) => ({ ...p, carte: p.carte.map((e) => (e.id === top.id ? { id, type: "region", params: { cle } } : e)) }));
+    history.replaceState({ ecran: id }, "", `#region/${cle}`);
+  }, [pousser, ecrirePiles]);
   const saisir = useCallback((cle) => ouvrirModal({ type: "saisie", cle }), [ouvrirModal]);
   const enregistrer = useCallback(async (s) => {
     history.back();
@@ -160,7 +164,7 @@ function Coque({ donnees }) {
   const marges = useCallback(() => {
     // The floating controls grow when the year timeline is shown: measured, not assumed.
     const haut = (document.querySelector(".ftop")?.getBoundingClientRect().bottom ?? 140) - (document.querySelector(".zone-carte")?.getBoundingClientRect().top ?? 0) + 8
-      + (etat.current.vueBarres ? 90 : 0); // room for the tallest bar and its value
+      + 90; // room for the tallest bar and its value
     if (matchMedia("(min-width: 900px)").matches) return { haut, bas: 16 };
     const H = tabsRef.current?.clientHeight ?? 600, barre = barreRef.current?.offsetHeight ?? 54;
     return { haut, bas: hauteurCran(etat.current.cran, H) + barre + 8 };
@@ -221,17 +225,15 @@ function Coque({ donnees }) {
   }, [envoi, enAttente]);
 
   const bandeau = etatBandeau(donnees, envoye);
-  const basculerBarres = (v) => {
-    etat.current.vueBarres = v; setVueBarres(v);
-    if (!apercu) setCommande((x) => ({ n: x.n + 1, type: "pays" }));
-  };
   const barresScore = useCallback((r) => scoreGlobal(jeu, r) ?? risque(r), [jeu]);
 
   const titreDe = (e) => (e.type === "region" ? jeu.regions.find((r) => r.cle === e.params.cle)?.nom ?? "Région" : TITRES_ECRANS[e.type]);
-  const regionApercu = apercu && jeu.regions.find((r) => r.cle === apercu);
   // On a large screen the map stays visible: it outlines the region open in the panel.
   const ecranRegion = [...piles[onglet]].reverse().find((e) => !e.sortant && e.type === "region");
-  const selection = apercu ?? ecranRegion?.params.cle ?? null;
+  const selection = ecranRegion?.params.cle ?? null;
+  // Back on the bare map: frame the whole country again.
+  const carteNue = !piles.carte.some((e) => !e.sortant);
+  useEffect(() => { if (carteNue) setCommande((c) => (c.n ? { n: c.n + 1, type: "pays" } : c)); }, [carteNue]);
   const resultats = q.trim()
     ? jeu.regions.filter((r) => [r.nom, r.ancienne].some((s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
       .includes(q.trim().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()))).slice(0, 5)
@@ -270,7 +272,7 @@ function Coque({ donnees }) {
       </button>
       <div className="zone" ref={zoneRef}>
         <div className="zone-carte">
-          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} valeur={COUCHES[couche].valeur} barres={vueBarres ? barresScore : null} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
+          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} valeur={COUCHES[couche].valeur} barres={barresScore} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
           <div className="ftop">
             <label className="search">
               <IconeApp />
@@ -286,10 +288,6 @@ function Coque({ donnees }) {
               </div>
             )}
             <div className="ctrl">
-              <div className="seg" role="group" aria-label="Vue de la carte">
-                <button aria-pressed={!vueBarres} onClick={() => basculerBarres(false)}>Couleurs</button>
-                <button aria-pressed={vueBarres} onClick={() => basculerBarres(true)}>Barres</button>
-              </div>
               <div className="mleg"><b>Score de risque</b>{COUCHES[couche].legende.map((l, k) => <span key={l}><i className="m" style={{ "--c": `var(--c${k + 1})` }} />{l.replace("Score de ", "")}</span>)}</div>
             </div>
           </div>
@@ -298,15 +296,9 @@ function Coque({ donnees }) {
           <div className="tabs" ref={tabsRef}>
             <section className="tab" id="t-carte" hidden={onglet !== "carte"}>
               <div className={`screen racine-carte${couvertRacine("carte") ? " covered" : ""}`} data-ecran="carte">
-                <Feuille cran={cran} setCran={setCran} defilement={apercu}
-                  tete={regionApercu ? (
-                    <>
-                      <div className="tt"><b>{regionApercu.nom}</b>
-                        <span><i className="m" style={{ "--c": `var(--c${regionApercu.priorite})` }} />{PRIORITES[regionApercu.priorite].libelle}, {PRIORITES[regionApercu.priorite].sous} · ancienne {regionApercu.ancienne}</span></div>
-                      <button className="sh-x" onClick={fermerApercu}>Fermer</button>
-                    </>
-                  ) : <div className="tt"><b>Burkina Faso</b><span>13 régions · {sousTitre}</span></div>}>
-                  {regionApercu ? <ApercuRegion jeu={jeu} r={regionApercu} nav={nav} /> : <ResumePays jeu={jeu} saisies={saisies} nav={nav} />}
+                <Feuille cran={cran} setCran={setCran}
+                  tete={<div className="tt"><b>Burkina Faso</b><span>13 régions · {sousTitre}</span></div>}>
+                  <ResumePays jeu={jeu} saisies={saisies} nav={nav} />
                 </Feuille>
               </div>
               {piles.carte.map((e, i, p) => ecranPousse(e, i, p, "carte"))}
