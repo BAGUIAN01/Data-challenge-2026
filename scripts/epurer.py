@@ -5,7 +5,7 @@ import sys
 import tokenize
 
 
-def epurer(src, garder_entete=True):
+def strip_comments(src, keep_header=True):
     tree = ast.parse(src)
     lines = src.splitlines()
     drop, keep_head = set(), None
@@ -15,7 +15,7 @@ def epurer(src, garder_entete=True):
         if body and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant) \
                 and isinstance(body[0].value.value, str):
             d = body[0]
-            if n is tree and garder_entete:
+            if n is tree and keep_header:
                 para = " ".join(d.value.value.strip().split("\n\n")[0].split())
                 keep_head = para.split(". ")[0].rstrip(".")
                 keep_head += "" if keep_head.endswith(("?", "!")) else "."
@@ -47,4 +47,4 @@ def epurer(src, garder_entete=True):
 if __name__ == "__main__":
     for f in sys.argv[1:]:
         s = open(f, encoding="utf-8").read()
-        open(f, "w", encoding="utf-8").write(epurer(s))
+        open(f, "w", encoding="utf-8").write(strip_comments(s))

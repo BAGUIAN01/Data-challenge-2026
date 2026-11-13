@@ -46,15 +46,15 @@ def features(path_pv, path_civ):
     name_col = next(c for c in g.columns if g[c].astype(str).map(solution_prevision.key).isin(f.cle.unique()).sum() >= 13)
     g["cle"] = g[name_col].map(solution_prevision.key)
     g = g.set_index("cle")
-    nb = {k: [j for j in g.index if j != k and g.geometry[k].buffer(0.01).intersects(g.geometry[j])] for k in g.index}
+    notebook = {k: [j for j in g.index if j != k and g.geometry[k].buffer(0.01).intersects(g.geometry[j])] for k in g.index}
     wide = f.pivot(index="start", columns="cle", values="l_incidents")
-    lag = pd.DataFrame({k: wide[v].mean(axis=1) for k, v in nb.items()})
+    lag = pd.DataFrame({k: wide[v].mean(axis=1) for k, v in notebook.items()})
     lag = lag.stack().rename("l_voisins").reset_index().rename(columns={"level_1": "cle"})
     f = f.merge(lag, on=["start", "cle"], how="left").sort_values(["cle", "start"])
     gg = f.groupby("cle")
     for col in ["extent", "l_civils", "l_voisins"]:
         f["d_" + col] = f[col] - gg[col].shift()
-    return f.drop(columns=["start"]), nb
+    return f.drop(columns=["start"]), notebook
 
 
 SETS = {
@@ -70,9 +70,9 @@ SETS = {
 def main():
     pd.set_option("display.width", 220)
     p = solution_prevision.build()
-    f, nb = features("data/raw/externe/hdx_acled/acled_political_violence_month_year.xlsx",
+    f, notebook = features("data/raw/externe/hdx_acled/acled_political_violence_month_year.xlsx",
                      "data/raw/externe/hdx_acled/acled_civilian_targeting_month_year.xlsx")
-    print("Voisins :", {k: len(v) for k, v in nb.items()})
+    print("Voisins :", {k: len(v) for k, v in notebook.items()})
     d = p.merge(f.drop(columns=["incidents"]), on=["cle", "annee"], how="left")
     d["y_drop"] = (d.y_eleves < np.log(0.95)).astype(float)
     d.loc[d.y_eleves.isna(), "y_drop"] = np.nan

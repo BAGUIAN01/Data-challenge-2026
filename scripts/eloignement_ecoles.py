@@ -25,8 +25,8 @@ def block_sum(src, factor):
                  .filled(0).astype("float64"))
         strip[strip < 0] = 0
         strip = np.pad(strip, ((0, -(-nrows // factor) * factor - nrows), (0, w * factor - W)))
-        nb = strip.shape[0] // factor
-        out[r0 // factor: r0 // factor + nb] = strip.reshape(nb, factor, w, factor).sum(axis=(1, 3))
+        notebook = strip.shape[0] // factor
+        out[r0 // factor: r0 // factor + notebook] = strip.reshape(notebook, factor, w, factor).sum(axis=(1, 3))
     return out, src.transform * Affine.scale(factor)
 
 

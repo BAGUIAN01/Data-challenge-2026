@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pandas as pd
 
-RACINE = Path(__file__).resolve().parent.parent
-OUT = RACINE / "soumission"
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "soumission"
 # Words that must not appear anywhere (team, members, brand): one per line in a local, git-ignored file.
-_MOTS = RACINE / ".noms_interdits"
-INTERDIT = re.compile("(?i)" + "|".join(re.escape(m.strip()) for m in _MOTS.read_text().splitlines() if m.strip())) if _MOTS.exists() else None
+_WORDS_FILE = ROOT / ".noms_interdits"
+FORBIDDEN = re.compile("(?i)" + "|".join(re.escape(m.strip()) for m in _WORDS_FILE.read_text().splitlines() if m.strip())) if _WORDS_FILE.exists() else None
 
 TABLES = [
     ("A_tendances_nationales", "Tendances nationales 2015/16-2024/25"),
@@ -67,7 +67,7 @@ TABLES = [
 ]
 # Challenge naming rule without the team part (blind review): ETAPE_DEFI_ROLE_description_vN.
 VERSION = 1
-NOMS = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rapport',
+UPLOAD_NAMES = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rapport',
     'documentation/fiches_regionales.pdf': '05-interpretation_D1_analyst_fiches-regionales',
     'documentation/formule_du_risque.md': '04-analyse_D1_scientist_formule-risque',
     'documentation/journal_des_decisions.md': '04-analyse_D1_scientist_journal-decisions',
@@ -83,63 +83,63 @@ NOMS = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rapport',
     'donnees/donnees_tableau_de_bord.json': '05-interpretation_D1_analyst_donnees-tableau-de-bord',
     'donnees/donnees_transformees.zip': '03-transformation_D1_engineer_donnees-transformees',
     'donnees/donnees_nettoyees.zip': '02-nettoyage_D1_engineer_donnees-nettoyees'}
-NOM_ACTION = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
+ACTION_NAME = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
               "meres": "l'instruction des mères", "grossesses": "les grossesses précoces", "prescolaire": "le préscolaire"}
 
 
-def zipper(dest, fichiers):
+def zip_files(dest, files):
     with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as z:
-        for src, arc in fichiers:
-            z.write(RACINE / src, arc)
+        for src, arc in files:
+            z.write(ROOT / src, arc)
 
 
-def git_archive(dest, chemin=None):
-    cmd = ["git", "archive", "--format=zip", "-o", str(dest), "HEAD"] + ([chemin] if chemin else [])
-    subprocess.run(cmd, cwd=RACINE, check=True)
+def git_archive(dest, subpath=None):
+    cmd = ["git", "archive", "--format=zip", "-o", str(dest), "HEAD"] + ([subpath] if subpath else [])
+    subprocess.run(cmd, cwd=ROOT, check=True)
 
 
-def priorites(jeu):
-    sg, fd = jeu["score_global"], jeu["facteur_dominant"]["par_region"]
-    defs = {d["id"]: d for d in jeu["facteurs_def"]}
-    lignes = []
-    for r in jeu["regions"]:
+def priorities(dataset):
+    sg, fd = dataset["score_global"], dataset["facteur_dominant"]["par_region"]
+    defs = {d["id"]: d for d in dataset["facteurs_def"]}
+    lines_out = []
+    for r in dataset["regions"]:
         f = fd[r["cle"]]
-        lignes.append({
+        lines_out.append({
             "region_2025": r["nom"], "ancienne_region": r["ancienne"], "score_global_2026_27": sg["par_region"][r["cle"]],
             "probabilite_chute_effectifs_pct": r["probabilites"]["ref_2026_27"], "alerte_septembre_pct": r["probabilites"]["sept_2026_27"],
             "taux_achevement_2024_25_pct": r["tap"][-1], "priorite": r["priorite"],
-            "agir_sur": NOM_ACTION[f["dominant"]] if f["dominant"] else "aucun facteur au-dessus de la moyenne : consolider",
+            "agir_sur": ACTION_NAME[f["dominant"]] if f["dominant"] else "aucun facteur au-dessus de la moyenne : consolider",
             "levier": defs[f["dominant"]]["levier"] if f["dominant"] else "Consolider ce qui marche.",
-            "ensuite": NOM_ACTION[f["second"]] if f["second"] else "",
+            "ensuite": ACTION_NAME[f["second"]] if f["second"] else "",
             "enfants_hors_cm2_estimes": int(round(r["enfants_hors_cm2"], -2)),
         })
-    return pd.DataFrame(lignes).sort_values(["priorite", "score_global_2026_27"], ascending=[True, False])
+    return pd.DataFrame(lines_out).sort_values(["priorite", "score_global_2026_27"], ascending=[True, False])
 
 
-def classeur(dest):
+def workbook(dest):
     with pd.ExcelWriter(dest, engine="openpyxl") as w:
         pd.DataFrame(TABLES, columns=["feuille", "contenu"]).to_excel(w, sheet_name="lisez-moi", index=False)
-        for nom, _ in TABLES:
-            pd.read_csv(RACINE / "analyse" / f"{nom}.csv").to_excel(w, sheet_name=nom[:31], index=False)
+        for name, _ in TABLES:
+            pd.read_csv(ROOT / "analyse" / f"{name}.csv").to_excel(w, sheet_name=name[:31], index=False)
 
 
 def main():
-    jeu = json.load(open(RACINE / "dashboard/public/data/tableau_de_bord.json", encoding="utf-8"))
+    dataset = json.load(open(ROOT / "dashboard/public/data/tableau_de_bord.json", encoding="utf-8"))
     if OUT.exists():
         shutil.rmtree(OUT)
     D, C, T = OUT / "donnees", OUT / "code", OUT / "documentation"
     for d in (D, C, T):
         d.mkdir(parents=True)
 
-    priorites(jeu).to_csv(D / "priorites_2026_27.csv", index=False)
-    shutil.copy2(RACINE / "dashboard/public/data/tableau_de_bord.json", D / "donnees_tableau_de_bord.json")
-    classeur(D / "resultats_analyse.xlsx")
-    zipper(D / "donnees_nettoyees.zip", [
+    priorities(dataset).to_csv(D / "priorites_2026_27.csv", index=False)
+    shutil.copy2(ROOT / "dashboard/public/data/tableau_de_bord.json", D / "donnees_tableau_de_bord.json")
+    workbook(D / "resultats_analyse.xlsx")
+    zip_files(D / "donnees_nettoyees.zip", [
         ("data/tidy/presco_tidy.csv", "donnees_challenge_propres.csv"),
         ("analyse/controles_qualite.txt", "controles_qualite.txt"),
         ("docs/sources_donnees.csv", "sources_donnees.csv"),
-    ] + [(f"data/externe_propre/{p.name}", p.name) for p in sorted((RACINE / "data/externe_propre").iterdir())])
-    zipper(D / "donnees_transformees.zip", [
+    ] + [(f"data/externe_propre/{p.name}", p.name) for p in sorted((ROOT / "data/externe_propre").iterdir())])
+    zip_files(D / "donnees_transformees.zip", [
         ("analyse/panel_region_annee_2025.csv", "panel_region_annee.csv"),
         ("analyse/acled_region_annee.csv", "violence_acled_region_annee.csv"),
         ("analyse/P16_signaux_region_annee.csv", "signaux_violence_region_annee.csv"),
@@ -152,45 +152,45 @@ def main():
 
     git_archive(C / "projet_complet.zip")
     git_archive(C / "tableau_de_bord.zip", "dashboard")
-    for i, nb in enumerate(sorted((RACINE / "notebooks").glob("*.ipynb")), 1):
-        shutil.copy2(nb, C / f"cahier_{nb.name}")
+    for i, notebook in enumerate(sorted((ROOT / "notebooks").glob("*.ipynb")), 1):
+        shutil.copy2(notebook, C / f"cahier_{notebook.name}")
 
-    shutil.copy2(RACINE / "rapport/rapport_defi1.pdf", T / "rapport.pdf")
-    shutil.copy2(RACINE / "analyse/fiches_regionales_13.pdf", T / "fiches_regionales.pdf")
-    shutil.copy2(RACINE / "analyse/formule_risque.md", T / "formule_du_risque.md")
-    shutil.copy2(RACINE / "docs/journal_decisions.md", T / "journal_des_decisions.md")
-    shutil.copy2(RACINE / "docs/LISEZ-MOI_soumission.md", T / "LISEZ-MOI.md")
+    shutil.copy2(ROOT / "rapport/rapport_defi1.pdf", T / "rapport.pdf")
+    shutil.copy2(ROOT / "analyse/fiches_regionales_13.pdf", T / "fiches_regionales.pdf")
+    shutil.copy2(ROOT / "analyse/formule_risque.md", T / "formule_du_risque.md")
+    shutil.copy2(ROOT / "docs/journal_decisions.md", T / "journal_des_decisions.md")
+    shutil.copy2(ROOT / "docs/LISEZ-MOI_soumission.md", T / "LISEZ-MOI.md")
 
-    for ancien, nom in NOMS.items():
-        f = OUT / ancien
-        f.rename(f.with_name(f"{nom}_v{VERSION}{f.suffix}"))
-    fichiers = sorted(p for p in OUT.rglob("*") if p.is_file())
-    if (RACINE / "fiche_de_la_solution.md").exists():
-        shutil.copy2(RACINE / "fiche_de_la_solution.md", OUT / "fiche_de_la_solution.md")
-    print(f"{len(fichiers)} fichiers (20 au plus), {sum(p.stat().st_size for p in fichiers) / 1e6:.1f} Mo")
-    for p in fichiers:
+    for old_name, name in UPLOAD_NAMES.items():
+        f = OUT / old_name
+        f.rename(f.with_name(f"{name}_v{VERSION}{f.suffix}"))
+    files = sorted(p for p in OUT.rglob("*") if p.is_file())
+    if (ROOT / "fiche_de_la_solution.md").exists():
+        shutil.copy2(ROOT / "fiche_de_la_solution.md", OUT / "fiche_de_la_solution.md")
+    print(f"{len(files)} fichiers (20 au plus), {sum(p.stat().st_size for p in files) / 1e6:.1f} Mo")
+    for p in files:
         print(f"  {p.relative_to(OUT)}  {p.stat().st_size / 1e6:.2f} Mo")
-    assert len(fichiers) <= 20 and all(p.stat().st_size < 50e6 for p in fichiers)
-    if INTERDIT is None:
+    assert len(files) <= 20 and all(p.stat().st_size < 50e6 for p in files)
+    if FORBIDDEN is None:
         print("liste .noms_interdits absente : contrôle d'anonymat non fait")
         return
-    traces = []
-    for p in fichiers:
-        textes = []
+    hits = []
+    for p in files:
+        texts = []
         if p.suffix == ".zip":
             with zipfile.ZipFile(p) as z:
-                textes = [(f"{p.name}!/{n}", z.read(n)) for n in z.namelist() if not n.endswith((".png", ".xlsx", ".pdf", "/"))]
+                texts = [(f"{p.name}!/{n}", z.read(n)) for n in z.namelist() if not n.endswith((".png", ".xlsx", ".pdf", "/"))]
         elif p.suffix != ".pdf" and p.suffix != ".xlsx":
-            textes = [(p.name, p.read_bytes())]
+            texts = [(p.name, p.read_bytes())]
         else:
             r = subprocess.run(["pdftotext", str(p), "-"], capture_output=True) if p.suffix == ".pdf" else None
-            textes = [(p.name, r.stdout)] if r else []
-        for nom, data in textes:
-            for m in set(x.lower() for x in INTERDIT.findall(data.decode("utf-8", "ignore"))):
-                traces.append((m, nom))
-    if INTERDIT.search(" ".join(p.name for p in fichiers)):
-        traces.append(("nom de fichier", "?"))
-    print("traces d'identité :", sorted(set(traces)) or "aucune")
+            texts = [(p.name, r.stdout)] if r else []
+        for name, data in texts:
+            for m in set(x.lower() for x in FORBIDDEN.findall(data.decode("utf-8", "ignore"))):
+                hits.append((m, name))
+    if FORBIDDEN.search(" ".join(p.name for p in files)):
+        hits.append(("nom de fichier", "?"))
+    print("traces d'identité :", sorted(set(hits)) or "aucune")
 
 
 if __name__ == "__main__":

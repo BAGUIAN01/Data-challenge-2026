@@ -187,10 +187,10 @@ def robustness(d):
 
 def profile(r):
     print("\n=== 3. Profil des facteurs par région (1 = parmi les 4 plus exposées) ===")
-    prio = pd.read_csv("analyse/P13_matrice_priorite_2026_27.csv")
+    prio_table = pd.read_csv("analyse/P13_matrice_priorite_2026_27.csv")
     n25 = pd.read_csv("analyse/panel_region_annee_2025.csv").drop_duplicates("region").set_index("region").region_2025
     r = r.assign(region_2025=r.region.map(n25))
-    r = r.merge(prio[["region_2025", "priorite"]], on="region_2025").set_index("region_2025")
+    r = r.merge(prio_table[["region_2025", "priorite"]], on="region_2025").set_index("region_2025")
     tiers = pd.DataFrame(index=r.index)
     for f, (_, up) in FACTORS.items():
         rank = r[f].rank(ascending=not up, method="min")

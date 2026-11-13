@@ -10,11 +10,11 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, "scripts")
-import fiches_regionales as fiches
+import fiches_regionales as sheets
 
 OUT = "dashboard/public/data/tableau_de_bord.json"
-YEARS = fiches.YEARS
-SHORT = fiches.SHORT
+YEARS = sheets.YEARS
+SHORT = sheets.SHORT
 FACTORS = [
     ("violence", "Violence", "incidents par an", True, "Continuité éducative : écoles délocalisées, enseignement à distance, radio."),
     ("deplaces", "Déplacés accueillis", "% de la population", True, "Places d'accueil, classes passerelles, inscription sans pièces."),
@@ -41,7 +41,7 @@ def project(geom, lon0, lat_max, k):
     return "".join(parts)
 
 
-def carte():
+def map_layer():
     g = gpd.read_file("data/ref/regions_13.geojson")
     g["geometry"] = g.geometry.simplify(0.01, preserve_topology=True)
     lon0, lat0, lon1, lat1 = g.total_bounds
@@ -56,19 +56,19 @@ def carte():
     return {"largeur": round(w, 1), "hauteur": round((lat1 - lat0) * k, 1), "regions": out}
 
 
-def formule_risque():
+def risk_formula():
     f = pd.read_csv("analyse/P17_formule_risque.csv")
-    cles = {"Référence": "reference", "Alerte de septembre": "septembre", "Alerte de janvier": "janvier"}
+    region_keys = {"Référence": "reference", "Alerte de septembre": "septembre", "Alerte de janvier": "janvier"}
     out = {"observations": int(f.observations.iloc[0]), "baisses": int(f.baisses.iloc[0])}
     for _, r in f.iterrows():
-        k = next(v for c, v in cles.items() if r.modele.startswith(c))
+        k = next(v for c, v in region_keys.items() if r.modele.startswith(c))
         out[k] = {c: float(r[c]) for c in ["constante", "l_inc", "d_l_inc", "l_late", "l_rentree"] if c in r and pd.notna(r[c])}
     return out
 
 
-def score_global():
+def global_score():
     s = pd.read_csv("analyse/P18_score_global_2026_27.csv").set_index("region_2025").score_global
-    names = {v: k for k, v in fiches.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
+    names = {v: k for k, v in sheets.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
     rj = pd.read_csv("analyse/P18_score_global_rejoue.csv").set_index("mesure")
     return {"poids_risque": 0.5, "par_region": {names[n]: int(v) for n, v in s.items()},
             "rejoue": {"auc_score": round(float(rj.loc["Score global", "AUC_baisse_t+1"]), 2),
@@ -77,23 +77,23 @@ def score_global():
                        "baisses_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "baisses_prises_%"])),
                        "perdus_score_pct": round(float(rj.loc["Score global", "eleves_perdus_pris_%"])),
                        "perdus_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "eleves_perdus_pris_%"]))},
-            "trajectoire": trajectoire({names[n]: int(v) for n, v in s.items()})}
+            "trajectoire": trajectory({names[n]: int(v) for n, v in s.items()})}
 
 
-def trajectoire(final):
+def trajectory(final):
     t = pd.read_csv("analyse/P18_score_global_trajectoire.csv")
-    annees = sorted(t.annee_cible.unique()) + ["26/27"]
-    par = {}
-    for cle, g in t.groupby("cle"):
-        g = g.set_index("annee_cible").reindex(annees[:-1])
-        par[cle] = {"score": [int(v) for v in g.score] + [final[cle]],
+    years_list = sorted(t.annee_cible.unique()) + ["26/27"]
+    by_region = {}
+    for region_key, g in t.groupby("cle"):
+        g = g.set_index("annee_cible").reindex(years_list[:-1])
+        by_region[region_key] = {"score": [int(v) for v in g.score] + [final[region_key]],
                     "chute": [None if pd.isna(v) else int(v) for v in g.chute_observee] + [None]}
-    return {"annees": annees, "par_region": par}
+    return {"annees": years_list, "par_region": by_region}
 
 
-def facteur_dominant():
+def dominant_factor():
     f = pd.read_csv("analyse/P19_facteur_dominant.csv").set_index("region_2025")
-    names = {v: k for k, v in fiches.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
+    names = {v: k for k, v in sheets.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
     ids = [c for c in f.columns if c not in ("dominant", "second")]
     txt = lambda v: None if pd.isna(v) else str(v)
     return {"par_region": {names[n]: {"dominant": txt(r.dominant), "second": txt(r.second),
@@ -101,12 +101,12 @@ def facteur_dominant():
 
 
 def main():
-    data = fiches.load()
+    data = sheets.load()
     p = data[0]
     nat = p[p.region == "NATIONAL"].set_index("annee").loc[YEARS]
     keys = sorted(p[p.region != "NATIONAL"].cle.unique())
     names = p.drop_duplicates("cle").set_index("cle").region_2025
-    prio = pd.read_csv("analyse/P13_matrice_priorite_2026_27.csv").set_index("region_2025")
+    prio_table = pd.read_csv("analyse/P13_matrice_priorite_2026_27.csv").set_index("region_2025")
     prof = pd.read_csv("analyse/P14_profil_facteurs.csv").set_index("region_2025")
     cal = pd.read_csv("analyse/P16_alertes_calendrier.csv").set_index("region")
     cal.columns = ["janv_2025_26", "sept_2026_27", "ref_2026_27"]
@@ -118,16 +118,16 @@ def main():
     tap_nat = float(nat.TAP_T.iloc[-1])
 
     regions = []
-    for cle in keys:
-        c = fiches.contenu(cle, data)
+    for region_key in keys:
+        c = sheets.content(region_key, data)
         r, f, name = c["r"], c["f"], c["name25"]
-        pr, pf, ca = prio.loc[name], prof.loc[name], cal.loc[name]
-        inc = acled[acled.cle == cle].set_index("annee").incidents.reindex(sy)
-        facteurs = {fid: {"valeur": num(pf["incidents_moy"] if fid == "violence" else pf[fid]),
+        pr, pf, ca = prio_table.loc[name], prof.loc[name], cal.loc[name]
+        inc = acled[acled.cle == region_key].set_index("annee").incidents.reindex(sy)
+        factors = {fid: {"valeur": num(pf["incidents_moy"] if fid == "violence" else pf[fid]),
                           "niveau": int(pf[f"{fid}_niveau"])} for fid, *_ in FACTORS}
-        lev_f = [lev for fid, _, _, _, lev in FACTORS if lev and facteurs[fid]["niveau"] == 1]
+        factor_levers = [lever for fid, _, _, _, lever in FACTORS if lever and factors[fid]["niveau"] == 1]
         regions.append({
-            "cle": cle, "nom": name, "ancienne": c["old"], "codes": r.codes_2025.iloc[0], "type": r.type_2025.iloc[0],
+            "cle": region_key, "nom": name, "ancienne": c["old"], "codes": r.codes_2025.iloc[0], "type": r.type_2025.iloc[0],
             "profil": c["profile"], "priorite": int(pr.priorite),
             "tap": [num(v) for v in r.TAP_T], "tap_f": [num(v) for v in r.TAP_F], "tap_g": [num(v) for v in r.TAP_G],
             "eleves": [int(v) for v in r.eleves_T], "ecoles": [int(v) for v in r.ecoles],
@@ -137,7 +137,7 @@ def main():
             "enfants_hors_cm2": int(f.enfants_hors_CM2_estimes),
             "probabilites": {"janv_2025_26": int(ca.janv_2025_26), "sept_2026_27": int(ca.sept_2026_27),
                              "ref_2026_27": int(ca.ref_2026_27)},
-            "facteurs": facteurs, "faits": c["facts"], "leviers": c["levers"], "leviers_facteurs": lev_f,
+            "facteurs": factors, "faits": c["facts"], "leviers": c["levers"], "leviers_facteurs": factor_levers,
         })
     payload = {
         "annees": SHORT, "annees_violence": [y[2:4] + "/" + y[7:] for y in sy],
@@ -148,11 +148,11 @@ def main():
                     "erreur_persistance_pct": round(float(nowc["effectifs_persistance_%"]), 1)},
         "validation": {"rang_tap": 0.97, "auc_reference": 0.83, "auc_septembre": 0.85, "auc_janvier": 0.88,
                        "matrice_regions_pct": 35, "matrice_baisses_pct": 71, "matrice_perdus_pct": 69},
-        "facteurs_def": [{"id": fid, "libelle": lab, "unite": u, "haut_expose": up, "levier": lev} for fid, lab, u, up, lev in FACTORS],
-        "facteur_dominant": facteur_dominant(),
-        "formule_risque": formule_risque(),
-        "score_global": score_global(),
-        "carte": carte(),
+        "facteurs_def": [{"id": fid, "libelle": lab, "unite": u, "haut_expose": up, "levier": lever} for fid, lab, u, up, lever in FACTORS],
+        "facteur_dominant": dominant_factor(),
+        "formule_risque": risk_formula(),
+        "score_global": global_score(),
+        "carte": map_layer(),
         "regions": regions,
     }
     body = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))

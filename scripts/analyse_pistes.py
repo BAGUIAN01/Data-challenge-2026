@@ -15,9 +15,9 @@ def panel(d):
     x = d[d.table.isin(keep) & (d.statut == "Total")].copy()
     x["var"] = x.table.map(keep) + "_" + x.sexe
     p = x.pivot_table(index=["region", "annee"], columns="var", values="valeur")
-    ecoles = d[(d.table == "E13")].pivot_table(index=["region", "annee"], columns="statut", values="valeur")
-    p["ecoles"] = ecoles["Total"]
-    p["ecoles_publiques"] = ecoles["Public"]
+    schools = d[(d.table == "E13")].pivot_table(index=["region", "annee"], columns="statut", values="valeur")
+    p["ecoles"] = schools["Total"]
+    p["ecoles_publiques"] = schools["Public"]
     p["IPS_TAP"] = d[d.table == "E12"].set_index(["region", "annee"]).valeur
     return p.reset_index()
 
@@ -54,8 +54,8 @@ def main():
     ex["part_eleves_2017_18_%"] = (ex["cumul_17_18_a_23_24"] /
                                   reg[reg.annee == "2017-2018"].set_index("region").eleves_T * 100)
     ex["sorties_base_%"] = base * 100
-    brut = reg.dropna(subset=["exces_brut"])
-    ex["cumul_sans_correction_CM2"] = brut[brut.annee >= "2017-2018"].groupby("region").exces_brut.sum()
+    raw_part = reg.dropna(subset=["exces_brut"])
+    ex["cumul_sans_correction_CM2"] = raw_part[raw_part.annee >= "2017-2018"].groupby("region").exces_brut.sum()
     ex = ex.sort_values("cumul_17_18_a_23_24", ascending=False)
     ex.round(1).to_csv(f"{out}/P1_sorties_excedentaires.csv")
     print(ex[["sorties_base_%", "cumul_sans_correction_CM2", "cumul_17_18_a_23_24", "part_eleves_2017_18_%"]].round(1).to_string())

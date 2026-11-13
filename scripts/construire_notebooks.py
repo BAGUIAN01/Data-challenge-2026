@@ -6,10 +6,10 @@ from pathlib import Path
 import nbformat
 from nbclient import NotebookClient
 
-RACINE = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent
 TIDY, REF, A = "data/tidy/presco_tidy.csv", "data/ref/regions_13_17.csv", "analyse/"
 
-CAHIERS = {
+NOTEBOOKS = {
     "02_nettoyage": ("Étape 2 · Nettoyage", "Lecture du fichier du challenge, contrôles de cohérence, sources externes.", [
         ("parse_presco", "Lecture du fichier du challenge", ["data/raw/Presco.txt", TIDY]),
         ("check_presco", "Contrôles de cohérence", [TIDY]),
@@ -49,111 +49,111 @@ CAHIERS = {
     ]),
 }
 
-CHEMINS = """racine = Path.cwd()
-while not (racine / "scripts").is_dir() and racine != racine.parent:
-    racine = racine.parent
-os.chdir(racine)
+PATHS_SETUP = """root = Path.cwd()
+while not (root / "scripts").is_dir() and root != root.parent:
+    root = root.parent
+os.chdir(root)
 sys.path.insert(0, "scripts")"""
 
-FIGURES = '''def montrer_figures(depuis, dossiers=("analyse/figures", "analyse", "analyse/fiches"), maxi=8):
-    vues = sorted((p for d in dossiers for p in Path(d).glob("*.png") if p.stat().st_mtime >= depuis), key=lambda p: p.name)
-    for p in vues[:maxi]:
+FIGURES = '''def show_figures(since, folders=("analyse/figures", "analyse", "analyse/fiches"), limit=8):
+    views = sorted((p for d in folders for p in Path(d).glob("*.png") if p.stat().st_mtime >= since), key=lambda p: p.name)
+    for p in views[:limit]:
         print(p)
         display(Image(filename=str(p), width=760))'''
 
-SCRIPTS = {p.stem for p in (RACINE / "scripts").glob("*.py")}
+SCRIPTS = {p.stem for p in (ROOT / "scripts").glob("*.py")}
 
 
-def reglage(n):
+def is_setup_statement(n):
     """Import, or a setting that belongs with the imports (matplotlib backend, search path)."""
     if isinstance(n, (ast.Import, ast.ImportFrom)):
         return True
     return isinstance(n, ast.Expr) and ast.unparse(n).startswith(("matplotlib.use(", "sys.path.insert("))
 
 
-def bloc_imports(noms):
+def imports_cell(names):
     """One cell with every import of the notebook: standard library, then packages, then the project's scripts."""
-    simples, depuis = set(), {}
+    plain_imports, modules = set(), {}
     base = [ast.parse("import os\nimport sys\nimport time\nfrom pathlib import Path\nfrom IPython.display import Image, display")]
-    arbres = base + [ast.parse((RACINE / "scripts" / f"{n}.py").read_text(encoding="utf-8")) for n in noms]
-    for t in arbres:
+    trees = base + [ast.parse((ROOT / "scripts" / f"{n}.py").read_text(encoding="utf-8")) for n in names]
+    for t in trees:
         for n in t.body:
             if isinstance(n, ast.Import):
                 for a in n.names:
-                    simples.add((a.name, a.asname))
+                    plain_imports.add((a.name, a.asname))
             elif isinstance(n, ast.ImportFrom):
-                depuis.setdefault(n.module, set()).update((a.name, a.asname) for a in n.names)
-    groupe = lambda m: 2 if m.split(".")[0] in SCRIPTS else 0 if m.split(".")[0] in sys.stdlib_module_names else 1
-    lignes = {0: [], 1: [], 2: []}
-    for m, a in sorted(simples):
-        lignes[groupe(m)].append((m, f"import {m}" + (f" as {a}" if a else "")))
-    for m, ns in sorted(depuis.items()):
-        noms_m = ", ".join(n + (f" as {a}" if a else "") for n, a in sorted(ns))
-        lignes[groupe(m)].append((m, f"from {m} import {noms_m}"))
-    paquets = [l for _, l in sorted(lignes[1], key=lambda x: (x[0] != "matplotlib", x[0], x[1].startswith("from")))]
-    if any(l == "import matplotlib" for l in paquets):
-        paquets.insert(paquets.index("import matplotlib") + 1, 'matplotlib.use("Agg")')
-    blocs = ["\n".join(l for _, l in sorted(lignes[0], key=lambda x: (x[1].startswith("from"), x[0]))), "\n".join(paquets), CHEMINS]
-    if lignes[2]:
-        blocs.append("\n".join(l for _, l in sorted(lignes[2])))
+                modules.setdefault(n.module, set()).update((a.name, a.asname) for a in n.names)
+    group_of = lambda m: 2 if m.split(".")[0] in SCRIPTS else 0 if m.split(".")[0] in sys.stdlib_module_names else 1
+    lines_out = {0: [], 1: [], 2: []}
+    for m, a in sorted(plain_imports):
+        lines_out[group_of(m)].append((m, f"import {m}" + (f" as {a}" if a else "")))
+    for m, ns in sorted(modules.items()):
+        names_m = ", ".join(n + (f" as {a}" if a else "") for n, a in sorted(ns))
+        lines_out[group_of(m)].append((m, f"from {m} import {names_m}"))
+    packages = [l for _, l in sorted(lines_out[1], key=lambda x: (x[0] != "matplotlib", x[0], x[1].startswith("from")))]
+    if any(l == "import matplotlib" for l in packages):
+        packages.insert(packages.index("import matplotlib") + 1, 'matplotlib.use("Agg")')
+    blocs = ["\n".join(l for _, l in sorted(lines_out[0], key=lambda x: (x[1].startswith("from"), x[0]))), "\n".join(packages), PATHS_SETUP]
+    if lines_out[2]:
+        blocs.append("\n".join(l for _, l in sorted(lines_out[2])))
     return "\n\n".join(b for b in blocs if b)
 
 
-def cellules(nom):
-    src = (RACINE / "scripts" / f"{nom}.py").read_text(encoding="utf-8")
+def script_cells(name):
+    src = (ROOT / "scripts" / f"{name}.py").read_text(encoding="utf-8")
     tree = ast.parse(src)
-    lignes = src.splitlines()
-    blocs, courant = [], []
+    lines_out = src.splitlines()
+    blocs, current = [], []
     for n in tree.body:
-        if reglage(n):
+        if is_setup_statement(n):
             continue
         if isinstance(n, ast.Expr) and isinstance(getattr(n, "value", None), ast.Constant) and isinstance(n.value.value, str):
             continue
         if isinstance(n, ast.If) and "__name__" in ast.unparse(n.test):
             continue
-        texte = "\n".join(lignes[(n.decorator_list[0].lineno if getattr(n, "decorator_list", None) else n.lineno) - 1:n.end_lineno])
+        text = "\n".join(lines_out[(n.decorator_list[0].lineno if getattr(n, "decorator_list", None) else n.lineno) - 1:n.end_lineno])
         if isinstance(n, (ast.FunctionDef, ast.ClassDef)):
-            if courant:
-                blocs.append("\n".join(courant)); courant = []
-            blocs.append(texte)
+            if current:
+                blocs.append("\n".join(current)); current = []
+            blocs.append(text)
         else:
-            courant.append(texte)
-    if courant:
-        blocs.append("\n".join(courant))
+            current.append(text)
+    if current:
+        blocs.append("\n".join(current))
     return blocs
 
 
-def construire(fichier, titre, chapo, etapes):
-    nb = nbformat.v4.new_notebook()
-    nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
-    nb.cells.append(nbformat.v4.new_markdown_cell(
-        f"# {titre}\n\n{chapo}\n\nÀ lancer dans le projet complet (archive `05-interpretation_D1_scientist_projet-complet_v1.zip`), "
+def build_notebook(file_name, title, lead, steps):
+    notebook = nbformat.v4.new_notebook()
+    notebook.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
+    notebook.cells.append(nbformat.v4.new_markdown_cell(
+        f"# {title}\n\n{lead}\n\nÀ lancer dans le projet complet (archive `05-interpretation_D1_scientist_projet-complet_v1.zip`), "
         "avec les données brutes placées comme le dit `data/raw/LISEZ-MOI.md`."))
-    nb.cells.append(nbformat.v4.new_code_cell(bloc_imports(list(dict.fromkeys(e[0] for e in etapes)))))
-    nb.cells.append(nbformat.v4.new_code_cell(FIGURES))
-    vus = set()
-    for i, (nom, intitule, args) in enumerate(etapes, 1):
-        nb.cells.append(nbformat.v4.new_markdown_cell(f"## {i}. {intitule}\n\n`scripts/{nom}.py`"))
+    notebook.cells.append(nbformat.v4.new_code_cell(imports_cell(list(dict.fromkeys(e[0] for e in steps)))))
+    notebook.cells.append(nbformat.v4.new_code_cell(FIGURES))
+    seen = set()
+    for i, (name, heading, args) in enumerate(steps, 1):
+        notebook.cells.append(nbformat.v4.new_markdown_cell(f"## {i}. {heading}\n\n`scripts/{name}.py`"))
         alias = ""
-        if nom not in vus:
-            for c in cellules(nom):
-                nb.cells.append(nbformat.v4.new_code_cell(c))
-            vus.add(nom)
-            alias = f"lancer_{nom} = main\n"
-        nb.cells.append(nbformat.v4.new_code_cell(
-            f"{alias}t0 = time.time()\nsys.argv = {[nom + '.py'] + args!r}\nlancer_{nom}()\nmontrer_figures(t0)"))
-    return nb
+        if name not in seen:
+            for c in script_cells(name):
+                notebook.cells.append(nbformat.v4.new_code_cell(c))
+            seen.add(name)
+            alias = f"run_{name} = main\n"
+        notebook.cells.append(nbformat.v4.new_code_cell(
+            f"{alias}t0 = time.time()\nsys.argv = {[name + '.py'] + args!r}\nrun_{name}()\nshow_figures(t0)"))
+    return notebook
 
 
 def main():
-    sortie = RACINE / "notebooks"
-    sortie.mkdir(exist_ok=True)
-    choix = sys.argv[1:] or list(CAHIERS)
-    for f in choix:
-        nb = construire(f, *CAHIERS[f])
-        NotebookClient(nb, timeout=3600, kernel_name="python3", resources={"metadata": {"path": str(RACINE)}}).execute()
-        nbformat.write(nb, sortie / f"{f}.ipynb")
-        print("cahier :", sortie / f"{f}.ipynb")
+    out_dir = ROOT / "notebooks"
+    out_dir.mkdir(exist_ok=True)
+    selected = sys.argv[1:] or list(NOTEBOOKS)
+    for f in selected:
+        notebook = build_notebook(f, *NOTEBOOKS[f])
+        NotebookClient(notebook, timeout=3600, kernel_name="python3", resources={"metadata": {"path": str(ROOT)}}).execute()
+        nbformat.write(notebook, out_dir / f"{f}.ipynb")
+        print("cahier :", out_dir / f"{f}.ipynb")
 
 
 if __name__ == "__main__":

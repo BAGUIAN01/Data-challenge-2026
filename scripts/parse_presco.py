@@ -148,12 +148,12 @@ def main():
                     "sexe", "annee", "valeur"])
         for tid, cycle, ind, unit, lab, sex, year, v in rows:
             region = norm_label("region", lab["region"]) if "region" in lab else "NATIONAL"
-            statut = norm_label("statut", lab.get("statut", "")) or "Total"
-            milieu = norm_label("milieu", lab.get("milieu", "")) or "Total"
-            niveau = lab.get("niveau", "") or "Total"
-            if niveau.upper() == "TOTAL":
-                niveau = "Total"
-            w.writerow([tid, cycle, ind, unit, region, statut, milieu, niveau, sex, year,
+            status = norm_label("statut", lab.get("statut", "")) or "Total"
+            area = norm_label("milieu", lab.get("milieu", "")) or "Total"
+            tier = lab.get("niveau", "") or "Total"
+            if tier.upper() == "TOTAL":
+                tier = "Total"
+            w.writerow([tid, cycle, ind, unit, region, status, area, tier, sex, year,
                         int(v) if v.is_integer() else v])
     print(f"{len(rows)} valeurs écrites dans {dst}")
 

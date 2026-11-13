@@ -79,12 +79,12 @@ def main():
 
 def robustness(gr, nat):
     print("\n=== C. Solidité de la projection du CM2, et ce qu'annoncent les grandes cohortes de CP1 ===")
-    passage = pd.Series({YEARS[i]: gr.loc["CM2", YEARS[i]] / gr.loc["CM1", YEARS[i - 1]] for i in range(1, 10)})
-    print("Passage du CM1 au CM2 :", {SHORT[y]: f"{v:.1%}" for y, v in passage.items()})
+    transition = pd.Series({YEARS[i]: gr.loc["CM2", YEARS[i]] / gr.loc["CM1", YEARS[i - 1]] for i in range(1, 10)})
+    print("Passage du CM1 au CM2 :", {SHORT[y]: f"{v:.1%}" for y, v in transition.items()})
     rows = []
     for i in range(3, 10):
         y0, y1 = YEARS[i - 1], YEARS[i]
-        known = passage.loc[:y0]
+        known = transition.loc[:y0]
         lo, hi = gr.loc["CM1", y0] * known.min(), gr.loc["CM1", y0] * known.max()
         mid = gr.loc["CM1", y0] * known.iloc[-1]
         real = gr.loc["CM2", y1]
@@ -97,9 +97,9 @@ def robustness(gr, nat):
     print(f"Fourchette tenue {r.dans_fourchette.sum()} fois sur {len(r)} ; sens juste {(r.sens_annonce == r.sens_reel).sum()} "
           f"fois sur {len(r)}")
     cm1 = gr.loc["CM1", "2024-2025"]
-    proj = {"bas": cm1 * passage.min(), "central": cm1 * passage.iloc[-1], "haut": cm1 * passage.max()}
+    proj = {"bas": cm1 * transition.min(), "central": cm1 * transition.iloc[-1], "haut": cm1 * transition.max()}
     print(f"CM2 2025/26 : {proj['central']:,.0f} [{proj['bas']:,.0f} ; {proj['haut']:,.0f}] contre "
-          f"{gr.loc['CM2', '2024-2025']:,.0f} en 2024/25 ; même le pire passage observé ({passage.min():.1%}, année du choc) "
+          f"{gr.loc['CM2', '2024-2025']:,.0f} en 2024/25 ; même le pire passage observé ({transition.min():.1%}, année du choc) "
           f"donne {proj['bas'] / gr.loc['CM2', '2024-2025'] - 1:+.1%}")
     den = gr.loc["CM2"] / (nat.TAP_T / 100)
     print("Variation du dénominateur implicite du TAP (CM2 / TAP) :",

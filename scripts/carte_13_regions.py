@@ -61,9 +61,9 @@ def main():
     light["geometry"] = light.geometry.simplify(0.005, preserve_topology=True)
     light.to_file("data/ref/regions_13.geojson", driver="GeoJSON")
 
-    typo = pd.read_csv(f"{out}/P2_typologie_regions.csv")
-    typo["cle_presco"] = typo.region.map(key)
-    m = light.merge(typo[["cle_presco", "TAP_2024_25", "groupe_k4"]], on="cle_presco", how="left")
+    typology = pd.read_csv(f"{out}/P2_typologie_regions.csv")
+    typology["cle_presco"] = typology.region.map(key)
+    m = light.merge(typology[["cle_presco", "TAP_2024_25", "groupe_k4"]], on="cle_presco", how="left")
     assert m.TAP_2024_25.notna().all()
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 6.4))

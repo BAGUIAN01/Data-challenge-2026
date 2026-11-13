@@ -61,13 +61,13 @@ def load():
     fc["cle"] = fc.cle.astype(str)
     ex = pd.read_csv("analyse/P1_sorties_excedentaires.csv")
     ex["cle"] = ex.iloc[:, 0].map(key)
-    typo = pd.read_csv("analyse/P2_typologie_regions.csv")
-    typo["cle"] = typo.region.map(key)
+    typology = pd.read_csv("analyse/P2_typologie_regions.csv")
+    typology["cle"] = typology.region.map(key)
     prob = pd.read_csv("analyse/P11_probabilites_alerte.csv")
     acled = pd.read_csv("analyse/acled_region_annee.csv")
     pov = pd.read_csv("data/externe_propre/pauvrete_ehcvm_2021_regions.csv")
     pov["cle"] = pov.region.map(key)
-    return p, fc, ex, typo, prob, acled, pov
+    return p, fc, ex, typology, prob, acled, pov
 
 
 def risk_level(pct):
@@ -82,19 +82,19 @@ def tile(fig, x, y, w, h, value, label, sub):
     fig.text(x + 0.012, y + 0.010, sub, fontsize=7, color=INK2, va="bottom")
 
 
-def contenu(cle, data):
-    p, fc, ex, typo, prob, acled, pov = data
-    r = p[p.cle == cle].set_index("annee").loc[YEARS]
+def content(region_key, data):
+    p, fc, ex, typology, prob, acled, pov = data
+    r = p[p.cle == region_key].set_index("annee").loc[YEARS]
     n = p[p.region == "NATIONAL"].set_index("annee").loc[YEARS]
     name25, old = r.region_2025.iloc[0], r.region.iloc[0].title().replace("Du", "du")
-    f = fc[fc.cle == cle].iloc[0]
-    e = ex[ex.cle == cle].iloc[0]
-    t = typo[typo.cle == cle].iloc[0]
+    f = fc[fc.cle == region_key].iloc[0]
+    e = ex[ex.cle == region_key].iloc[0]
+    t = typology[typology.cle == region_key].iloc[0]
     profile = {1: "Choc puis reprise partielle", 2: "Effondrement", 3: "Érosion", 4: "Stabilité / accueil"}[int(t.groupe_k4)]
     pr26 = float(prob.set_index("region_2025").loc[name25, "rentrée 2026/27"])
     level = risk_level(pr26)
-    inc = acled[acled.cle == cle].set_index("annee").incidents
-    poverty = float(pov.set_index("cle").loc[cle, "incidence_pauvrete_2021_pct"])
+    inc = acled[acled.cle == region_key].set_index("annee").incidents
+    poverty = float(pov.set_index("cle").loc[region_key, "incidence_pauvrete_2021_pct"])
 
     tap0, tap1, tap21 = r.TAP_T.iloc[0], r.TAP_T.iloc[-1], r.TAP_T.loc["2021-2022"]
     el_max, el_now = r.eleves_T.max(), r.eleves_T.iloc[-1]
@@ -144,8 +144,8 @@ def contenu(cle, data):
 C1, C2, C3 = "#104281", "#3987e5", "#86b6ef"
 FG, FG2, FG3, LINE, EDGE, CARD, BAD, NATC = "#0f172a", "#475569", "#7d8799", "#e3e7ed", "#cfd5de", "#f4f6f9", "#b42318", "#b9c2cf"
 Z2, Z3 = "#dfe4eb", "#c3cbd7"
-PRIO = {1: ("Priorité 1", "agir maintenant"), 2: ("Priorité 2", "veille renforcée"), 3: ("Priorité 3", "consolider")}
-NOM_ACTION = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
+PRIORITY_LABELS = {1: ("Priorité 1", "agir maintenant"), 2: ("Priorité 2", "veille renforcée"), 3: ("Priorité 3", "consolider")}
+ACTION_NAME = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
               "meres": "l'instruction des mères", "grossesses": "les grossesses précoces", "prescolaire": "le préscolaire"}
 
 
@@ -154,12 +154,12 @@ def _style():
                          "axes.labelcolor": FG2, "xtick.color": FG3, "ytick.color": FG3, "pdf.fonttype": 42})
 
 
-def _carte(fig, x, y, w, h):
+def _card(fig, x, y, w, h):
     fig.patches.append(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.012",
                                       transform=fig.transFigure, facecolor=CARD, edgecolor="none", zorder=-5))
 
 
-def _axes_propres(ax):
+def _clean_axes(ax):
     for s in ["top", "right", "left"]:
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(LINE)
@@ -167,22 +167,22 @@ def _axes_propres(ax):
     ax.set_facecolor("none")
 
 
-def classe(v):
+def score_color(v):
     return C1 if v >= 50 else (C2 if v >= 25 else C3)
 
 
-def make(cle, jeu, out):
+def make(region_key, dataset, out):
     _style()
-    R = {r["cle"]: r for r in jeu["regions"]}
-    r, sg, fdj = R[cle], jeu["score_global"], jeu["facteur_dominant"]["par_region"][cle]
-    defs = {d["id"]: d for d in jeu["facteurs_def"]}
-    dom = fdj["dominant"]
-    s = sg["par_region"][cle]
+    R = {r["cle"]: r for r in dataset["regions"]}
+    r, sg, fd_entry = R[region_key], dataset["score_global"], dataset["facteur_dominant"]["par_region"][region_key]
+    defs = {d["id"]: d for d in dataset["facteurs_def"]}
+    dominant = fd_entry["dominant"]
+    s = sg["par_region"][region_key]
     p = r["probabilites"]["ref_2026_27"]
     tap = r["tap"][-1]
-    rang = 1 + sum(1 for k, v in sg["par_region"].items() if v > s)
-    brutal, lent = 50 * p / 100, 50 * (1 - tap / 100)
-    niveau = "élevé" if s >= 50 else ("moyen" if s >= 25 else "faible")
+    rank = 1 + sum(1 for k, v in sg["par_region"].items() if v > s)
+    sudden, slow = 50 * p / 100, 50 * (1 - tap / 100)
+    tier = "élevé" if s >= 50 else ("moyen" if s >= 25 else "faible")
 
     fig = plt.figure(figsize=(8.27, 11.69))
     fig.patch.set_facecolor("white")
@@ -190,62 +190,62 @@ def make(cle, jeu, out):
 
     fig.text(L, 0.968, "FICHE RÉGIONALE · RISQUE DE DÉCROCHAGE AU PRIMAIRE · RENTRÉE 2026/27", fontsize=7.5, color=FG3, va="top", fontweight="bold")
     fig.text(L, 0.950, r["nom"], fontsize=25, fontweight="bold", color=FG, va="top")
-    lib, sous = PRIO[r["priorite"]]
+    label_text, subtitle = PRIORITY_LABELS[r["priorite"]]
     fig.patches.append(FancyBboxPatch((L, 0.9035), 0.012, 0.0085, boxstyle="round,pad=0,rounding_size=0.002",
                                       transform=fig.transFigure, facecolor=[C1, C2, C3][r["priorite"] - 1], edgecolor="none"))
-    fig.text(L + 0.018, 0.912, f"{lib} · {sous} · ancienne région {r['ancienne']}", fontsize=9.5, color=FG2, va="top")
+    fig.text(L + 0.018, 0.912, f"{label_text} · {subtitle} · ancienne région {r['ancienne']}", fontsize=9.5, color=FG2, va="top")
 
     y0, h0 = 0.745, 0.145
-    _carte(fig, L, y0, W, h0)
+    _card(fig, L, y0, W, h0)
     fig.text(L + 0.025, y0 + h0 - 0.02, "Score global de risque", fontsize=10.5, fontweight="bold", color=FG, va="top")
-    fig.text(L + W - 0.025, y0 + h0 - 0.02, f"{rang}{'re' if rang == 1 else 'e'} sur 13 · {niveau}", fontsize=8.5, color=FG3, va="top", ha="right")
-    fig.text(L + 0.025, y0 + 0.058, f"{s}", fontsize=40, fontweight="bold", color=classe(s), va="baseline")
+    fig.text(L + W - 0.025, y0 + h0 - 0.02, f"{rank}{'re' if rank == 1 else 'e'} sur 13 · {tier}", fontsize=8.5, color=FG3, va="top", ha="right")
+    fig.text(L + 0.025, y0 + 0.058, f"{s}", fontsize=40, fontweight="bold", color=score_color(s), va="baseline")
     fig.text(L + 0.025 + 0.041 * len(str(s)) + 0.012, y0 + 0.058, "/ 100", fontsize=13, color=FG3, va="baseline")
     bx, bw, by = L + 0.30, W - 0.325, y0 + 0.075
     fig.patches.append(FancyBboxPatch((bx, by), bw, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor="white", edgecolor="none"))
-    fig.patches.append(FancyBboxPatch((bx, by), bw * brutal / 100, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor=FG, edgecolor="none"))
-    fig.patches.append(FancyBboxPatch((bx + bw * brutal / 100, by), bw * lent / 100, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor=Z3, edgecolor="none"))
+    fig.patches.append(FancyBboxPatch((bx, by), bw * sudden / 100, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor=FG, edgecolor="none"))
+    fig.patches.append(FancyBboxPatch((bx + bw * sudden / 100, by), bw * slow / 100, 0.016, boxstyle="round,pad=0,rounding_size=0.004", transform=fig.transFigure, facecolor=Z3, edgecolor="none"))
     for yq, col in [(by - 0.0195, FG), (by - 0.0365, Z3)]:
         fig.patches.append(FancyBboxPatch((bx, yq), 0.009, 0.0065, boxstyle="round,pad=0,rounding_size=0.0015",
                                           transform=fig.transFigure, facecolor=col, edgecolor="none"))
-    fig.text(bx + 0.016, by - 0.012, f"Chute des effectifs (violence) : {fr(brutal)}", fontsize=8.2, color=FG, va="top")
-    fig.text(bx + 0.016, by - 0.029, f"Enfants qui n'achèvent pas le primaire : {fr(lent)}", fontsize=8.2, color="#8a94a5", va="top")
+    fig.text(bx + 0.016, by - 0.012, f"Chute des effectifs (violence) : {fr(sudden)}", fontsize=8.2, color=FG, va="top")
+    fig.text(bx + 0.016, by - 0.029, f"Enfants qui n'achèvent pas le primaire : {fr(slow)}", fontsize=8.2, color="#8a94a5", va="top")
     fig.text(L + 0.025, y0 + 0.018, f"Moitié risque de chute des effectifs ({fr(p)} %), moitié part d'enfants qui n'achèvent pas ({fr(100 - tap, 1)} %).",
              fontsize=7.8, color=FG3)
 
     y1, h1 = 0.585, 0.145
-    _carte(fig, L, y1, W, h1)
+    _card(fig, L, y1, W, h1)
     fig.text(L + 0.025, y1 + h1 - 0.02, "Sur quoi agir", fontsize=10.5, fontweight="bold", color=FG, va="top")
-    if dom:
+    if dominant:
         fig.text(L + W - 0.025, y1 + h1 - 0.02, "poids de chaque facteur", fontsize=8.5, color=FG3, va="top", ha="right")
-    if dom:
-        fig.text(L + 0.025, y1 + h1 - 0.047, f"Agir sur {NOM_ACTION[dom]}", fontsize=14, fontweight="bold", color=FG, va="top")
-        lev = textwrap.wrap(defs[dom]["levier"], 52)
-        for i, ln in enumerate(lev[:3]):
+    if dominant:
+        fig.text(L + 0.025, y1 + h1 - 0.047, f"Agir sur {ACTION_NAME[dominant]}", fontsize=14, fontweight="bold", color=FG, va="top")
+        lever = textwrap.wrap(defs[dominant]["levier"], 52)
+        for i, ln in enumerate(lever[:3]):
             fig.text(L + 0.025, y1 + h1 - 0.075 - i * 0.016, ln, fontsize=9, color=FG2, va="top")
-        if fdj["second"]:
-            fig.text(L + 0.025, y1 + 0.018, f"Ensuite : {NOM_ACTION[fdj['second']]}", fontsize=8.5, color=FG3)
+        if fd_entry["second"]:
+            fig.text(L + 0.025, y1 + 0.018, f"Ensuite : {ACTION_NAME[fd_entry['second']]}", fontsize=8.5, color=FG3)
     else:
         fig.text(L + 0.025, y1 + h1 - 0.047, "Aucun facteur au-dessus de la moyenne", fontsize=13, fontweight="bold", color=FG, va="top")
         fig.text(L + 0.025, y1 + h1 - 0.075, "Consolider ce qui marche.", fontsize=9, color=FG2, va="top")
-    top = sorted(fdj["contributions"].items(), key=lambda kv: -kv[1])[:4] if dom else []
-    mx = max(abs(v) for _, v in fdj["contributions"].items()) or 1
+    top = sorted(fd_entry["contributions"].items(), key=lambda kv: -kv[1])[:4] if dominant else []
+    mx = max(abs(v) for _, v in fd_entry["contributions"].items()) or 1
     for i, (fid, v) in enumerate(top):
         yy = y1 + h1 - 0.052 - i * 0.022
         fig.text(L + 0.49, yy, defs[fid]["libelle"], fontsize=8.2, color=FG2, va="center")
         fig.patches.append(FancyBboxPatch((L + 0.68, yy - 0.004), 0.15, 0.008, boxstyle="round,pad=0,rounding_size=0.003", transform=fig.transFigure, facecolor="white", edgecolor="none"))
         if v > 0:
             fig.patches.append(FancyBboxPatch((L + 0.68, yy - 0.004), 0.15 * v / mx, 0.008, boxstyle="round,pad=0,rounding_size=0.003",
-                                              transform=fig.transFigure, facecolor=FG if fid == dom else C3, edgecolor="none"))
+                                              transform=fig.transFigure, facecolor=FG if fid == dominant else C3, edgecolor="none"))
 
     tr = sg["trajectoire"]
-    ann, sc, ch = tr["annees"], tr["par_region"][cle]["score"], tr["par_region"][cle]["chute"]
+    year_labels, sc, ch = tr["annees"], tr["par_region"][region_key]["score"], tr["par_region"][region_key]["chute"]
     y2, h2 = 0.375, 0.19
-    _carte(fig, L, y2, W, h2)
+    _card(fig, L, y2, W, h2)
     fig.text(L + 0.025, y2 + h2 - 0.02, "Le score, année par année", fontsize=10.5, fontweight="bold", color=FG, va="top")
-    fig.text(L + W - 0.025, y2 + h2 - 0.02, f"{ann[-1]} prévu : {sc[-1]}", fontsize=9, color=C1, va="top", ha="right", fontweight="bold")
+    fig.text(L + W - 0.025, y2 + h2 - 0.02, f"{year_labels[-1]} prévu : {sc[-1]}", fontsize=9, color=C1, va="top", ha="right", fontweight="bold")
     ax = fig.add_axes([L + 0.04, y2 + 0.062, W - 0.10, h2 - 0.105])
-    n = len(ann)
+    n = len(year_labels)
     ax.axhspan(50, 100, color=Z3, alpha=.45, lw=0)
     ax.axhspan(25, 50, color=Z2, alpha=.45, lw=0)
     ax.plot(range(n - 1), sc[:-1], color=FG, lw=2, solid_capstyle="round", zorder=3)
@@ -262,38 +262,38 @@ def make(cle, jeu, out):
     ax.set_ylim(0, 100)
     ax.set_yticks([25, 50])
     ax.set_xticks(range(n))
-    ax.set_xticklabels(ann[:-1] + [f"{ann[-1]}\nprévu"], fontsize=7.5)
+    ax.set_xticklabels(year_labels[:-1] + [f"{year_labels[-1]}\nprévu"], fontsize=7.5)
     ax.get_xticklabels()[-1].set_color(C1)
     ax.get_xticklabels()[-1].set_fontweight("bold")
-    _axes_propres(ax)
+    _clean_axes(ax)
     fig.text(L + 0.025, y2 + 0.013, "Cercle rouge : chute des effectifs de plus de 5 % observée cette année-là   ·   chaque point est calculé avec ce qu'on savait cette année-là",
              fontsize=7.3, color=FG3)
 
     y3, h3 = 0.185, 0.17
     wl = 0.52
-    _carte(fig, L, y3, wl, h3)
-    _carte(fig, L + wl + 0.015, y3, W - wl - 0.015, h3)
+    _card(fig, L, y3, wl, h3)
+    _card(fig, L + wl + 0.015, y3, W - wl - 0.015, h3)
     fig.text(L + 0.025, y3 + h3 - 0.02, "Achèvement du primaire", fontsize=10, fontweight="bold", color=FG, va="top")
     fig.text(L + wl - 0.02, y3 + h3 - 0.02, f"{fr(tap, 1)} % en 24/25", fontsize=8.5, color=FG3, va="top", ha="right")
-    for xl, col, nom in [(L + 0.025, FG, r["nom"]), (L + 0.30, NATC, "Pays")]:
+    for xl, col, region_name in [(L + 0.025, FG, r["nom"]), (L + 0.30, NATC, "Pays")]:
         fig.patches.append(FancyBboxPatch((xl, y3 + h3 - 0.0465), 0.02, 0.0022, boxstyle="round,pad=0,rounding_size=0.001",
                                           transform=fig.transFigure, facecolor=col, edgecolor="none"))
-        fig.text(xl + 0.026, y3 + h3 - 0.04, nom, fontsize=7.8, color=FG2, va="top")
+        fig.text(xl + 0.026, y3 + h3 - 0.04, region_name, fontsize=7.8, color=FG2, va="top")
     ax = fig.add_axes([L + 0.035, y3 + 0.035, wl - 0.10, h3 - 0.095])
-    xs = range(len(jeu["annees"]))
-    ax.plot(xs, jeu["national"]["tap"], color=NATC, lw=1.8, label="Pays")
+    xs = range(len(dataset["annees"]))
+    ax.plot(xs, dataset["national"]["tap"], color=NATC, lw=1.8, label="Pays")
     ax.plot(xs, r["tap"], color=FG, lw=2.2, label=r["nom"])
     pv = r["prevision_2025_26"]
-    k = len(jeu["annees"])
+    k = len(dataset["annees"])
     ax.vlines(k, pv["basse"], pv["haute"], color=Z3, lw=7)
     ax.plot([k - 1, k], [r["tap"][-1], pv["centrale"]], color=FG, lw=1.5, ls=(0, (3, 3)))
     ax.scatter(k, pv["centrale"], s=26, facecolor="white", edgecolor=FG, lw=1.5, zorder=4)
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 50, 100])
     ax.set_xticks([0, k - 1, k])
-    ax.set_xticklabels([jeu["annees"][0], jeu["annees"][-1], "25/26\nprévu"], fontsize=7.5)
+    ax.set_xticklabels([dataset["annees"][0], dataset["annees"][-1], "25/26\nprévu"], fontsize=7.5)
     ax.grid(axis="y", color=LINE, lw=.6)
-    _axes_propres(ax)
+    _clean_axes(ax)
     xv = L + wl + 0.015
     fig.text(xv + 0.02, y3 + h3 - 0.02, "Violence", fontsize=10, fontweight="bold", color=FG, va="top")
     fig.text(L + W - 0.02, y3 + h3 - 0.02, "incidents / an", fontsize=8.5, color=FG3, va="top", ha="right")
@@ -302,15 +302,15 @@ def make(cle, jeu, out):
     ax.bar(range(len(inc)), inc, color=[C3] * (len(inc) - 1) + [FG], width=.72)
     ax.annotate(fr(inc[-1]), (len(inc) - 1, inc[-1]), xytext=(0, 3), textcoords="offset points", ha="center", fontsize=8, fontweight="bold", color=FG)
     ax.set_xticks([0, len(inc) - 1])
-    ax.set_xticklabels([jeu["annees_violence"][0], jeu["annees_violence"][-1]], fontsize=7.5)
+    ax.set_xticklabels([dataset["annees_violence"][0], dataset["annees_violence"][-1]], fontsize=7.5)
     ax.set_yticks([])
-    _axes_propres(ax)
+    _clean_axes(ax)
 
     y4 = 0.168
     fig.text(L, y4, "Leviers", fontsize=10.5, fontweight="bold", color=FG, va="top")
-    leviers = (r["leviers"] + r["leviers_facteurs"])[:3]
+    lever_texts = (r["leviers"] + r["leviers_facteurs"])[:3]
     yy = y4 - 0.022
-    for i, lv in enumerate(leviers):
+    for i, lv in enumerate(lever_texts):
         lines = textwrap.wrap(lv, 105)
         fig.text(L, yy, f"{i + 1}", fontsize=9, fontweight="bold", color=C1, va="top")
         for j, ln in enumerate(lines[:2]):
@@ -337,17 +337,17 @@ def make(cle, jeu, out):
 def main():
     out = "analyse/fiches"
     os.makedirs(out, exist_ok=True)
-    jeu = json.load(open("dashboard/public/data/tableau_de_bord.json", encoding="utf-8"))
-    keys = sys.argv[1:] or [r["cle"] for r in sorted(jeu["regions"], key=lambda r: -jeu["score_global"]["par_region"][r["cle"]])]
+    dataset = json.load(open("dashboard/public/data/tableau_de_bord.json", encoding="utf-8"))
+    keys = sys.argv[1:] or [r["cle"] for r in sorted(dataset["regions"], key=lambda r: -dataset["score_global"]["par_region"][r["cle"]])]
     os.makedirs("dashboard/public/fiches", exist_ok=True)
-    livret = PdfWriter()
+    booklet = PdfWriter()
     for k in keys:
-        slug, nom = make(k, jeu, out)
+        slug, region_name = make(k, dataset, out)
         shutil.copy2(f"{out}/fiche_{slug}.pdf", f"dashboard/public/fiches/{k}.pdf")
-        livret.append(f"{out}/fiche_{slug}.pdf")
-        print("fiche :", nom)
+        booklet.append(f"{out}/fiche_{slug}.pdf")
+        print("fiche :", region_name)
     if not sys.argv[1:]:
-        livret.write("analyse/fiches_regionales_13.pdf")
+        booklet.write("analyse/fiches_regionales_13.pdf")
         print("livret : analyse/fiches_regionales_13.pdf (régions de la plus urgente à la moins urgente)")
 
 

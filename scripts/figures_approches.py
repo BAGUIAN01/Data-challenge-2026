@@ -89,7 +89,7 @@ def cohorts():
     plt.close(fig)
 
 
-PRIO = {1: ("Priorité 1 : agir maintenant", "#104281"), 2: ("Priorité 2 : veille renforcée", "#3987e5"),
+PRIORITY_LABELS = {1: ("Priorité 1 : agir maintenant", "#104281"), 2: ("Priorité 2 : veille renforcée", "#3987e5"),
         3: ("Priorité 3 : consolider", "#b7d3f6")}
 LABEL = {"Liptako + Soum": (0, -13, "center"), "Goulmou + Sirba + Tapoa": (-4, 10, "center"),
          "Koulsé": (6, 8, "left"), "Bankui + Sourou": (0, -13, "center"), "Yaadga": (0, 9, "center"),
@@ -109,7 +109,7 @@ def matrix():
     ax.text(tap_nat + 1, 99, "Moyenne nationale (51,6 %)", fontsize=8, color=MUTED, va="top")
     ax.text(99, 41, "Risque élevé (≥ 40 %)", fontsize=8, color=MUTED, ha="right", va="bottom")
     ax.text(99, 16, "Risque moyen (≥ 15 %)", fontsize=8, color=MUTED, ha="right", va="bottom")
-    for k, (lab, col) in PRIO.items():
+    for k, (lab, col) in PRIORITY_LABELS.items():
         s = m[m.priorite == k]
         ax.scatter(s.TAP_24_25, s.probabilite_baisse_2026_27 * 100, s=90, color=col, edgecolor=INK2,
                    linewidth=0.6, label=lab, zorder=3)

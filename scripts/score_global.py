@@ -13,14 +13,14 @@ sys.path.insert(0, "scripts")
 import solution_prevision
 
 warnings.filterwarnings("ignore")
-POIDS = 0.5
+RISK_WEIGHT = 0.5
 
 
 def score(prob, tap):
-    return 100 * (POIDS * prob + (1 - POIDS) * (1 - tap / 100))
+    return 100 * (RISK_WEIGHT * prob + (1 - RISK_WEIGHT) * (1 - tap / 100))
 
 
-def rejouer(p):
+def replay(p):
     nat = pd.read_csv("analyse/panel_region_annee.csv").query("region == 'NATIONAL'").set_index("annee").TAP_T
     d = p.dropna(subset=["l_inc", "d_l_inc", "y_eleves"]).copy()
     d["y_drop"] = (d.y_eleves < np.log(0.95)).astype(int)
@@ -40,14 +40,14 @@ def rejouer(p):
         tests.append(te)
     t = pd.concat(tests)
     rows = []
-    for nom, col in [("Score global", "score"), ("Risque seul (violence)", "prob"), ("Achèvement seul", "retard")]:
-        pris_b = pris_l = 0
+    for name, col in [("Score global", "score"), ("Risque seul (violence)", "prob"), ("Achèvement seul", "retard")]:
+        caught_drops = caught_lost = 0
         for _, g in t.groupby("annee_t"):
             k = int((g.prio == 1).sum())
             top = g.nlargest(k, col)
-            pris_b += top.y_drop.sum(); pris_l += top.lost.sum()
-        rows.append({"mesure": nom, "AUC_baisse_t+1": roc_auc_score(t.y_drop, t[col]),
-                     "baisses_prises_%": 100 * pris_b / t.y_drop.sum(), "eleves_perdus_pris_%": 100 * pris_l / t.lost.sum()})
+            caught_drops += top.y_drop.sum(); caught_lost += top.lost.sum()
+        rows.append({"mesure": name, "AUC_baisse_t+1": roc_auc_score(t.y_drop, t[col]),
+                     "baisses_prises_%": 100 * caught_drops / t.y_drop.sum(), "eleves_perdus_pris_%": 100 * caught_lost / t.lost.sum()})
     p1 = t.prio == 1
     rows.append({"mesure": "Matrice (priorité 1)", "AUC_baisse_t+1": np.nan,
                  "baisses_prises_%": 100 * t.y_drop[p1].sum() / t.y_drop.sum(), "eleves_perdus_pris_%": 100 * t.lost[p1].sum() / t.lost.sum()})
@@ -56,15 +56,15 @@ def rejouer(p):
           f"à chaque année, autant de régions en tête que la matrice en met en priorité 1 ({int(p1.sum())} au total).")
     print(r.round(2).to_string(index=False))
     r.round(3).to_csv("analyse/P18_score_global_rejoue.csv", index=False)
-    sens = []
+    direction = []
     for w in [0.3, 0.4, 0.5, 0.6, 0.7]:
         s = 100 * (w * t.prob + (1 - w) * (1 - t.TAP_T / 100))
-        sens.append({"poids_risque": w, "AUC_baisse_t+1": roc_auc_score(t.y_drop, s)})
+        direction.append({"poids_risque": w, "AUC_baisse_t+1": roc_auc_score(t.y_drop, s)})
     print("\nSensibilité au poids du risque (pour information, le poids reste 0,5) :")
-    print(pd.DataFrame(sens).round(3).to_string(index=False))
+    print(pd.DataFrame(direction).round(3).to_string(index=False))
 
 
-def trajectoire(p):
+def trajectory(p):
     nat = pd.read_csv("analyse/panel_region_annee.csv").query("region == 'NATIONAL'").set_index("annee").TAP_T
     d = p.copy()
     d["y_drop"] = np.where(d.y_eleves.isna(), np.nan, (d.y_eleves < np.log(0.95)).astype(float))
@@ -79,9 +79,9 @@ def trajectoire(p):
         mdl = make_pipeline(StandardScaler(), LogisticRegression(C=1.0)).fit(tr[["l_inc", "d_l_inc"]], tr.y_drop)
         prob = mdl.predict_proba(te[["l_inc", "d_l_inc"]])[:, 1]
         y0 = int(ty[:4]) + 1
-        cible = solution_prevision.SHORT[f"{y0}-{y0 + 1}"]
+        target_year = solution_prevision.SHORT[f"{y0}-{y0 + 1}"]
         for (_, row), pr in zip(te.iterrows(), prob):
-            out.append({"cle": row.cle, "annee_cible": cible, "probabilite": round(pr, 3),
+            out.append({"cle": row.cle, "annee_cible": target_year, "probabilite": round(pr, 3),
                         "score": round(score(pr, row.TAP_T)), "chute_observee": row.y_drop})
     t = pd.DataFrame(out)
     print(f"\nTrajectoire : {t.annee_cible.nunique()} années rejouées ({', '.join(sorted(t.annee_cible.unique()))}), puis 2026/27.")
@@ -103,9 +103,9 @@ def score_2026():
 def main():
     pd.set_option("display.width", 200)
     p = solution_prevision.build()
-    rejouer(p)
+    replay(p)
     score_2026()
-    trajectoire(p)
+    trajectory(p)
 
 
 if __name__ == "__main__":

@@ -8,8 +8,8 @@ YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 SHORT = {y: y[2:4] + "/" + y[7:] for y in YEARS}
 
 
-def get(d, table, sexe="T", statut="Total", **f):
-    x = d[(d.table == table) & (d.sexe == sexe) & (d.statut == statut)]
+def get(d, table, sex="T", status="Total", **f):
+    x = d[(d.table == table) & (d.sexe == sex) & (d.statut == status)]
     for k, v in f.items():
         x = x[x[k] == v]
     return x
@@ -31,8 +31,8 @@ def main():
         "nouveaux_CP1": wide(get(d, "E5", region="NATIONAL")).iloc[0],
         "TBS_%": wide(get(d, "E7", region="NATIONAL")).iloc[0],
         "TAP_%": wide(get(d, "E8", region="NATIONAL")).iloc[0],
-        "TAP_garcons_%": wide(get(d, "E8", sexe="G", region="NATIONAL")).iloc[0],
-        "TAP_filles_%": wide(get(d, "E8", sexe="F", region="NATIONAL")).iloc[0],
+        "TAP_garcons_%": wide(get(d, "E8", sex="G", region="NATIONAL")).iloc[0],
+        "TAP_filles_%": wide(get(d, "E8", sex="F", region="NATIONAL")).iloc[0],
         "reussite_CEP_%": wide(get(d, "E9", region="NATIONAL")).iloc[0],
     })
     nat.index = [SHORT[y] for y in nat.index]
@@ -40,20 +40,20 @@ def main():
     print("\n=== A. Tendances nationales (primaire) ===")
     print(nat.round(1).to_string())
 
-    eff = wide(get(d, "E1")).drop("NATIONAL")
-    eco = wide(get(d, "E13")).drop("NATIONAL")
+    pupils = wide(get(d, "E1")).drop("NATIONAL")
+    sch = wide(get(d, "E13")).drop("NATIONAL")
     tap = wide(get(d, "E8")).drop("NATIONAL")
-    drawdown = (eff / eff.cummax(axis=1) - 1).min(axis=1)
+    drawdown = (pupils / pupils.cummax(axis=1) - 1).min(axis=1)
     reg = pd.DataFrame({
-        "eleves_max": eff.max(axis=1).astype(int),
-        "annee_max": eff.idxmax(axis=1).map(SHORT),
-        "eleves_2024_25": eff["2024-2025"].astype(int),
+        "eleves_max": pupils.max(axis=1).astype(int),
+        "annee_max": pupils.idxmax(axis=1).map(SHORT),
+        "eleves_2024_25": pupils["2024-2025"].astype(int),
     })
     reg["pire_chute_%"] = (drawdown * 100).round(1)
-    reg["annee_pire_chute"] = (eff / eff.cummax(axis=1) - 1).idxmin(axis=1).map(SHORT)
+    reg["annee_pire_chute"] = (pupils / pupils.cummax(axis=1) - 1).idxmin(axis=1).map(SHORT)
     reg["2024_25_vs_max_%"] = ((reg.eleves_2024_25 / reg.eleves_max - 1) * 100).round(1)
-    reg["ecoles_max"] = eco.max(axis=1).astype(int)
-    reg["ecoles_2024_25"] = eco["2024-2025"].astype(int)
+    reg["ecoles_max"] = sch.max(axis=1).astype(int)
+    reg["ecoles_2024_25"] = sch["2024-2025"].astype(int)
     reg["ecoles_vs_max_%"] = ((reg.ecoles_2024_25 / reg.ecoles_max - 1) * 100).round(1)
     reg["TAP_15_16"] = tap["2015-2016"]
     reg["TAP_21_22"] = tap["2021-2022"]
@@ -67,9 +67,9 @@ def main():
     ni = wide(get(d, "E5")).drop("NATIONAL")
     nat_e = wide(get(d, "E1", region="NATIONAL")).iloc[0]
     nat_ni = wide(get(d, "E5", region="NATIONAL")).iloc[0]
-    ex = pd.DataFrame(index=eff.index)
+    ex = pd.DataFrame(index=pupils.index)
     for t0, t1 in zip(YEARS[:-1], YEARS[1:]):
-        ex[SHORT[t0] + "→" + SHORT[t1]] = ((1 - (eff[t1] - ni[t1]) / eff[t0]) * 100).round(1)
+        ex[SHORT[t0] + "→" + SHORT[t1]] = ((1 - (pupils[t1] - ni[t1]) / pupils[t0]) * 100).round(1)
     ex.loc["NATIONAL"] = [round((1 - (nat_e[t1] - nat_ni[t1]) / nat_e[t0]) * 100, 1) for t0, t1 in zip(YEARS[:-1], YEARS[1:])]
     ex.to_csv(f"{out}/C_sorties_apparentes_par_region.csv")
     print("\n=== C. Sorties apparentes (% des élèves d'une année absents l'année suivante, hors nouveaux CP1) ===")
@@ -101,16 +101,16 @@ def main():
 
     ips = wide(get(d, "E12")).round(2)
     ips.columns = [SHORT[c] for c in ips.columns]
-    tapg = wide(get(d, "E8", sexe="G"))["2024-2025"]
-    tapf = wide(get(d, "E8", sexe="F"))["2024-2025"]
+    tapg = wide(get(d, "E8", sex="G"))["2024-2025"]
+    tapf = wide(get(d, "E8", sex="F"))["2024-2025"]
     gender = pd.DataFrame({"TAP_garcons_24_25": tapg, "TAP_filles_24_25": tapf,
                            "IPS_TAP_15_16": ips["15/16"], "IPS_TAP_24_25": ips["24/25"]}).sort_values("IPS_TAP_24_25")
     gender.to_csv(f"{out}/E_parite_achevement.csv")
     print("\n=== E. Parité filles/garçons de l'achèvement (IPS du TAP : >1 = filles devant) ===")
     print(gender.to_string())
 
-    dl_e = np.log(eff[YEARS[1:]].values / eff[YEARS[:-1]].values).ravel()
-    dl_s = np.log(eco[YEARS[1:]].values / eco[YEARS[:-1]].values).ravel()
+    dl_e = np.log(pupils[YEARS[1:]].values / pupils[YEARS[:-1]].values).ravel()
+    dl_s = np.log(sch[YEARS[1:]].values / sch[YEARS[:-1]].values).ravel()
     slope, intercept = np.polyfit(dl_s, dl_e, 1)
     r2 = np.corrcoef(dl_s, dl_e)[0, 1] ** 2
     print("\n=== F. Écoles en moins et élèves en moins (variations annuelles, 13 régions x 9 années) ===")

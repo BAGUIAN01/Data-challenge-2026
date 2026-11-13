@@ -89,10 +89,10 @@ def main():
         fc[col] = cur.incidents
         fc[f"alerte_{label.split()[1].replace('/', '_')}"] = cur.alerte
     fc["profil"] = None
-    typo = pd.read_csv("analyse/P2_typologie_regions.csv")
-    typo["cle"] = typo.region.map(key)
+    typology = pd.read_csv("analyse/P2_typologie_regions.csv")
+    typology["cle"] = typology.region.map(key)
     prof = {1: "Choc puis reprise partielle", 2: "Effondrement", 3: "Érosion", 4: "Stabilité / accueil"}
-    fc["profil"] = typo.set_index("cle").groupe_k4.map(prof)
+    fc["profil"] = typology.set_index("cle").groupe_k4.map(prof)
     fc = fc.sort_values("TAP_24_25")
     fc.round(1).to_csv("analyse/P9_prevision_2025_26_alerte.csv")
     print("\n--- Tableau de prévision et d'alerte ---")
