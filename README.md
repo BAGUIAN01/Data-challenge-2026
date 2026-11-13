@@ -13,7 +13,8 @@ Data Challenge Burkina, édition Éducation 2026. **Défi 1 : cartographie et an
 | `data/ref/` | Correspondance 13 / 17 régions et fond de carte des 13 régions |
 | `data/externe_propre/` | Sources externes nettoyées, chacune avec sa source |
 | `data/raw/` | Données brutes, **non versionnées** : voir `data/raw/LISEZ-MOI.md` |
-| `dashboard/` | **Le tableau de bord** : application Next.js local-first (fonctionne sans réseau), base Neon. Voir `dashboard/README.md` |
+| `dashboard/` | **Le tableau de bord** : application de téléphone Next.js local-first (fonctionne sans réseau), au niveau des 13 régions, base Neon. Voir `dashboard/README.md` |
+| `maquettes/` | La maquette de l'application, avant le code |
 
 ## Où lire les résultats
 

@@ -7,6 +7,29 @@ Application Next.js du Défi 1. Elle répond à trois questions, région par ré
 
 Elle s'utilise **sans réseau** et garde ses données dans une base **Neon** (PostgreSQL) pour la version en ligne.
 
+Elle ne parle que des **13 régions** : les données du concours ne descendent ni aux provinces ni aux écoles.
+
+## Une application de téléphone
+
+Une seule page (`app/page.js`), gardée par le service worker, dans laquelle on navigue comme dans une application installée. La maquette d'origine est dans `../maquettes/application-mobile/`.
+
+| Onglet | Ce qu'on y trouve |
+| --- | --- |
+| **Carte** | Les 13 régions en trois couches : priorité, risque, achèvement. Le bleu est une seule rampe : plus foncé, plus préoccupant. Toucher une région ouvre son aperçu dans la feuille du bas ; la feuille montre le pays : où agir, les 13 régions sur l'échelle du risque, les élèves, l'achèvement. |
+| **Régions** | La matrice de priorité et la liste des régions, avec des filtres. Chaque région ouvre sa fiche : risque, élèves attendus, achèvement avec la prévision 2025/26, filles et garçons, violence, facteurs, leviers, fiche PDF. |
+| **Alertes** | Le calendrier d'alerte, les saisies d'écoles ouvertes, l'alerte de septembre. |
+| **Plus** | État de la synchronisation, apparence (clair, sombre), installation, méthode et sources. |
+
+Ce qui la rend proche d'une application installée :
+- **gestes** : la carte se pince et se déplace au doigt. La feuille du bas se tire au doigt. Un écran se ferme en glissant depuis le bord gauche ;
+- **navigation** : le bouton retour du téléphone ferme l'écran ouvert, et chaque onglet garde ses écrans ;
+- **adresse d'une région** : chaque région a la sienne (`/#region/NORD`), qui la rouvre même sans réseau ;
+- **installation** : elle s'installe sur l'écran d'accueil, avec ses icônes et son manifeste.
+
+Sur un grand écran, la carte reste à droite et les onglets passent dans un panneau à gauche.
+
+**Le seul geste d'écriture, c'est la saisie des écoles ouvertes à la rentrée.** Les élèves attendus se calculent pendant la frappe. La saisie s'affiche aussitôt. « Annuler » reste proposé 6 secondes, et la saisie ne part pas avant.
+
 ## Comment elle fonctionne sans réseau
 
 | Besoin | Ce qui le permet |
@@ -14,7 +37,7 @@ Elle s'utilise **sans réseau** et garde ses données dans une base **Neon** (Po
 | **Lire** | Les données sont lues d'abord dans la base de l'appareil (IndexedDB, via Dexie). Elles sont mises à jour depuis Neon quand le serveur répond. Si l'appareil n'a encore rien, il utilise le jeu de données publié avec l'application. |
 | **Écrire** | Une saisie (écoles ouvertes à la rentrée) est enregistrée tout de suite sur l'appareil et s'affiche aussitôt. Elle part vers Neon au retour du réseau, avec une clé (`client_id`) qui empêche tout doublon. |
 | **Ouvrir** | Le service worker (Serwist) garde sur l'appareil toutes les pages, les 13 fiches régionales, les scripts, les données et les fiches PDF. Aucune page ne lit le serveur au moment où elle s'affiche. |
-| **Dire** | Un bandeau indique d'où viennent les données (« Sans réseau : données de cet appareil, reçues le… ») et combien de saisies attendent le réseau. |
+| **Dire** | Un bandeau en haut indique quand on est hors ligne (« Hors ligne · données de ce téléphone, reçues le… ») et combien de saisies attendent le réseau. Le sous-titre de la carte dit toujours de quelle version des données il s'agit. |
 | **Prouver** | `npm run verif:hors-ligne` vérifie tout cela dans un vrai navigateur, **serveur arrêté**. Avec le service worker bloqué (`VERIF_SABOTAGE=1`), le contrôle échoue, comme il doit. |
 
 ## Lancer en local
@@ -57,7 +80,13 @@ L'application s'ouvre sur http://localhost:3000.
    npm run verif:aller-retour
    ```
 
-**En ligne (Vercel, par exemple)** : déclarez `DATABASE_URL` dans les variables d'environnement du projet, avec `dashboard` comme dossier racine.
+## Mettre en ligne (Vercel et Neon)
+
+1. Sur vercel.com, **importez le dépôt** et choisissez `dashboard` comme dossier racine (Root Directory). Next.js est reconnu tout seul.
+2. Dans l'onglet *Storage* du projet, **ajoutez une base Neon** : Vercel déclare `DATABASE_URL` lui-même.
+3. **Redéployez.** La commande de construction (`vercel-build`) applique le schéma et charge les données dans la base (`db/preparer.mjs`), puis construit l'application. Il n'y a aucune étape à faire à la main.
+
+Sans base, le déploiement fonctionne aussi : l'application utilise les données publiées avec elle, et les saisies restent sur les téléphones (« base en ligne non configurée »).
 
 **Le schéma** (`db/schema.sql`) :
 - `jeu_donnees` : les versions publiées, dont une seule est active ;
@@ -89,9 +118,10 @@ Les phrases et les leviers de chaque région viennent de la même fonction que l
 | Commande | Ce qu'elle garantit |
 | --- | --- |
 | `npm run verif:aller-retour` | Les 1 425 valeurs relues dans la base sont celles du fichier exporté. Vu en échec quand une valeur est modifiée en base. |
-| `npm run verif:hors-ligne` | Serveur arrêté : les 5 pages s'ouvrent (dont une jamais visitée), le disent, la fiche PDF se télécharge, une saisie est gardée. Au retour du serveur, elle arrive dans la base, une seule fois. Vu en échec avec le service worker bloqué. |
+| `npm run verif:hors-ligne` | Sur un écran d'iPhone, serveur arrêté, les points suivants sont vérifiés. Vu en échec avec le service worker bloqué. <ul><li>l'application s'ouvre sur une région par son adresse et dit qu'elle est hors ligne ;</li><li>le retour, un lien vers une autre région et les quatre onglets fonctionnent ;</li><li>la fiche PDF est servie ;</li><li>une saisie est gardée et comptée ;</li><li>au retour du serveur, la saisie arrive dans la base, une seule fois.</li></ul> |
+| `npm run verif:ecran` | Sur un téléphone de 360 px, au toucher, les points suivants sont vérifiés. Vu en échec, point par point, avec `VERIF_SABOTAGE=1`. <ul><li>rien ne dépasse de l'écran, sur les quatre onglets ;</li><li>les noms de la carte ne se chevauchent pas ;</li><li>le retour du téléphone ferme une région sans quitter l'application ;</li><li>un glissement depuis le bord ferme l'écran ;</li><li>la feuille du bas se pose à une hauteur de repos ;</li><li>aucune erreur dans la console.</li></ul> |
 
-`verif:hors-ligne` demande Playwright (`npm i -D playwright`) et une base de test dans `DATABASE_URL`.
+Les deux contrôles demandent Playwright (`npm i -D playwright`). `verif:hors-ligne` demande aussi une base de test dans `DATABASE_URL`, ce que `verif:ecran` ne demande pas.
 
 ## Avant un usage réel
 

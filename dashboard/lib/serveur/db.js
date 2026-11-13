@@ -13,7 +13,8 @@ export function sql() {
     if (!url) throw new Error("DATABASE_URL absent");
     // Neon requires TLS; a local database (tests) usually does not.
     const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url) || url.includes("host=/");
-    client = postgres(url, { ssl: local ? false : "require", max: 5, idle_timeout: 20, prepare: false });
+    // Notices ("already exists, skipping" when the idempotent schema runs again) are not errors.
+    client = postgres(url, { ssl: local ? false : "require", max: 5, idle_timeout: 20, prepare: false, onnotice: () => {} });
   }
   return client;
 }

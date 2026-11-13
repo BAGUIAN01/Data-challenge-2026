@@ -3,10 +3,10 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import withSerwistInit from "@serwist/next";
 
-// Pages to keep on the device at install time. The revision changes at every build, so that a new
+// The app is one page, kept on the device at install time. The revision changes at every build, so that a new
 // build replaces the pages (their scripts change names from one build to the next).
 const jeu = JSON.parse(readFileSync(new URL("./public/data/tableau_de_bord.json", import.meta.url), "utf8"));
-const pages = ["/", "/priorites", "/alertes", "/methode", ...jeu.regions.map((r) => `/region/${r.cle}`)];
+const pages = ["/"];
 const revision = `${jeu.version}-${Date.now()}`;
 
 // Files of public/ (data snapshot, PDF fiches, icon, manifest). Serwist stops scanning public/ as

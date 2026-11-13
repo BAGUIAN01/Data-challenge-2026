@@ -6,6 +6,9 @@
 
 export const DERNIERE_ANNEE = "2024-2025";
 
+// School years a field entry can be made for.
+export const ANNEES_SAISIE = ["2025-2026", "2026-2027"];
+
 export function anneesDepuisAnnuaire(annee) {
   return Number(annee.slice(0, 4)) - Number(DERNIERE_ANNEE.slice(0, 4));
 }
