@@ -114,13 +114,13 @@ Les cahiers reprennent le code des scripts, étape par étape ; les relancer red
 python rapport/construire_rapport.py
 ```
 
-**9. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
+**9. Soumission** (fichiers prêts à téléverser, rangés comme sur la plateforme : données, code, documentation ; 20 fichiers au plus, aucun nom d'équipe)
 
 ```bash
-python scripts/construire_depots.py Biiga --depuis <référence de la dernière livraison>
+python scripts/construire_soumission.py
 ```
 
-Le résultat va dans `depots/`, qui n'est pas suivi par git.
+Le résultat va dans `soumission/`, qui n'est pas suivi par git.
 
 ## Principes
 
