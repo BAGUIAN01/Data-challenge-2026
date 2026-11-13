@@ -88,8 +88,8 @@
   "version": 1
  },
  "03-architect-dictionnaire-variables.md": {
-  "signature": "cd8c547cdd53e72011cb7fed6ed4632a",
-  "version": 1
+  "signature": "5681f41566a4e369203099df96e8dada",
+  "version": 2
  },
  "03-architect-parcours-donnees.md": {
   "signature": "9fde4ae64057bbfb398ddc5a27edc8e9",
@@ -304,7 +304,7 @@
   "version": 1
  },
  "05-analyst-tableau-de-bord-local-first.zip": {
-  "signature": "ec3f0bc00d0b6667882973f3e2c4d8bc58806eae",
+  "signature": "0e155096e7487c4f72bac62728fcb446fa702bdc",
   "version": 5
  },
  "05-scientist-alertes-calendrier.csv": {
@@ -320,7 +320,7 @@
   "version": 1
  },
  "05-scientist-projet-complet-relancable.zip": {
-  "signature": "1bec36f0abf246e9cf6f71e5197140cf",
+  "signature": "b9a8646df629e8c05d691c022887aaaa",
   "version": 6
  },
  "05-scientist-risque-2026-27.png": {
