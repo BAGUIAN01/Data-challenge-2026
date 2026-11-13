@@ -148,7 +148,7 @@ export function VuePlus({ jeu, donnees, theme, setTheme, installer, nav }) {
       <section className="group">
         <div className="row" style={{ "--inset": "14px" }}><span className="t"><b className="l">Apparence</b></span>
           <span className="seg2" role="group" aria-label="Apparence">
-            {[["auto", "Auto"], ["light", "Clair"], ["dark", "Sombre"]].map(([k, l]) => <button key={k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{l}</button>)}
+            {[["light", "Clair"], ["dark", "Sombre"], ["auto", "Auto"]].map(([k, l]) => <button key={k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{l}</button>)}
           </span>
         </div>
         {installer && (

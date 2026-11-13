@@ -61,7 +61,7 @@ function Coque({ donnees }) {
   const [cran, setCran] = useState("bas");
   const [filtre, setFiltre] = useState("toutes");
   const [commande, setCommande] = useState({ n: 0 });
-  const [theme, setThemeEtat] = useState("auto");
+  const [theme, setThemeEtat] = useState("light"); // light by default
   const [q, setQ] = useState("");
   const [installer, setInstaller] = useState(null);
   const [envoye, setEnvoye] = useState(false);
@@ -177,12 +177,12 @@ function Coque({ donnees }) {
 
   // ---------- Theme, installation, deep link, send feedback ----------
   useEffect(() => {
-    try { const t = localStorage.getItem("theme"); if (t === "light" || t === "dark") setThemeEtat(t); } catch { /* private mode */ }
+    try { const t = localStorage.getItem("theme"); if (t === "dark" || t === "auto") setThemeEtat(t); } catch { /* private mode */ }
   }, []);
   const setTheme = useCallback((t) => {
     setThemeEtat(t);
-    if (t === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
-    try { if (t === "auto") localStorage.removeItem("theme"); else localStorage.setItem("theme", t); } catch { /* private mode */ }
+    if (t === "light") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+    try { if (t === "light") localStorage.removeItem("theme"); else localStorage.setItem("theme", t); } catch { /* private mode */ }
   }, []);
   useEffect(() => {
     const autonome = matchMedia("(display-mode: standalone)").matches || navigator.standalone;

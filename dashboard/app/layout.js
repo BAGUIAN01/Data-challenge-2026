@@ -16,14 +16,11 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f3f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#07090d" },
-  ],
+  themeColor: "#f2f3f6", // light by default, whatever the phone's setting
 };
 
 // Applies the theme chosen on this device before the first paint (no flash of the other theme).
-const THEME = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+const THEME = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="auto")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({ children }) {
   return (

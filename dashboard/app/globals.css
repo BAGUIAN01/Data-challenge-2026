@@ -12,8 +12,9 @@
   --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
   color-scheme: light;
 }
+/* Light by default. Dark only when chosen: « Sombre », or « Auto » with a phone set to dark. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root[data-theme="auto"] {
     --bg: #0e131c; --grouped: #07090d; --card: #141a24; --fill: rgba(118, 118, 128, .24); --press: #1d2431;
     --fg: #e8ecf2; --fg-2: #a3adbb; --fg-3: #7b8696; --line: #222a37; --edge: #2c3646; --land: #121823;
     --c1: #9ec5f4; --c2: #3987e5; --c3: #184f95; --c1-t: #0b0b0b; --c2-t: #0b0b0b; --c3-t: #f0efec;
