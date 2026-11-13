@@ -18,6 +18,8 @@ import { couches, PRIORITES, risque, scoreGlobal } from "@/lib/regles";
 const ONGLETS = [["carte", "Carte", IcCarte], ["regions", "Régions", IcRegions], ["alertes", "Alertes", IcAlertes], ["plus", "Plus", IcPlus]];
 const TITRES = { carte: "Carte", regions: "Régions", alertes: "Alertes", plus: "Plus" };
 const TITRES_ECRANS = { methode: "Méthode", sources: "Sources", attente: "En attente d'envoi" };
+// Short legend labels for a phone, where the legend shares its row with the year player.
+const COURT = ["50+", "25–49", "< 25"];
 const DUREE = 450;
 const nSaisies = (n) => (n === 1 ? "1 saisie" : `${n} saisies`);
 
@@ -291,7 +293,7 @@ function Coque({ donnees }) {
               </div>
             )}
             <div className="ctrl">
-              <div className="mleg"><b>{traj ? "Score" : "Score de risque"}</b>{COUCHES[couche].legende.map((l, k) => <span key={l}><i className="m" style={{ "--c": `var(--c${k + 1})` }} />{l}</span>)}</div>
+              <div className="mleg"><b>{traj ? "Score" : "Score de risque"}</b>{COUCHES[couche].legende.map((l, k) => <span key={l}><i className="m" style={{ "--c": `var(--c${k + 1})` }} /><span className="long">{l}</span><span className="court">{COURT[k] ?? l}</span></span>)}</div>
             </div>
           </div>
           {traj && <div className="lect-zone"><Lecteur traj={traj} carte={carteApi} /></div>}

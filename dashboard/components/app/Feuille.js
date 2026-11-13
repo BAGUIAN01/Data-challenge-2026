@@ -10,7 +10,7 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const grandEcran = () => matchMedia("(min-width: 900px)").matches;
 
 export function hauteurCran(c, H) {
-  return c === "bas" ? 214 : c === "mi" ? Math.round(H * 0.58) : H - 8;
+  return c === "bas" ? 176 : c === "mi" ? Math.round(H * 0.58) : H - 8;
 }
 
 export default function Feuille({ cran, setCran, tete, children, defilement }) {

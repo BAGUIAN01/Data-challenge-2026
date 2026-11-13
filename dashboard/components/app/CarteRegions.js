@@ -91,7 +91,7 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
         // Region names, as on the colour map, written just under the foot of each bar. The full-height
         // bars and their values are reserved first; a name that would cross one of them, or another
         // name, is left out (biggest regions first, the selected one always).
-        const tn = (W < 600 ? 12.5 : 14) * k, mn = 2 * k, pris2 = [];
+        const tn = (W < 600 ? 13 : 14) * k, mn = 2 * k, pris2 = [];
         for (const r of R) {
           const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.barres(r) ?? 0, hp = Math.max(2 * k, (v / 100) * Hm);
           pris2.push([f.lx + dx - w / 2, f.ly + dy - hp - 6 * k - fs, f.lx + dx + w / 2, f.ly + dy]);
@@ -132,8 +132,11 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
     // Viewbox that fits a box in the visible part of the map (between the controls and the sheet).
     function cible(box, marge = 1.06) {
       const W = svg.clientWidth, H = svg.clientHeight, { haut, bas } = s.marges(), visH = Math.max(120, H - haut - bas);
-      const [x, y, w, h] = box, z = Math.max(w / (W - 24), h / visH) * marge, cx = x + w / 2, cy = y + h / 2;
-      return { x: cx - (W / 2) * z, y: cy - (haut + visH / 2) * z, w: W * z, h: H * z };
+      const [x, y, w, h] = box, z = Math.max(w / (W - 12), h / visH) * marge, cx = x + w / 2, cy = y + h / 2;
+      // Pinned under the controls when there is height to spare (a phone is limited by its width):
+      // the free space goes to the bottom, the map sits close to the bars' headroom.
+      const hPx = h / z, centre = haut + Math.min(visH, hPx) / 2;
+      return { x: cx - (W / 2) * z, y: cy - centre * z, w: W * z, h: H * z };
     }
     function aller(to, ms = 420) {
       cancelAnimationFrame(anim);
@@ -209,9 +212,9 @@ export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir
 
     api.current = {
       render,
-      pays: () => aller(cible([0, 0, L, Hc])),
+      pays: () => aller(cible([0, 0, L, Hc], 1.0)),
       region: (cle) => aller(cible(boites[cle], 1.6)),
-      immediat: () => { vb = cible([0, 0, L, Hc]); render(); },
+      immediat: () => { vb = cible([0, 0, L, Hc], 1.0); render(); },
       // Bars move to the current values: from 0 the first time, from what is shown afterwards.
       fixer: (fn) => { fixe = fn; if (!fn) { depart = { ...arrivee }; avance = 1; } render(); },
       pousser: () => {
