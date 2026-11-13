@@ -18,15 +18,27 @@ export const PRIORITES = {
 // Exposure tier of a factor: 1 = among the 4 most exposed regions, 3 = among the 4 least exposed.
 export const EXPOSITION = { 1: "forte", 2: "moyenne", 3: "faible" };
 
-// Most urgent first: priority, then the lowest completion rate.
-export function trierRegions(regions) {
-  return [...regions].sort((a, b) => a.priorite - b.priorite || a.tap.at(-1) - b.tap.at(-1));
+// Global score (scripts/score_global.py): 100 x (0.5 x risk + 0.5 x share of children who do not
+// complete primary). Computed once in the analysis, read here from the data set.
+export const scoreGlobal = (jeu, r) => jeu?.score_global?.par_region?.[r.cle] ?? null;
+export const niveauScore = (s) => (s >= 50 ? "élevé" : s >= 25 ? "moyen" : "faible");
+export const ZONES_SCORE = [[0, 25, "faible", "var(--z1)"], [25, 50, "moyen", "var(--z2)"], [50, 100, "élevé", "var(--z3)"]];
+
+// Most urgent first: priority, then the global score (when the data set has it), then the lowest completion.
+export function trierRegions(regions, jeu) {
+  const s = (r) => scoreGlobal(jeu, r) ?? 0;
+  return [...regions].sort((a, b) => a.priorite - b.priorite || s(b) - s(a) || a.tap.at(-1) - b.tap.at(-1));
 }
 
 // Map layers share one ordinal blue ramp: class 1 (darkest in light mode) is the most worrying.
-export function couches(seuils) {
+export function couches(jeu) {
+  const seuils = jeu.seuils;
   const nat = seuils.tap_national.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const score = jeu.score_global
+    ? { score: { nom: "Score", classe: (r) => { const s = scoreGlobal(jeu, r) ?? 0; return s >= 50 ? 1 : s >= 25 ? 2 : 3; }, legende: ["Score de 50 et plus", "25 à 49", "Moins de 25"] } }
+    : {};
   return {
+    ...score,
     risque: {
       nom: "Risque",
       classe: (r) => (risque(r) >= seuils.risque_eleve ? 1 : risque(r) >= seuils.risque_moyen ? 2 : 3),

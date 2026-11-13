@@ -62,6 +62,35 @@ La priorité croise ce risque avec le taux d'achèvement 2024/25 ($TAP$), compar
 
 Ces probabilités classent bien les régions, mais restent approximatives (Brier 0,166 contre 0,169 pour le taux de base) : on lit des niveaux, pas des pourcentages exacts.
 
+## Le score global : les deux formes de décrochage en un chiffre
+
+$$
+\text{score} = 100 \times \Big( 0{,}5 \cdot p + 0{,}5 \cdot \big(1 - \tfrac{TAP}{100}\big) \Big)
+$$
+
+- $p$ : la probabilité de chute des effectifs (la formule ci-dessus). Elle mesure le décrochage **brutal**, porté par la violence.
+- $1 - TAP/100$ : la part d'enfants qui n'achèvent pas le primaire. Elle mesure le décrochage **lent** : pauvreté, faim, grossesses précoces, instruction des mères.
+- **Les poids** (moitié, moitié) ont été fixés avant le test. Les bornes sont fixes (0 et 1) : le score d'une région ne dépend que de ses propres données.
+
+**Exemple, Yaadga.** $p = 0{,}55$ et $TAP = 46{,}4\ \%$, donc score $= 100 \times (0{,}5 \times 0{,}55 + 0{,}5 \times 0{,}536) = 54$. Yaadga est 4e sur 13.
+
+Les cinq régions en tête du score (Goulmou + Sirba + Tapoa 66, Liptako + Soum 65, Koulsé 60, Yaadga 54, Bankui + Sourou 52) sont exactement les cinq régions en priorité 1. Calcul : `scripts/score_global.py`, résultats dans `analyse/P18_*.csv`.
+
+**Rejoué sur le passé** (2019/20 à 2023/24, avec seulement l'information de chaque année) :
+
+| Mesure | AUC, chute de l'année suivante | Fortes baisses repérées | Élèves perdus repérés |
+| --- | --- | --- | --- |
+| Score global | 0,80 | 64 % | 65 % |
+| Risque seul | 0,83 | 64 % | 65 % |
+| Achèvement seul | 0,72 | 71 % | 69 % |
+| Priorité 1 de la matrice | — | 71 % | 69 % |
+
+Pour comparer à égalité, on retient chaque année autant de régions que la matrice en met en priorité 1.
+
+**Ce qu'on en retient : le score résume, il ne cible pas mieux.** Il est affiché comme résumé lisible. Pour cibler, la règle reste la priorité de la matrice : sur le passé, elle repère plus de fortes baisses et plus d'élèves perdus.
+
+Changer le poids du risque entre 0,3 et 0,7 fait varier l'AUC de 0,77 à 0,81. Ce test est donné pour information : il n'a pas servi à choisir le poids.
+
 ## Les deux autres prévisions de l'application
 
 - **Élèves de l'année, à partir des écoles ouvertes à la rentrée** (D13) : $\ln(E_{t+n}/E_{2024/25}) = 0{,}0197\,n + 0{,}7784 \cdot \ln(O_{t+n}/O_{2024/25})$.

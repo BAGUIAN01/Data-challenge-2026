@@ -6,7 +6,7 @@ import { Bande, Courbe, Echelle, Fourchette, Matrice, Pile } from "./Graphes";
 import { Chevron } from "./icones";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, couches, niveau, PRIORITES, risque, signe } from "@/lib/regles";
+import { alerteSeptembre, centaine, couches, niveau, niveauScore, PRIORITES, risque, scoreGlobal, signe, ZONES_SCORE } from "@/lib/regles";
 
 const pctFr = (v, d = 1) => `${fr(v, d)} %`;
 
@@ -48,9 +48,27 @@ export function CartePriorites({ jeu, onFiltre }) {
   );
 }
 
+// The global score of the 13 regions on one strip. It sums up both forms of dropout; the priority
+// stays the rule for targeting (it did better on the past, and the card says so).
+export function CarteScore({ jeu, onOuvrir }) {
+  const [lu, setLu] = useState(null);
+  if (!jeu.score_global) return null;
+  const C = couches(jeu).score, n = jeu.regions.filter((r) => (scoreGlobal(jeu, r) ?? 0) >= 50).length;
+  const r = lu && jeu.regions.find((x) => x.cle === lu);
+  return (
+    <section className="card" aria-label="Score global de décrochage">
+      <div className="ch"><b>Score global de décrochage</b><span>{r ? `${r.nom} · ${scoreGlobal(jeu, r)}/100` : "Toucher un point"}</span></div>
+      <div className="kpi"><b className="num">{n}</b><span className="u">régions à 50 ou plus, sur 100</span></div>
+      <Bande points={jeu.regions.map((x) => ({ id: x.cle, nom: x.nom, v: scoreGlobal(jeu, x) ?? 0, c: `var(--c${C.classe(x)})` }))}
+        seuils={jeu.seuils} zones={ZONES_SCORE} lu={lu} onLire={setLu} onOuvrir={onOuvrir} />
+      <p className="foot">Moitié risque de chute des effectifs (la violence), moitié part d'enfants qui n'achèvent pas le primaire : le brutal et le lent.</p>
+    </section>
+  );
+}
+
 export function CarteBande({ jeu, onOuvrir }) {
   const [lu, setLu] = useState(null);
-  const C = couches(jeu.seuils).risque, n = jeu.regions.filter((r) => risque(r) >= jeu.seuils.risque_eleve).length;
+  const C = couches(jeu).risque, n = jeu.regions.filter((r) => risque(r) >= jeu.seuils.risque_eleve).length;
   const r = lu && jeu.regions.find((x) => x.cle === lu);
   return (
     <section className="card" aria-label="Où le risque monte">
@@ -119,7 +137,7 @@ export function BlocEstimation({ jeu, region, annee, ecoles }) {
 
 export function CarteMatrice({ jeu, onOuvrir }) {
   const [lu, setLu] = useState(null);
-  const C = couches(jeu.seuils).priorite, r = lu && jeu.regions.find((x) => x.cle === lu);
+  const C = couches(jeu).priorite, r = lu && jeu.regions.find((x) => x.cle === lu);
   return (
     <section className="card">
       <div className="ch"><b>Matrice de priorité</b><span>{r ? `${r.nom} · ${pctFr(r.tap.at(-1))} · ${risque(r)} %` : "Toucher un point"}</span></div>

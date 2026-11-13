@@ -2,11 +2,11 @@
 // Content of the screens: the country summary (sheet over the map), the region preview, the tab
 // roots (Régions, Alertes, Plus) and the pushed screens (region, method, sources, pending entries).
 import { useEffect, useRef, useState } from "react";
-import { BlocEstimation, CarteBande, CarteCalendrier, CarteElevesPays, CarteMatrice, CartePriorites, CarteRisque, CarteTapPays } from "./Cartes";
+import { BlocEstimation, CarteBande, CarteCalendrier, CarteElevesPays, CarteMatrice, CartePriorites, CarteRisque, CarteScore, CarteTapPays } from "./Cartes";
 import { Chevron, IconeApp } from "./icones";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { ANNEES_SAISIE, estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, PRIORITES, risque, trierRegions } from "@/lib/regles";
+import { alerteSeptembre, centaine, PRIORITES, risque, scoreGlobal, trierRegions } from "@/lib/regles";
 
 export function derniere(saisies, cle) {
   return saisies.filter((s) => s.cle === cle).sort((a, b) => String(b.saisi_le).localeCompare(String(a.saisi_le)))[0] ?? null;
@@ -35,13 +35,14 @@ function Silhouette({ jeu, cle, c }) {
   return <svg viewBox={`${x - m} ${y - m} ${w + 2 * m} ${h + 2 * m}`} aria-hidden="true"><path d={jeu.carte.regions[cle].d} fill={`var(--c${c})`} /></svg>;
 }
 
-export function LigneRegion({ jeu, r, onOuvrir, valeur = "risque" }) {
-  const v = valeur === "sept" ? alerteSeptembre(r) : risque(r);
+export function LigneRegion({ jeu, r, onOuvrir, valeur = "score" }) {
+  const s = scoreGlobal(jeu, r), montre = valeur === "score" && s !== null ? "score" : valeur === "score" ? "risque" : valeur;
+  const v = montre === "sept" ? `${alerteSeptembre(r)} %` : montre === "risque" ? `${risque(r)} %` : s;
   return (
     <button className="row" onClick={() => onOuvrir(r.cle)}>
       <span className="lead"><Silhouette jeu={jeu} cle={r.cle} c={r.priorite} /></span>
       <span className="t"><b>{r.nom}</b><span>{PRIORITES[r.priorite].libelle} · achèvement {fr(r.tap.at(-1), 1)} %</span></span>
-      <span className="v num">{v} %<small>{valeur === "sept" ? "septembre" : "risque"}</small></span><Chevron />
+      <span className="v num">{v}<small>{montre === "sept" ? "septembre" : montre === "risque" ? "risque" : "score /100"}</small></span><Chevron />
     </button>
   );
 }
@@ -50,12 +51,13 @@ export function ResumePays({ jeu, saisies, nav }) {
   const nb = new Set(saisies.map((s) => s.cle)).size;
   return (
     <>
+      <CarteScore jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <CarteBande jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <CartePriorites jeu={jeu} onFiltre={(f) => nav.ongletRegions(f)} />
       <CarteElevesPays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
       <CarteTapPays jeu={jeu} />
       <div className="sh">Régions<span>de la plus urgente à la moins urgente</span></div>
-      <div className="group">{trierRegions(jeu.regions).map((r) => <LigneRegion key={r.cle} jeu={jeu} r={r} onOuvrir={nav.ouvrirRegion} />)}</div>
+      <div className="group">{trierRegions(jeu.regions, jeu).map((r) => <LigneRegion key={r.cle} jeu={jeu} r={r} onOuvrir={nav.ouvrirRegion} />)}</div>
     </>
   );
 }
@@ -76,7 +78,7 @@ export function VueRegions({ jeu, filtre, setFiltre, nav }) {
   const n = (f) => jeu.regions.filter(f).length;
   const FIL = [["toutes", "Toutes", jeu.regions.length], ...[1, 2, 3].map((p) => [`p${p}`, `Priorité ${p}`, n((r) => r.priorite === p)]),
     ["eleve", "Risque élevé", n((r) => risque(r) >= jeu.seuils.risque_eleve)]];
-  const liste = trierRegions(jeu.regions).filter((r) => filtre === "toutes" || (filtre === "eleve" ? risque(r) >= jeu.seuils.risque_eleve : `p${r.priorite}` === filtre));
+  const liste = trierRegions(jeu.regions, jeu).filter((r) => filtre === "toutes" || (filtre === "eleve" ? risque(r) >= jeu.seuils.risque_eleve : `p${r.priorite}` === filtre));
   return (
     <>
       <p className="sub" style={{ marginTop: 0 }}>De la plus urgente à la moins urgente</p>
@@ -208,12 +210,35 @@ function FormuleRisque({ jeu }) {
   );
 }
 
+// The global score written out, with its replay on the past, said as it came out.
+function FormuleScore({ jeu }) {
+  const g = jeu.score_global;
+  if (!g) return null;
+  const r = jeu.regions.find((x) => x.cle === "NORD") ?? jeu.regions[0], w = g.poids_risque, rj = g.rejoue;
+  return (
+    <section className="card">
+      <div className="ch"><b>Le score global</b><span>sur 100</span></div>
+      <p className="formule">score = 100 × ( {fr(w, 1)} × p + {fr(1 - w, 1)} × (1 − TAP / 100) )</p>
+      <ul className="plain">
+        <li><b>p</b> : la probabilité de chute des effectifs (la formule ci-dessus), le décrochage brutal.</li>
+        <li><b>1 − TAP / 100</b> : la part d'enfants qui n'achèvent pas le primaire, le décrochage lent.</li>
+        <li>Les deux comptent autant ; ce choix a été fixé avant le test.</li>
+      </ul>
+      <p className="para">Exemple, {r.nom} : p = {risque(r)} %, TAP = {fr(r.tap.at(-1), 1)} %, score = {scoreGlobal(jeu, r)}.</p>
+      <p className="foot">Rejoué sur 2019/20 à 2023/24 : les régions en tête du score contenaient {rj.baisses_score_pct} % des fortes baisses de l'année suivante
+        et {rj.perdus_score_pct} % des élèves perdus, contre {rj.baisses_matrice_pct} % et {rj.perdus_matrice_pct} % pour la priorité 1. Le score résume ; pour cibler,
+        la priorité reste la règle.</p>
+    </section>
+  );
+}
+
 export function CorpsMethode({ jeu }) {
   const v = jeu.validation;
   return (
     <>
       <p className="sub" style={{ marginTop: 0 }}>Ce que l'outil sait faire, avec quelle fiabilité, et ce qu'il ne sait pas faire.</p>
       <FormuleRisque jeu={jeu} />
+      <FormuleScore jeu={jeu} />
       <section className="card"><div className="ch"><b>Où agir en premier</b></div>
         <p className="para">Achèvement sous la moyenne du pays et risque élevé : priorité 1. Rejouée sur 2019/20 à 2023/24 avec seulement l'information de
           chaque année, elle désignait {v.matrice_regions_pct} % des régions, mais contenait {v.matrice_baisses_pct} % des fortes baisses de l'année suivante
@@ -265,7 +290,7 @@ export function CorpsAttente({ jeu, saisies, nav }) {
 
 // The one write gesture: number of schools open at the start of the year, for a region and a year.
 export function FormSaisie({ jeu, cleInitiale, onEnregistrer }) {
-  const regions = trierRegions(jeu.regions);
+  const regions = trierRegions(jeu.regions, jeu);
   const [cle, setCle] = useState(cleInitiale ?? regions[0].cle);
   const [annee, setAnnee] = useState(ANNEES_SAISIE[0]);
   const [texte, setTexte] = useState("");

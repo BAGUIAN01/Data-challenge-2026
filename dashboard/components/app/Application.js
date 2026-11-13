@@ -54,7 +54,7 @@ function Coque({ donnees }) {
   const [piles, setPiles] = useState({ carte: [], regions: [], alertes: [], plus: [] });
   const [modal, setModal] = useState(null);
   const [snack, setSnack] = useState(null);
-  const [couche, setCouche] = useState("risque");
+  const [couche, setCouche] = useState(() => (jeu.score_global ? "score" : "risque"));
   const [apercu, setApercu] = useState(null);
   const [cran, setCran] = useState("bas");
   const [filtre, setFiltre] = useState("toutes");
@@ -67,7 +67,7 @@ function Coque({ donnees }) {
   etat.current = { ...etat.current, onglet, modal, cran };
   if (!etat.current.piles) etat.current.piles = piles;
   const ignorer = useRef(0), compteur = useRef(0), tabsRef = useRef(null), barreRef = useRef(null), zoneRef = useRef(null), envoiAvant = useRef(false);
-  const COUCHES = useMemo(() => couches(jeu.seuils), [jeu]);
+  const COUCHES = useMemo(() => couches(jeu), [jeu]);
   const enAttente = saisies.filter((s) => s.statut === "en_attente").length;
 
   // ---------- Stacks ----------

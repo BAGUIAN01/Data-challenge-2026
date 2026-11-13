@@ -78,6 +78,21 @@ def formule_risque():
     return out
 
 
+def score_global():
+    """Global score per region and its replay on the past (scripts/score_global.py). Stored with the
+    data set's parameters: one computation (Python), read as is by the app and the database."""
+    s = pd.read_csv("analyse/P18_score_global_2026_27.csv").set_index("region_2025").score_global
+    names = {v: k for k, v in fiches.load()[0].drop_duplicates("cle").set_index("cle").region_2025.items()}
+    rj = pd.read_csv("analyse/P18_score_global_rejoue.csv").set_index("mesure")
+    return {"poids_risque": 0.5, "par_region": {names[n]: int(v) for n, v in s.items()},
+            "rejoue": {"auc_score": round(float(rj.loc["Score global", "AUC_baisse_t+1"]), 2),
+                       "auc_risque": round(float(rj.loc["Risque seul (violence)", "AUC_baisse_t+1"]), 2),
+                       "baisses_score_pct": round(float(rj.loc["Score global", "baisses_prises_%"])),
+                       "baisses_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "baisses_prises_%"])),
+                       "perdus_score_pct": round(float(rj.loc["Score global", "eleves_perdus_pris_%"])),
+                       "perdus_matrice_pct": round(float(rj.loc["Matrice (priorité 1)", "eleves_perdus_pris_%"]))}}
+
+
 def main():
     data = fiches.load()
     p = data[0]
@@ -131,6 +146,7 @@ def main():
                        "matrice_regions_pct": 35, "matrice_baisses_pct": 71, "matrice_perdus_pct": 69},
         "facteurs_def": [{"id": fid, "libelle": lab, "unite": u, "haut_expose": up} for fid, lab, u, up, _ in FACTORS],
         "formule_risque": formule_risque(),
+        "score_global": score_global(),
         "carte": carte(),
         "regions": regions,
     }

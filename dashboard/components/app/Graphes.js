@@ -109,8 +109,8 @@ export function zonesRisque(seuils) {
 }
 
 // Probability on its scale; p2 (optional) is a second reading shown as a ring.
-export function Echelle({ p, p2, seuils, actif, label }) {
-  const z = zonesRisque(seuils);
+export function Echelle({ p, p2, seuils, actif, label, zones }) {
+  const z = zones ?? zonesRisque(seuils);
   return (
     <div className="scale" role="img" aria-label={label}>
       <div className="zs">{z.map(([a, b, , c]) => <i key={a} style={{ flex: b - a, background: c }} />)}</div>
@@ -122,7 +122,7 @@ export function Echelle({ p, p2, seuils, actif, label }) {
 }
 
 // The 13 regions on one strip: dots stacked upward when they would touch.
-export function Bande({ points, seuils, lu, onLire, onOuvrir }) {
+export function Bande({ points, seuils, zones, lu, onLire, onOuvrir }) {
   const ref = useRef(null);
   const W = useLargeur(ref, 300);
   const d = 13;
@@ -141,7 +141,7 @@ export function Bande({ points, seuils, lu, onLire, onOuvrir }) {
       <div className="dots" ref={ref} style={{ height: H }}>
         {pts.map((p) => <i key={p.id} className={lu === p.id ? "on" : ""} style={{ left: p.x, top: H - 12 - p.k * d, "--c": p.c }} title={p.nom} />)}
       </div>
-      <Echelle seuils={seuils} />
+      <Echelle seuils={seuils} zones={zones} />
     </div>
   );
 }

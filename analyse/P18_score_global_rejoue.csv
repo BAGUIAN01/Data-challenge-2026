@@ -1,0 +1,5 @@
+mesure,AUC_baisse_t+1,baisses_prises_%,eleves_perdus_pris_%
+Score global,0.796,64.286,64.857
+Risque seul (violence),0.829,64.286,64.857
+Achèvement seul,0.723,71.429,68.566
+Matrice (priorité 1),,71.429,68.566

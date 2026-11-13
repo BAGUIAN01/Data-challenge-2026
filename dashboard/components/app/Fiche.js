@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Colonnes, Courbe, Fourchette } from "./Graphes";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, EXPOSITION, niveau, PRIORITES, risque, signe } from "@/lib/regles";
+import { alerteSeptembre, centaine, EXPOSITION, niveau, niveauScore, PRIORITES, risque, scoreGlobal, signe } from "@/lib/regles";
 
 const pct = (v, d = 1) => `${fr(v, d)} %`;
 // What each factor's value measures, in a few words.
@@ -44,8 +44,9 @@ function Repere({ titre, sous, valeur, droite, bande }) {
 }
 
 function verdict(jeu, r) {
-  const sous = r.tap.at(-1) < jeu.seuils.tap_national, n = niveau(risque(r), jeu.seuils);
-  return `Risque ${n} de baisse des effectifs en 2026/27 (${risque(r)} %), achèvement ${sous ? "sous" : "au-dessus de"} la moyenne du pays.`;
+  const sous = r.tap.at(-1) < jeu.seuils.tap_national, n = niveau(risque(r), jeu.seuils), s = scoreGlobal(jeu, r);
+  const debut = s === null ? "" : `Score global ${s}/100, ${rangFr(rang(jeu.regions, (x) => scoreGlobal(jeu, x) ?? 0, r, "haut"))} sur 13. `;
+  return `${debut}Risque ${n} de baisse des effectifs en 2026/27 (${risque(r)} %), achèvement ${sous ? "sous" : "au-dessus de"} la moyenne du pays.`;
 }
 
 export default function FicheRegion({ jeu, r, saisies, onMethode }) {
@@ -77,6 +78,12 @@ export default function FicheRegion({ jeu, r, saisies, onMethode }) {
 
       <section className="sec">
         <h2>Prévision<span>rang sur 13 : 1 = le plus préoccupant</span></h2>
+        {scoreGlobal(jeu, r) !== null && (
+          <Repere titre="Score global de décrochage" sous={`moitié risque de chute (${p} %), moitié enfants qui n'achèvent pas (${pct(100 - r.tap.at(-1))})`}
+            valeur={`${scoreGlobal(jeu, r)}/100`} droite={`${rangFr(rang(R, (x) => scoreGlobal(jeu, x) ?? 0, r, "haut"))}/13`}
+            bande={<Bande13 valeurs={R.map((x) => scoreGlobal(jeu, x) ?? 0)} choisie={scoreGlobal(jeu, r)} reference={50} min={0} max={100}
+              label={`Score global des 13 régions ; ${r.nom} ${scoreGlobal(jeu, r)} sur 100, niveau ${niveauScore(scoreGlobal(jeu, r))}`} />} />
+        )}
         <Repere titre="Risque de baisse des effectifs" sous={`2026/27 · ${niveau(p, jeu.seuils)} · alerte de septembre ${sept} % · mise à jour début janvier`} valeur={`${p} %`}
           droite={`${rangFr(rang(R, risque, r, "haut"))}/13`}
           bande={<Bande13 valeurs={R.map(risque)} choisie={p} reference={jeu.seuils.risque_eleve} min={0} max={100}
