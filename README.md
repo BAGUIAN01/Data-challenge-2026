@@ -21,7 +21,7 @@ Data Challenge Burkina, édition Éducation 2026. **Défi 1 : cartographie et an
 ## Où lire les résultats
 
 1. `rapport/rapport_defi1.pdf` : le rapport (10 pages).
-2. Le tableau de bord en ligne : <https://kalantigui-decrochage.vercel.app> (code dans `dashboard/`, voir `dashboard/README.md`).
+2. Le tableau de bord : code dans `dashboard/`, voir `dashboard/README.md` ; il est aussi en ligne (lien donné dans la fiche de la solution).
 3. `analyse/solution_anticipation.md` : la solution (où agir, où le risque monte, combien d'enfants, calendrier d'alerte).
 4. `analyse/facteurs_decrochage.md` : les causes autres que l'insécurité.
 5. `analyse/autres_approches_prevision.md` et `analyse/machine_learning.md` : ce qui prévoit et ce qui ne prévoit pas.
