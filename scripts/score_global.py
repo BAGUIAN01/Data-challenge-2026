@@ -10,7 +10,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from solution_prevision import SHORT, build, priority
+import solution_prevision
 
 warnings.filterwarnings("ignore")
 POIDS = 0.5
@@ -33,10 +33,10 @@ def rejouer(p):
             continue
         mdl = make_pipeline(StandardScaler(), LogisticRegression(C=1.0)).fit(tr[["l_inc", "d_l_inc"]], tr.y_drop)
         te["prob"] = mdl.predict_proba(te[["l_inc", "d_l_inc"]])[:, 1]
-        te["prio"] = [priority(t, nat[ty], pr) for t, pr in zip(te.TAP_T, te.prob)]
+        te["prio"] = [solution_prevision.priority(t, nat[ty], pr) for t, pr in zip(te.TAP_T, te.prob)]
         te["score"] = score(te.prob, te.TAP_T)
         te["retard"] = 100 - te.TAP_T
-        te["annee_t"] = SHORT[ty]
+        te["annee_t"] = solution_prevision.SHORT[ty]
         tests.append(te)
     t = pd.concat(tests)
     rows = []
@@ -79,7 +79,7 @@ def trajectoire(p):
         mdl = make_pipeline(StandardScaler(), LogisticRegression(C=1.0)).fit(tr[["l_inc", "d_l_inc"]], tr.y_drop)
         prob = mdl.predict_proba(te[["l_inc", "d_l_inc"]])[:, 1]
         y0 = int(ty[:4]) + 1
-        cible = SHORT[f"{y0}-{y0 + 1}"]
+        cible = solution_prevision.SHORT[f"{y0}-{y0 + 1}"]
         for (_, row), pr in zip(te.iterrows(), prob):
             out.append({"cle": row.cle, "annee_cible": cible, "probabilite": round(pr, 3),
                         "score": round(score(pr, row.TAP_T)), "chute_observee": row.y_drop})
@@ -102,7 +102,7 @@ def score_2026():
 
 def main():
     pd.set_option("display.width", 200)
-    p = build()
+    p = solution_prevision.build()
     rejouer(p)
     score_2026()
     trajectoire(p)

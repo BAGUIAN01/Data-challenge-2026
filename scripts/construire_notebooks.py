@@ -49,22 +49,54 @@ CAHIERS = {
     ]),
 }
 
-DEPART = '''import os, sys, time
-from pathlib import Path
-from IPython.display import Image, display
-
-racine = Path.cwd()
+CHEMINS = """racine = Path.cwd()
 while not (racine / "scripts").is_dir() and racine != racine.parent:
     racine = racine.parent
 os.chdir(racine)
-sys.path.insert(0, "scripts")
+sys.path.insert(0, "scripts")"""
 
-
-def montrer_figures(depuis, dossiers=("analyse/figures", "analyse", "analyse/fiches"), maxi=8):
+FIGURES = '''def montrer_figures(depuis, dossiers=("analyse/figures", "analyse", "analyse/fiches"), maxi=8):
     vues = sorted((p for d in dossiers for p in Path(d).glob("*.png") if p.stat().st_mtime >= depuis), key=lambda p: p.name)
     for p in vues[:maxi]:
         print(p)
         display(Image(filename=str(p), width=760))'''
+
+SCRIPTS = {p.stem for p in (RACINE / "scripts").glob("*.py")}
+
+
+def reglage(n):
+    """Import, or a setting that belongs with the imports (matplotlib backend, search path)."""
+    if isinstance(n, (ast.Import, ast.ImportFrom)):
+        return True
+    return isinstance(n, ast.Expr) and ast.unparse(n).startswith(("matplotlib.use(", "sys.path.insert("))
+
+
+def bloc_imports(noms):
+    """One cell with every import of the notebook: standard library, then packages, then the project's scripts."""
+    simples, depuis = set(), {}
+    base = [ast.parse("import os\nimport sys\nimport time\nfrom pathlib import Path\nfrom IPython.display import Image, display")]
+    arbres = base + [ast.parse((RACINE / "scripts" / f"{n}.py").read_text(encoding="utf-8")) for n in noms]
+    for t in arbres:
+        for n in t.body:
+            if isinstance(n, ast.Import):
+                for a in n.names:
+                    simples.add((a.name, a.asname))
+            elif isinstance(n, ast.ImportFrom):
+                depuis.setdefault(n.module, set()).update((a.name, a.asname) for a in n.names)
+    groupe = lambda m: 2 if m.split(".")[0] in SCRIPTS else 0 if m.split(".")[0] in sys.stdlib_module_names else 1
+    lignes = {0: [], 1: [], 2: []}
+    for m, a in sorted(simples):
+        lignes[groupe(m)].append((m, f"import {m}" + (f" as {a}" if a else "")))
+    for m, ns in sorted(depuis.items()):
+        noms_m = ", ".join(n + (f" as {a}" if a else "") for n, a in sorted(ns))
+        lignes[groupe(m)].append((m, f"from {m} import {noms_m}"))
+    paquets = [l for _, l in sorted(lignes[1], key=lambda x: (x[0] != "matplotlib", x[0], x[1].startswith("from")))]
+    if any(l == "import matplotlib" for l in paquets):
+        paquets.insert(paquets.index("import matplotlib") + 1, 'matplotlib.use("Agg")')
+    blocs = ["\n".join(l for _, l in sorted(lignes[0], key=lambda x: (x[1].startswith("from"), x[0]))), "\n".join(paquets), CHEMINS]
+    if lignes[2]:
+        blocs.append("\n".join(l for _, l in sorted(lignes[2])))
+    return "\n\n".join(b for b in blocs if b)
 
 
 def cellules(nom):
@@ -73,6 +105,8 @@ def cellules(nom):
     lignes = src.splitlines()
     blocs, courant = [], []
     for n in tree.body:
+        if reglage(n):
+            continue
         if isinstance(n, ast.Expr) and isinstance(getattr(n, "value", None), ast.Constant) and isinstance(n.value.value, str):
             continue
         if isinstance(n, ast.If) and "__name__" in ast.unparse(n.test):
@@ -95,7 +129,8 @@ def construire(fichier, titre, chapo, etapes):
     nb.cells.append(nbformat.v4.new_markdown_cell(
         f"# {titre}\n\n{chapo}\n\nÀ lancer dans le projet complet (archive `05-interpretation_D1_scientist_projet-complet_v1.zip`), "
         "avec les données brutes placées comme le dit `data/raw/LISEZ-MOI.md`."))
-    nb.cells.append(nbformat.v4.new_code_cell(DEPART))
+    nb.cells.append(nbformat.v4.new_code_cell(bloc_imports(list(dict.fromkeys(e[0] for e in etapes)))))
+    nb.cells.append(nbformat.v4.new_code_cell(FIGURES))
     vus = set()
     for i, (nom, intitule, args) in enumerate(etapes, 1):
         nb.cells.append(nbformat.v4.new_markdown_cell(f"## {i}. {intitule}\n\n`scripts/{nom}.py`"))

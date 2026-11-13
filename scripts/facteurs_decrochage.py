@@ -4,6 +4,10 @@ import unicodedata
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata, spearmanr
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 SEED = 2026
 N_BOOT = 5000
@@ -146,10 +150,6 @@ def panel(p, acled, food):
 
 
 def robustness(d):
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.metrics import roc_auc_score
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
 
     print("\n=== 2 bis. Contrôles du résultat sur la faim ===")
     top = d[d.annee >= "2019-2020"].groupby("cle").l_inc.mean().nlargest(4).index

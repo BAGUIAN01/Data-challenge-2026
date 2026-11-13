@@ -4,6 +4,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.patches import Patch
 
 SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
 INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
@@ -63,7 +64,6 @@ def main():
         if v >= 15:
             ax.annotate(f"{v:.0f} %", (v, i), xytext=(4, 0), textcoords="offset points", va="center", fontsize=8.5,
                         color=INK2)
-    from matplotlib.patches import Patch
     ax.legend(handles=[Patch(color=c, label=l) for _, l, c in TIERS], loc="lower right", fontsize=8.5)
     ax.set_xlabel("Probabilité d'une baisse des effectifs de plus de 5 % en 2026/27")
     header(fig, "Où le risque monte pour 2026/27",

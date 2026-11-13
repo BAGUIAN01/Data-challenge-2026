@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.patches import FancyBboxPatch
+from pypdf import PdfWriter
+import json
+import shutil
+import textwrap
 
 YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 SHORT = [y[2:4] + "/" + y[7:] for y in YEARS]
@@ -169,7 +173,6 @@ def classe(v):
 
 def make(cle, jeu, out):
     _style()
-    import textwrap
     R = {r["cle"]: r for r in jeu["regions"]}
     r, sg, fdj = R[cle], jeu["score_global"], jeu["facteur_dominant"]["par_region"][cle]
     defs = {d["id"]: d for d in jeu["facteurs_def"]}
@@ -332,9 +335,6 @@ def make(cle, jeu, out):
 
 
 def main():
-    import json
-    import shutil
-    from pypdf import PdfWriter
     out = "analyse/fiches"
     os.makedirs(out, exist_ok=True)
     jeu = json.load(open("dashboard/public/data/tableau_de_bord.json", encoding="utf-8"))

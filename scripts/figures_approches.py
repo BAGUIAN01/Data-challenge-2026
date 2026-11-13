@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Patch
 
 SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
 INK, INK2, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#fcfcfb"
@@ -159,7 +160,6 @@ def factors():
     ax.grid(False)
     for sp in ax.spines.values():
         sp.set_visible(False)
-    from matplotlib.patches import Patch
     ax.legend(handles=[Patch(color=TIER_COL[1], label="Parmi les 4 régions les plus exposées"),
                        Patch(color=TIER_COL[2], label="Intermédiaire"),
                        Patch(color=TIER_COL[3], label="Parmi les 4 moins exposées")],

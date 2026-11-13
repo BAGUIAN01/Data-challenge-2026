@@ -4,6 +4,9 @@ import unicodedata
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 SHORT = {f"{y}-{y + 1}": f"{str(y)[2:]}/{str(y + 1)[2:]}" for y in range(2014, 2028)}
@@ -133,9 +136,6 @@ def priority(tap, tap_nat, prob):
 
 
 def backtest_matrix(p):
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
 
     print("\n=== 4. La matrice de priorité, rejouée sur le passé (année t -> ce qui arrive en t+1) ===")
     nat = pd.read_csv("analyse/panel_region_annee.csv").query("region == 'NATIONAL'").set_index("annee").TAP_T

@@ -9,25 +9,25 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from anticipation_fine import SETS, features
-from solution_prevision import build
+import anticipation_fine
+import solution_prevision
 
 warnings.filterwarnings("ignore")
 NOMS = {"l_inc": "ln(1 + incidents de l'année scolaire)", "d_l_inc": "escalade : écart du terme précédent avec l'année d'avant",
         "l_late": "ln(1 + incidents de juillet à septembre)", "l_rentree": "ln(1 + incidents d'octobre à décembre)"}
-MODELES = [("Référence (D12), rentrée 2026/27", SETS["Référence : violence (niveau, escalade)"], "2025-2026", "2026/27, référence (D12)"),
-           ("Alerte de septembre, rentrée 2026/27", SETS["F2 + juillet-septembre"], "2025-2026", "2026/27, alerte de septembre (juil.-sept. 2026 connus)"),
-           ("Alerte de janvier, rentrée 2025/26", SETS["F3 + rentrée (oct.-déc.)"], "2024-2025", "2025/26, alerte de janvier (oct.-déc. 2025 connus)")]
+MODELES = [("Référence (D12), rentrée 2026/27", anticipation_fine.SETS["Référence : violence (niveau, escalade)"], "2025-2026", "2026/27, référence (D12)"),
+           ("Alerte de septembre, rentrée 2026/27", anticipation_fine.SETS["F2 + juillet-septembre"], "2025-2026", "2026/27, alerte de septembre (juil.-sept. 2026 connus)"),
+           ("Alerte de janvier, rentrée 2025/26", anticipation_fine.SETS["F3 + rentrée (oct.-déc.)"], "2024-2025", "2025/26, alerte de janvier (oct.-déc. 2025 connus)")]
 
 
 def main():
-    p = build()
-    f, _ = features("data/raw/externe/hdx_acled/acled_political_violence_month_year.xlsx",
+    p = solution_prevision.build()
+    f, _ = anticipation_fine.features("data/raw/externe/hdx_acled/acled_political_violence_month_year.xlsx",
                     "data/raw/externe/hdx_acled/acled_civilian_targeting_month_year.xlsx")
     d = p.merge(f.drop(columns=["incidents"]), on=["cle", "annee"], how="left")
     d["y_drop"] = (d.y_eleves < np.log(0.95)).astype(float)
     d.loc[d.y_eleves.isna(), "y_drop"] = np.nan
-    d = d.dropna(subset=sorted({c for v in SETS.values() for c in v}) + ["y_drop"])
+    d = d.dropna(subset=sorted({c for v in anticipation_fine.SETS.values() for c in v}) + ["y_drop"])
     acled = pd.read_csv("analyse/acled_region_annee.csv").sort_values(["cle", "annee"])
     acled["l_inc"] = np.log1p(acled.incidents)
     acled["d_l_inc"] = acled.l_inc - acled.groupby("cle").l_inc.shift()

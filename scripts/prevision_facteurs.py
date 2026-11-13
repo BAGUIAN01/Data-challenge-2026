@@ -10,7 +10,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from solution_prevision import SHORT, build, key
+import solution_prevision
 
 warnings.filterwarnings("ignore")
 DHS_NAMES = {"Boucle de Mouhoun": "BOUCLEDUMOUHOUN", "Centre (including Ouagadougou)": "CENTRE",
@@ -24,7 +24,7 @@ def dhs_rounds():
         d = pd.read_csv("data/raw/externe/hdx_dhs/" + f)
         d = d[(d.Indicator == ind) & d.SurveyYear.isin([2010, 2014, 2017, 2021]) & (d.CharacteristicLabel != "Ouagadougou")]
         d = d.drop_duplicates(["SurveyYear", "CharacteristicLabel"])
-        d = d.assign(cle=d.CharacteristicLabel.map(lambda s: DHS_NAMES.get(s, key(s))), var=col)
+        d = d.assign(cle=d.CharacteristicLabel.map(lambda s: DHS_NAMES.get(s, solution_prevision.key(s))), var=col)
         out.append(d[["cle", "SurveyYear", "var", "Value"]])
     w = pd.concat(out).pivot_table(index=["cle", "SurveyYear"], columns="var", values="Value").reset_index()
     assert w.groupby("SurveyYear").cle.nunique().eq(13).all()
@@ -32,7 +32,7 @@ def dhs_rounds():
 
 
 def data():
-    p = build()
+    p = solution_prevision.build()
     food = pd.read_csv("data/externe_propre/faim_cadre_harmonise_region_annee.csv")
     p = p.merge(food[["cle", "annee", "faim_phase3plus_pct"]], on=["cle", "annee"], how="left")
     p["faim"] = p.faim_phase3plus_pct / 10
@@ -89,7 +89,7 @@ def regress(p, target, horizon, label):
         if len(tr) < 26:
             continue
         te = d[d.annee == ty]
-        row = {"annee_t": SHORT[ty], "Comme aujourd'hui": np.abs(te[target]).mean()}
+        row = {"annee_t": solution_prevision.SHORT[ty], "Comme aujourd'hui": np.abs(te[target]).mean()}
         for k, cols in SETS.items():
             X = np.column_stack([np.ones(len(tr))] + [tr[c] for c in cols])
             b = np.linalg.lstsq(X, tr[target], rcond=None)[0]

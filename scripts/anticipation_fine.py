@@ -11,7 +11,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, "scripts")
-from solution_prevision import SHORT, build, key
+import solution_prevision
 
 warnings.filterwarnings("ignore")
 SEED = 2026
@@ -21,7 +21,7 @@ MONTHS = {m: i for i, m in enumerate(["January", "February", "March", "April", "
 
 def monthly(path):
     a = pd.read_excel(path, sheet_name="Data")
-    a["cle"] = a.Admin1.map(key)
+    a["cle"] = a.Admin1.map(solution_prevision.key)
     a["m"] = a.Month.map(MONTHS)
     a["start"] = np.where(a.m >= 10, a.Year, a.Year - 1)
     return a
@@ -43,8 +43,8 @@ def features(path_pv, path_civ):
     for col in ["incidents", "late", "rentree", "civils"]:
         f["l_" + col] = np.log1p(f[col])
     g = gpd.read_file("data/ref/regions_13.geojson")
-    name_col = next(c for c in g.columns if g[c].astype(str).map(key).isin(f.cle.unique()).sum() >= 13)
-    g["cle"] = g[name_col].map(key)
+    name_col = next(c for c in g.columns if g[c].astype(str).map(solution_prevision.key).isin(f.cle.unique()).sum() >= 13)
+    g["cle"] = g[name_col].map(solution_prevision.key)
     g = g.set_index("cle")
     nb = {k: [j for j in g.index if j != k and g.geometry[k].buffer(0.01).intersects(g.geometry[j])] for k in g.index}
     wide = f.pivot(index="start", columns="cle", values="l_incidents")
@@ -69,7 +69,7 @@ SETS = {
 
 def main():
     pd.set_option("display.width", 220)
-    p = build()
+    p = solution_prevision.build()
     f, nb = features("data/raw/externe/hdx_acled/acled_political_violence_month_year.xlsx",
                      "data/raw/externe/hdx_acled/acled_civilian_targeting_month_year.xlsx")
     print("Voisins :", {k: len(v) for k, v in nb.items()})
@@ -114,7 +114,7 @@ def main():
                  "erreur_effectifs_%": np.abs(real - 0.5 * np.array(num[list(SETS)[0]])).mean() * 100})
     r = pd.DataFrame(rows)
     print(f"\n=== Baisse > 5 % à la prochaine rentrée ({len(truth)} prédictions, {int(truth.sum())} baisses, "
-          f"années {SHORT[min(yrs)]} à {SHORT[max(yrs)]}) et variation des effectifs ===")
+          f"années {solution_prevision.SHORT[min(yrs)]} à {solution_prevision.SHORT[max(yrs)]}) et variation des effectifs ===")
     print(r.round(3).to_string(index=False))
     r.round(4).to_csv("analyse/P16_signaux_fins.csv", index=False)
     f.to_csv("analyse/P16_signaux_region_annee.csv", index=False)
@@ -124,7 +124,7 @@ def main():
     for ty in sorted(set(yrs)):
         s = yrs == ty
         if 0 < truth[s].sum() < s.sum():
-            per.append({"annee_t": SHORT[ty], "baisses": int(truth[s].sum()),
+            per.append({"annee_t": solution_prevision.SHORT[ty], "baisses": int(truth[s].sum()),
                         **{k.split(" ")[0]: roc_auc_score(truth[s], np.array(v)[s]) for k, v in preds.items()
                            if k.startswith(("Référence", "F2", "F3"))}})
     print("\nAUC par année (années avec au moins une baisse et une non-baisse) :")
