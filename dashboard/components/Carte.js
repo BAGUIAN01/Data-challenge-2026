@@ -6,7 +6,7 @@ import { fr, pct, PRIORITES } from "@/lib/format";
 import useLargeur from "./useLargeur";
 
 // Label nudges in map units, for the small central regions whose labels would collide.
-const DECALAGE = { CENTRE: [0, 2], PLATEAUCENTRAL: [16, 18], CENTRESUD: [0, 10], CENTREOUEST: [-14, 0], CENTREEST: [10, 8], SAHEL: [-6, 14] };
+const DECALAGE = { CENTRE: [0, 2], PLATEAUCENTRAL: [16, 18], CENTRESUD: [0, 10], CENTREOUEST: [-14, 0], CENTREEST: [10, 8], SAHEL: [10, -30] };
 
 function lignes(nom) {
   return nom.split(" + ").flatMap((p, i, a) => (i < a.length - 1 ? [`${p} +`] : [p]));
