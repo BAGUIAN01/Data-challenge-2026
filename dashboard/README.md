@@ -1,5 +1,7 @@
 # Tableau de bord local-first
 
+En ligne : <https://kalantigui-decrochage.vercel.app>
+
 Application Next.js du Défi 1. Elle répond à trois questions, région par région :
 - **où agir en premier** : carte et matrice de priorité ;
 - **où le risque monte** : calendrier d'alerte ;
