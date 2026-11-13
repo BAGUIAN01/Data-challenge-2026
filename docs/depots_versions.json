@@ -20,8 +20,8 @@
   "version": 1
  },
  "01-engineer-sources-donnees.csv": {
-  "signature": "2a086e8f865a6c45d605c8d52a52b03d",
-  "version": 1
+  "signature": "42ae016207630c20c56e8fee9185e2d0",
+  "version": 2
  },
  "02-engineer-controles-presco.py": {
   "signature": "8b66393692b620a82dce2bb5c252f961",
@@ -97,6 +97,10 @@
  },
  "03-architect-schema-base-neon.sql": {
   "signature": "ff549a3f24c5e0e9127954eb9ee167b1",
+  "version": 1
+ },
+ "03-engineer-attaques-education-region-annee.csv": {
+  "signature": "a4478872f5b8cb797c539b04109710c8",
   "version": 1
  },
  "03-engineer-panel-region-annee-2025.csv": {
@@ -224,11 +228,11 @@
   "version": 1
  },
  "04-scientist-prevision-hypothese.py": {
-  "signature": "d365d0adf2db0e41a7d31332957ce007",
-  "version": 1
+  "signature": "4213619604782b1d9ae014697cb9125a",
+  "version": 2
  },
  "04-scientist-resultats-modeles.xlsx": {
-  "signature": "dd25d72a3a276d41863096c40b21e8f5",
+  "signature": "9bef6e60414415079621438b01a6bba1",
   "version": 4
  },
  "04-scientist-score-global.py": {
@@ -304,7 +308,7 @@
   "version": 1
  },
  "05-scientist-projet-complet-relancable.zip": {
-  "signature": "94c186795f95422f991ca5880ca6959d",
+  "signature": "8f323994c40419899a98cb424eba6ec4",
   "version": 6
  },
  "05-scientist-risque-2026-27.png": {
