@@ -86,6 +86,14 @@ python scripts/fiches_regionales.py
 
 Chaque script décrit en tête ce qu'il fait, ce qu'il lit et ce qu'il écrit.
 
+**7. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
+
+```bash
+python scripts/construire_depots.py Biiga 1
+```
+
+Le résultat va dans `depots/`, qui n'est pas suivi par git.
+
 ## Principes
 
 - **Chaque modèle est testé sur des années qu'il n'a pas vues**, contre la règle « comme l'an passé ».
