@@ -4,13 +4,13 @@ Burkina Faso, rentrée 2026/27 · 13 régions · données agrégées, aucune don
 
 ## Noms des fichiers
 
-`ÉTAPE_DÉFI_RÔLE_description_vN` : l'étape où le fichier est produit (01-collecte à 05-interpretation), le défi (D1), le rôle (engineer, architect, analyst, scientist), ce qu'il contient, sa version. Le nom de l'équipe n'y figure pas, pour l'évaluation à l'aveugle.
+`ÉTAPE_DÉFI_RÔLE_description_vN` : l'étape où le fichier est produit (02-nettoyage à 05-interpretation), le défi (D1), le rôle (engineer, architect, analyst, scientist), ce qu'il contient, sa version. Le nom de l'équipe n'y figure pas, pour l'évaluation à l'aveugle.
 
 ## Par où commencer
 
-1. **`documentation/05-interpretation_D1_analyst_rapport_v1.pdf`** : le rapport (10 pages). Le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
+1. **`05-interpretation_D1_analyst_rapport_v1.pdf`** (catégorie Documentation) : le rapport (10 pages). Le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
 2. **Le tableau de bord en ligne** : son lien est donné dans la fiche de la solution. Il s'ouvre sur téléphone comme sur ordinateur et fonctionne sans réseau.
-3. **`donnees/05-interpretation_D1_analyst_priorites-2026-27_v1.csv`** : le résultat en un tableau, une ligne par région (score, risque, priorité, sur quoi agir, levier).
+3. **`05-interpretation_D1_analyst_priorites-2026-27_v1.csv`** (catégorie Données) : le résultat en un tableau, une ligne par région (score, risque, priorité, sur quoi agir, levier).
 
 ## Ce que contient chaque fichier
 
