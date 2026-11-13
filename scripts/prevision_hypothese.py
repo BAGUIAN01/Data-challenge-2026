@@ -170,6 +170,9 @@ def main():
     e["cle"] = e["Admin 1"].map(lambda x: key(EN.get(x, x)))
     e["annee"] = pd.to_datetime(e.Date).map(school_year)
     ea = e.groupby(["cle", "annee"]).size().rename("attaques_education")
+    # Our aggregate (count per region and school year) is deposited, as for ACLED: the test can be
+    # replayed from it without the source file.
+    ea.reset_index().sort_values(["cle", "annee"]).to_csv("analyse/P10_attaques_education_region_annee.csv", index=False)
     q = p.join(ea, on=["cle", "annee"])
     q["attaques_education"] = q.attaques_education.fillna(0)
     q = q[(q.annee >= "2016-2017")].dropna(subset=["dlog_ecoles_next"])

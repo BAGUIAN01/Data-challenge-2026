@@ -89,6 +89,7 @@ WB_SCIENTIST = [
     ("P15_TAP_trois_ans", "... et à trois ans ?"),
     ("P16_signaux_fins", "Signaux fins de violence : six variantes testées"),
     ("P17_formule_risque", "La formule du risque : coefficients en unités d'origine, vérifiés contre les probabilités affichées"),
+    ("P18_score_global_2026_27", "Score global de chaque région pour la rentrée 2026/27 : achèvement, probabilité de chute, priorité, score"),
     ("P18_score_global_rejoue", "Score global rejoué sur le passé, contre le risque seul, l'achèvement seul et la matrice"),
     ("P18_score_global_trajectoire", "Score de chaque région année par année (chaque année avec sa seule information), jusqu'à 2026/27"),
     ("P19_facteur_dominant", "Facteur dominant de chaque région : poids de chaque facteur")
@@ -135,6 +136,7 @@ MANIFEST = [
     ("03", "engineer", "panel-region-annee", "analyse/panel_region_annee.csv", "Une ligne par région et par année : effectifs, taux, écoles, sorties apparentes, variations", "analyse-pistes (04)"),
     ("03", "engineer", "panel-region-annee-2025", "analyse/panel_region_annee_2025.csv", "Le même panel, avec les noms de 2025", "regions-2025"),
     ("03", "engineer", "violence-acled-region-annee", "analyse/acled_region_annee.csv", "Incidents et morts par région et par année scolaire (agrégat d'ACLED)", "violence-acled (04)"),
+    ("03", "engineer", "attaques-education-region-annee", "analyse/P10_attaques_education_region_annee.csv", "Attaques contre l'éducation (Insecurity Insight) par région et année scolaire : notre agrégat, la source n'étant pas redistribuée", "prevision-hypothese"),
     ("03", "engineer", "signaux-violence-region-annee", "analyse/P16_signaux_region_annee.csv", "Signaux fins par région et par année : étendue, juillet-septembre, rentrée, civils, voisins", "anticipation-fine (04)"),
     ("04", "analyst", "indicateurs-descriptifs", ("workbook", WB_ANALYST), "Classeur des indicateurs descriptifs (A à G, P1 à P7), une feuille par tableau", "analyse-descriptive, analyse-pistes"),
     ("04", "analyst", "synthese-donnees", "analyse/synthese_donnees.md", "Ce que disent les données du challenge", "Équipe"),
