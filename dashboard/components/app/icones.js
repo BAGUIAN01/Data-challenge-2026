@@ -9,7 +9,7 @@ export const IcRegions = () => <svg {...trace}><path d="M8 6h12M8 12h12M8 18h12"
 export const IcAlertes = () => <svg {...trace}><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></svg>;
 export const IcPlus = () => <svg {...trace}><path d="M4 7h16M4 12h16M4 17h16" /></svg>;
 
-// The app icon, kept on the device by the service worker like every public file.
+// The Kalantigui logo, kept on the device by the service worker like every public file.
 export function IconeApp() {
   return <img className="appi" src="/icone-192.png" alt="" width="192" height="192" />;
 }
