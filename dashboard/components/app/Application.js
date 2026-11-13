@@ -8,8 +8,9 @@ import { useDonnees } from "../DonneesProvider";
 import CarteRegions from "./CarteRegions";
 import Ecran from "./Ecran";
 import Feuille, { hauteurCran } from "./Feuille";
+import FicheRegion from "./Fiche";
 import { IcAlertes, IcCarte, IconeApp, IcPlus, IcRegions } from "./icones";
-import { ApercuRegion, CorpsAttente, CorpsMethode, CorpsRegion, CorpsSources, FormSaisie, ResumePays, VueAlertes, VuePlus, VueRegions } from "./Vues";
+import { ApercuRegion, CorpsAttente, CorpsMethode, CorpsSources, FormSaisie, ResumePays, VueAlertes, VuePlus, VueRegions } from "./Vues";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { couches, PRIORITES } from "@/lib/regles";
 
@@ -53,7 +54,7 @@ function Coque({ donnees }) {
   const [piles, setPiles] = useState({ carte: [], regions: [], alertes: [], plus: [] });
   const [modal, setModal] = useState(null);
   const [snack, setSnack] = useState(null);
-  const [couche, setCouche] = useState("priorite");
+  const [couche, setCouche] = useState("risque");
   const [apercu, setApercu] = useState(null);
   const [cran, setCran] = useState("bas");
   const [filtre, setFiltre] = useState("toutes");
@@ -215,6 +216,7 @@ function Coque({ donnees }) {
   }, [envoi, enAttente]);
 
   const bandeau = etatBandeau(donnees, envoye);
+
   const titreDe = (e) => (e.type === "region" ? jeu.regions.find((r) => r.cle === e.params.cle)?.nom ?? "Région" : TITRES_ECRANS[e.type]);
   const regionApercu = apercu && jeu.regions.find((r) => r.cle === apercu);
   // On a large screen the map stays visible: it outlines the region open in the panel.
@@ -233,12 +235,12 @@ function Coque({ donnees }) {
     if (e.type === "region") {
       const cle = e.params.cle;
       return (
-        <Ecran {...commun} barre={
+        <Ecran {...commun} className="doc" barre={
           <div className="btns">
             <button className="btn" onClick={() => saisir(cle)}>Saisir les écoles</button>
             <a className="btn2" href={`/fiches/${cle}.pdf`} target="_blank" rel="noopener">Ouvrir la fiche</a>
           </div>}>
-          <CorpsRegion jeu={jeu} r={jeu.regions.find((r) => r.cle === cle)} saisies={saisies} />
+          <FicheRegion jeu={jeu} r={jeu.regions.find((r) => r.cle === cle)} saisies={saisies} onMethode={() => pousser("methode")} />
         </Ecran>
       );
     }

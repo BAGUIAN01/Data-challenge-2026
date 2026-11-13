@@ -8,7 +8,7 @@ export const metadata = {
   manifest: "/manifest.webmanifest",
   applicationName: "Décrochage",
   appleWebApp: { capable: true, title: "Décrochage", statusBarStyle: "default" },
-  icons: { icon: "/icone.svg", apple: "/icone-180.png" },
+  icons: { icon: [{ url: "/favicon-32.png", sizes: "32x32" }, { url: "/icone-192.png", sizes: "192x192" }], apple: "/icone-180.png" },
   formatDetection: { telephone: false },
 };
 

@@ -66,6 +66,18 @@ def carte():
     return {"largeur": round(w, 1), "hauteur": round((lat1 - lat0) * k, 1), "regions": out}
 
 
+def formule_risque():
+    """The risk models as formulas, in original units (scripts/formule_risque.py, checked there against
+    the probabilities shown): logit(p) = constante + sum of coefficient x variable."""
+    f = pd.read_csv("analyse/P17_formule_risque.csv")
+    cles = {"Référence": "reference", "Alerte de septembre": "septembre", "Alerte de janvier": "janvier"}
+    out = {"observations": int(f.observations.iloc[0]), "baisses": int(f.baisses.iloc[0])}
+    for _, r in f.iterrows():
+        k = next(v for c, v in cles.items() if r.modele.startswith(c))
+        out[k] = {c: float(r[c]) for c in ["constante", "l_inc", "d_l_inc", "l_late", "l_rentree"] if c in r and pd.notna(r[c])}
+    return out
+
+
 def main():
     data = fiches.load()
     p = data[0]
@@ -118,6 +130,7 @@ def main():
         "validation": {"rang_tap": 0.97, "auc_reference": 0.83, "auc_septembre": 0.85, "auc_janvier": 0.88,
                        "matrice_regions_pct": 35, "matrice_baisses_pct": 71, "matrice_perdus_pct": 69},
         "facteurs_def": [{"id": fid, "libelle": lab, "unite": u, "haut_expose": up} for fid, lab, u, up, _ in FACTORS],
+        "formule_risque": formule_risque(),
         "carte": carte(),
         "regions": regions,
     }

@@ -2,11 +2,11 @@
 // The figure cards. Each one carries its context: a scale, a comparison, a range or a history.
 // Colour only where it means something (the blue ramp, a decline); text stays in text colours.
 import { useState } from "react";
-import { Bande, Colonnes, Courbe, Echelle, Fourchette, Matrice, Pile } from "./Graphes";
+import { Bande, Courbe, Echelle, Fourchette, Matrice, Pile } from "./Graphes";
 import { Chevron } from "./icones";
 import { fr } from "@/lib/format";
 import { estimerEffectifs } from "@/lib/prevision-effectifs";
-import { alerteSeptembre, centaine, couches, EXPOSITION, niveau, PRIORITES, risque, signe } from "@/lib/regles";
+import { alerteSeptembre, centaine, couches, niveau, PRIORITES, risque, signe } from "@/lib/regles";
 
 const pctFr = (v, d = 1) => `${fr(v, d)} %`;
 
@@ -91,93 +91,6 @@ export function CarteTapPays({ jeu }) {
   );
 }
 
-export function CarteTapRegion({ jeu, region: r }) {
-  const [lu, setLu] = useState(null);
-  const n = jeu.annees.length - 1, pv = r.prevision_2025_26, prevue = lu === n + 1;
-  const i = lu === null || prevue ? n : lu;
-  return (
-    <section className="card">
-      <div className="ch"><b>Achèvement du primaire</b><span>{prevue ? "25/26 prévision" : jeu.annees[i]}</span></div>
-      <div className="kpi">
-        <b className="num">{prevue ? `≈ ${pctFr(pv.centrale)}` : pctFr(r.tap[i])}</b>
-        <span className="u">{prevue ? `${fr(pv.basse, 1)} à ${pctFr(pv.haute)}` : `pays ${pctFr(jeu.national.tap[i])}`}</span>
-      </div>
-      <Courbe annees={jeu.annees} series={[{ v: jeu.national.tap, c: "var(--nat)" }, { v: r.tap, c: "var(--fg)" }]} y0={0} y1={100}
-        fmt={(x) => pctFr(x)} prev={pv} lu={lu} onLire={setLu} label={`Taux d'achèvement de ${r.nom} et du pays`} />
-      <div className="lg">
-        <span><i style={{ "--c": "var(--fg)" }} />{r.nom}</span><span><i style={{ "--c": "var(--nat)" }} />Burkina Faso</span>
-        <span><i className="bx" style={{ "--c": "var(--band2)" }} />Prévision 2025/26</span>
-      </div>
-      <p className="foot">
-        Prévision 2025/26 : {fr(pv.basse, 1)} à {pctFr(pv.haute)}. Le classement des régions change peu d'une année à l'autre
-        (corrélation de rang {fr(jeu.validation.rang_tap, 2)}).
-      </p>
-    </section>
-  );
-}
-
-export function CarteGenre({ jeu, region: r }) {
-  const f = r.tap_f.at(-1), g = r.tap_g.at(-1), max = Math.max(f, g, 1);
-  return (
-    <section className="card">
-      <div className="ch"><b>Filles et garçons</b><span>Achèvement {jeu.annees.at(-1)}</span></div>
-      <div className="cmp">
-        <span>Filles</span><span className="trk"><i style={{ "--c": "var(--fg)", width: `${(f / max) * 100}%` }} /></span><b className="num">{pctFr(f)}</b>
-        <span>Garçons</span><span className="trk"><i style={{ "--c": "var(--z3)", width: `${(g / max) * 100}%` }} /></span><b className="num">{pctFr(g)}</b>
-      </div>
-      <p className="foot">
-        {Math.abs(f - g) < 1 ? "Filles et garçons achèvent à peu près autant."
-          : f > g ? `Les garçons achèvent moins : ${fr(f - g, 1)} points d'écart.` : `Les filles achèvent moins : ${fr(g - f, 1)} points d'écart.`}
-      </p>
-    </section>
-  );
-}
-
-export function CarteViolence({ jeu, region: r }) {
-  const [lu, setLu] = useState(null);
-  const v = r.incidents, n = v.length - 1, i = lu ?? n, d = v[n] - v[n - 1];
-  return (
-    <section className="card">
-      <div className="ch"><b>Violence</b><span>{lu === null ? "oct. 2025 – sept. 2026" : jeu.annees_violence[i]}</span></div>
-      <div className="kpi"><b className="num">{fr(v[i])}</b><span className="u">incidents</span>
-        {lu === null && <span className="d num">{signe(d)}{fr(Math.abs(d))} sur un an</span>}</div>
-      <Colonnes valeurs={v} annees={jeu.annees_violence} lu={lu} onLire={setLu} label={`Incidents de sécurité par année scolaire, ${r.nom}`} />
-      <p className="foot">Incidents de sécurité par année scolaire, d'octobre à septembre (ACLED). La violence sert à l'alerte ; elle n'explique pas tout le recul.</p>
-    </section>
-  );
-}
-
-function valeurFacteur(def, v) {
-  if (v === null || v === undefined) return "—";
-  if (def.id === "violence") return `${fr(v)} incidents par an`;
-  if (def.id === "grossesses") return `${fr(v)} pour 1 000 filles de 15-19 ans`;
-  return `${fr(v, 1)} ${def.unite === "%" ? "%" : def.unite}`;
-}
-
-export function CarteFacteurs({ jeu, region: r }) {
-  return (
-    <section className="card">
-      <div className="ch"><b>Ce qui pèse sur la scolarité</b><span>Exposition</span></div>
-      {jeu.facteurs_def.map((def) => {
-        const f = r.facteurs[def.id];
-        if (!f) return null;
-        return (
-          <div className="fx" key={def.id}>
-            <b>{def.libelle}</b><span>{valeurFacteur(def, f.valeur)}</span>
-            <div className="tier" aria-label={`exposition ${EXPOSITION[f.niveau]}`}>
-              {EXPOSITION[f.niveau]}<span className="bars3">{[1, 2, 3].map((k) => <i key={k} className={k <= 4 - f.niveau ? "on" : ""} />)}</span>
-            </div>
-          </div>
-        );
-      })}
-      <p className="foot">
-        Forte : parmi les 4 régions les plus exposées ; faible : parmi les 4 moins exposées. Pour le CEP et le préscolaire, une valeur basse expose
-        davantage. Ces facteurs expliquent les écarts entre régions ; ils n'améliorent pas la prévision.
-      </p>
-    </section>
-  );
-}
-
 // Expected pupils from a count of open schools (decision D13): a measured range at one year from the
 // last yearbook, an order of magnitude beyond.
 export function BlocEstimation({ jeu, region, annee, ecoles }) {
@@ -201,26 +114,6 @@ export function BlocEstimation({ jeu, region, annee, ecoles }) {
         {" "}{dans ? "2024/25 y reste : la baisse est probable, pas certaine." : "2024/25 en sort : l'écart est net."}
       </p>
     </>
-  );
-}
-
-export function CarteEstimation({ jeu, region, saisie }) {
-  if (!saisie) {
-    return (
-      <section className="card">
-        <div className="ch"><b>Élèves attendus</b><span>aucune saisie</span></div>
-        <p className="para">
-          Comptez les écoles ouvertes à la rentrée : les élèves de l'année se calculent sur ce téléphone, avec une erreur moyenne
-          de ± {fr(jeu.nowcast.erreur_pct, 1)} %.
-        </p>
-      </section>
-    );
-  }
-  return (
-    <section className="card">
-      <div className="ch"><b>Élèves attendus</b><span>{saisie.annee.replace("-", "/")} · {saisie.statut === "en_attente" ? "en attente d'envoi" : "envoyée"}</span></div>
-      <BlocEstimation jeu={jeu} region={region} annee={saisie.annee} ecoles={saisie.ecoles_ouvertes} />
-    </section>
   );
 }
 

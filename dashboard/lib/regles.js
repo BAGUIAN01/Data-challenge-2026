@@ -27,12 +27,12 @@ export function trierRegions(regions) {
 export function couches(seuils) {
   const nat = seuils.tap_national.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   return {
-    priorite: { nom: "Priorité", classe: (r) => r.priorite, legende: ["Priorité 1, agir maintenant", "Priorité 2", "Priorité 3"] },
     risque: {
       nom: "Risque",
       classe: (r) => (risque(r) >= seuils.risque_eleve ? 1 : risque(r) >= seuils.risque_moyen ? 2 : 3),
       legende: ["Risque élevé", "Moyen", "Faible"],
     },
+    priorite: { nom: "Priorité", classe: (r) => r.priorite, legende: ["Priorité 1, agir maintenant", "Priorité 2", "Priorité 3"] },
     achevement: {
       nom: "Achèvement",
       classe: (r) => (r.tap.at(-1) < 35 ? 1 : r.tap.at(-1) < seuils.tap_national ? 2 : 3),

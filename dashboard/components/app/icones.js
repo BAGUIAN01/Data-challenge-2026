@@ -1,4 +1,4 @@
-// Line icons (24 px grid) and the app icon. Icons always come with a written label next to them.
+// Line icons (24 px grid) and the app's logo. Icons always come with a written label next to them.
 
 const trace = { className: "i", viewBox: "0 0 24 24", "aria-hidden": true };
 
@@ -9,10 +9,7 @@ export const IcRegions = () => <svg {...trace}><path d="M8 6h12M8 12h12M8 18h12"
 export const IcAlertes = () => <svg {...trace}><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></svg>;
 export const IcPlus = () => <svg {...trace}><path d="M4 7h16M4 12h16M4 17h16" /></svg>;
 
+// The Kalantigui logo, kept on the device by the service worker like every public file.
 export function IconeApp() {
-  return (
-    <span className="appi" aria-hidden="true">
-      <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2a78d6" /><path d="M14 46V30m12 16V22m12 24V34m12 12V16" stroke="#fff" strokeWidth="6" strokeLinecap="round" /></svg>
-    </span>
-  );
+  return <img className="appi" src="/icone-192.png" alt="" width="192" height="192" />;
 }

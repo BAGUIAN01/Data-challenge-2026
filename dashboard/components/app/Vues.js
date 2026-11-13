@@ -2,8 +2,7 @@
 // Content of the screens: the country summary (sheet over the map), the region preview, the tab
 // roots (Régions, Alertes, Plus) and the pushed screens (region, method, sources, pending entries).
 import { useEffect, useRef, useState } from "react";
-import { BlocEstimation, CarteBande, CarteCalendrier, CarteElevesPays, CarteEstimation, CarteFacteurs, CarteGenre, CarteMatrice,
-  CartePriorites, CarteRisque, CarteTapPays, CarteTapRegion, CarteViolence } from "./Cartes";
+import { BlocEstimation, CarteBande, CarteCalendrier, CarteElevesPays, CarteMatrice, CartePriorites, CarteRisque, CarteTapPays } from "./Cartes";
 import { Chevron, IconeApp } from "./icones";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { ANNEES_SAISIE, estimerEffectifs } from "@/lib/prevision-effectifs";
@@ -51,8 +50,8 @@ export function ResumePays({ jeu, saisies, nav }) {
   const nb = new Set(saisies.map((s) => s.cle)).size;
   return (
     <>
-      <CartePriorites jeu={jeu} onFiltre={(f) => nav.ongletRegions(f)} />
       <CarteBande jeu={jeu} onOuvrir={nav.ouvrirRegion} />
+      <CartePriorites jeu={jeu} onFiltre={(f) => nav.ongletRegions(f)} />
       <CarteElevesPays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
       <CarteTapPays jeu={jeu} />
       <div className="sh">Régions<span>de la plus urgente à la moins urgente</span></div>
@@ -69,25 +68,6 @@ export function ApercuRegion({ jeu, r, nav }) {
         <button className="btn" onClick={() => nav.ouvrirRegion(r.cle)}>Voir la région</button>
         <button className="btn2" onClick={() => nav.saisir(r.cle)}>Saisir les écoles</button>
       </div>
-    </>
-  );
-}
-
-export function CorpsRegion({ jeu, r, saisies }) {
-  return (
-    <>
-      <p className="sub"><i className="m" style={{ "--c": `var(--c${r.priorite})` }} />{PRIORITES[r.priorite].libelle}, {PRIORITES[r.priorite].sous}
-        {" "}· ancienne {r.ancienne} · {r.profil.toLowerCase()}</p>
-      <CarteRisque jeu={jeu} region={r} />
-      <CarteEstimation jeu={jeu} region={r} saisie={derniere(saisies, r.cle)} />
-      <CarteTapRegion jeu={jeu} region={r} />
-      <CarteGenre jeu={jeu} region={r} />
-      <CarteViolence jeu={jeu} region={r} />
-      <CarteFacteurs jeu={jeu} region={r} />
-      <section className="card"><div className="ch"><b>À retenir</b></div><ul className="plain">{r.faits.map((f, i) => <li key={i}>{f}</li>)}</ul></section>
-      <section className="card"><div className="ch"><b>Leviers</b></div>
-        <ul className="plain">{r.leviers.concat(r.leviers_facteurs).map((f, i) => <li key={i}>{f}</li>)}</ul></section>
-      <p className="note">Sources : DGESS (données du Data Challenge Burkina 2026) ; ACLED, Cadre Harmonisé, EDS, CONASUR via HDX ; INSD (EHCVM 2021). Aucune donnée personnelle.</p>
     </>
   );
 }
@@ -193,11 +173,47 @@ export function VuePlus({ jeu, donnees, theme, setTheme, installer, nav }) {
   );
 }
 
+// Signed decimal with a real minus sign, French style.
+const nb = (v, d = 2) => `${v < 0 ? "−" : ""}${fr(Math.abs(v), d)}`;
+const terme = (v, x) => ` ${v < 0 ? "−" : "+"} ${fr(Math.abs(v), 2)} · ${x}`;
+
+// The risk model written out, with a worked example that gives back the probability on screen.
+function FormuleRisque({ jeu }) {
+  const f = jeu.formule_risque;
+  if (!f?.reference) return null;
+  const ref = f.reference, r = jeu.regions.find((x) => x.cle === "NORD") ?? jeu.regions[0];
+  const I = r.incidents.at(-1), I0 = r.incidents.at(-2), x1 = Math.log1p(I), x2 = x1 - Math.log1p(I0);
+  const z = ref.constante + ref.l_inc * x1 + ref.d_l_inc * x2, p = 100 / (1 + Math.exp(-z));
+  return (
+    <section className="card">
+      <div className="ch"><b>La formule du risque</b><span>régression logistique</span></div>
+      <p className="formule">p = 1 / (1 + e<sup>−z</sup>)</p>
+      <p className="formule num">z = {nb(ref.constante)}{terme(ref.l_inc, "ln(1 + I)")}{terme(ref.d_l_inc, "[ln(1 + I) − ln(1 + I₋₁)]")}</p>
+      <ul className="plain">
+        <li><b>p</b> : probabilité que les effectifs du primaire baissent de plus de 5 % l'année suivante.</li>
+        <li><b>I</b> : incidents de sécurité de l'année scolaire, d'octobre à septembre (ACLED) ; <b>I₋₁</b> : ceux de l'année d'avant. Le second terme mesure l'escalade.</li>
+      </ul>
+      <p className="para">Exemple, {r.nom} : I = {fr(I)}, I₋₁ = {fr(I0)}, donc z = {nb(z)} et p = {fr(p, 0)} %.</p>
+      {f.septembre && f.janvier && (
+        <div className="formules-sec">
+          <p><b>Alerte de septembre</b> (juillet à septembre connus, J) :<br />
+            <span className="num">z = {nb(f.septembre.constante)}{terme(f.septembre.l_inc, "ln(1 + I)")}{terme(f.septembre.d_l_inc, "escalade")}{terme(f.septembre.l_late, "ln(1 + J)")}</span></p>
+          <p><b>Alerte de janvier</b> (octobre à décembre connus, R) :<br />
+            <span className="num">z = {nb(f.janvier.constante)}{terme(f.janvier.l_inc, "ln(1 + I)")}{terme(f.janvier.d_l_inc, "escalade")}{terme(f.janvier.l_rentree, "ln(1 + R)")}</span></p>
+        </div>
+      )}
+      <p className="foot">Appris sur {f.observations} couples région × année, dont {f.baisses} baisses de plus de 5 %. Niveaux : élevé à partir de {jeu.seuils.risque_eleve} %,
+        moyen à partir de {jeu.seuils.risque_moyen} %. Priorité 1 : risque élevé et achèvement sous la moyenne du pays ({fr(jeu.seuils.tap_national, 1)} %).</p>
+    </section>
+  );
+}
+
 export function CorpsMethode({ jeu }) {
   const v = jeu.validation;
   return (
     <>
       <p className="sub" style={{ marginTop: 0 }}>Ce que l'outil sait faire, avec quelle fiabilité, et ce qu'il ne sait pas faire.</p>
+      <FormuleRisque jeu={jeu} />
       <section className="card"><div className="ch"><b>Où agir en premier</b></div>
         <p className="para">Achèvement sous la moyenne du pays et risque élevé : priorité 1. Rejouée sur 2019/20 à 2023/24 avec seulement l'information de
           chaque année, elle désignait {v.matrice_regions_pct} % des régions, mais contenait {v.matrice_baisses_pct} % des fortes baisses de l'année suivante

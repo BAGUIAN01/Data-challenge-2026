@@ -1,4 +1,4 @@
-// Apply db/schema.sql to the database named by DATABASE_URL (idempotent).
+// Apply db/schema.sql to the database (DATABASE_URL or POSTGRES_URL, see lib/serveur/db.js). Idempotent.
 import { readFileSync } from "node:fs";
 import { sql } from "../lib/serveur/db.js";
 

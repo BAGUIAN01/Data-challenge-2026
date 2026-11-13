@@ -82,11 +82,20 @@ L'application s'ouvre sur http://localhost:3000.
 
 ## Mettre en ligne (Vercel et Neon)
 
-1. Sur vercel.com, **importez le dépôt** et choisissez `dashboard` comme dossier racine (Root Directory). Next.js est reconnu tout seul.
-2. Dans l'onglet *Storage* du projet, **ajoutez une base Neon** : Vercel déclare `DATABASE_URL` lui-même.
-3. **Redéployez.** La commande de construction (`vercel-build`) applique le schéma et charge les données dans la base (`db/preparer.mjs`), puis construit l'application. Il n'y a aucune étape à faire à la main.
+Le projet Vercel déploie à chaque `git push` sur `main`, avec `dashboard` comme dossier racine (Root Directory) et la base Neon déclarée dans ses variables d'environnement.
 
-Sans base, le déploiement fonctionne aussi : l'application utilise les données publiées avec elle, et les saisies restent sur les téléphones (« base en ligne non configurée »).
+**Les données vont dans la base à chaque déploiement.** La commande de construction (`vercel-build`) lance `db/preparer.mjs` avant `next build`. Ce script :
+- applique le schéma ;
+- charge la version publiée des données et la rend active ;
+- garde les saisies.
+
+L'application lit ensuite ses données dans la base (`/api/donnees`), puis les garde sur l'appareil.
+
+- **La variable** peut s'appeler `DATABASE_URL` ou `POSTGRES_URL` (le nom que pose l'intégration Neon de Vercel). Les noms sans *pooler* sont aussi acceptés.
+- **Le paramètre `channel_binding=require`** des adresses Neon est retiré avant la connexion : le client PostgreSQL l'enverrait au serveur, qui le refuse.
+- **Si la base ne peut pas être remplie, la construction s'arrête**, avec la raison dans le journal. Le déploiement précédent reste en ligne.
+
+Sans base déclarée, le déploiement fonctionne aussi : l'application utilise les données publiées avec elle, et les saisies restent sur les téléphones (« base en ligne non configurée »).
 
 **Le schéma** (`db/schema.sql`) :
 - `jeu_donnees` : les versions publiées, dont une seule est active ;
