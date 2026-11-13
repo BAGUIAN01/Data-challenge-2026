@@ -1,0 +1,25 @@
+{
+  "name": "tableau-de-bord-decrochage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tableau de bord local-first du risque de décrochage scolaire par région (Data Challenge Burkina 2026, Défi 1)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "db:schema": "node --env-file-if-exists=.env.local db/appliquer-schema.mjs",
+    "db:seed": "node --env-file-if-exists=.env.local db/seed.mjs",
+    "verif:aller-retour": "node --env-file-if-exists=.env.local scripts/verif-aller-retour.mjs",
+    "verif:hors-ligne": "node --env-file-if-exists=.env.local scripts/verif-hors-ligne.mjs"
+  },
+  "dependencies": {
+    "@serwist/next": "9.5.13",
+    "dexie": "4.4.7",
+    "next": "15.5.29",
+    "postgres": "3.4.8",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "serwist": "9.5.13"
+  },
+  "type": "module"
+}

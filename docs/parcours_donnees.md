@@ -36,6 +36,8 @@ La correspondance officielle de l'IGB relie ces 13 régions aux 17 de 2025, pour
 | | ACLED | `acled_anticipation.py`, `anticipation_fine.py` | `analyse/acled_region_annee.csv`, `analyse/P16_signaux_region_annee.csv` |
 | **4. Analyse** | Panel et sources | `analyse_presco.py`, `analyse_pistes.py`, `prevision_hypothese.py`, `machine_learning.py`, `approches_prevision.py`, `solution_prevision.py`, `facteurs_decrochage.py`, `prevision_facteurs.py`, `anticipation_fine.py` | `analyse/P*.csv`, `analyse/resultats_*.txt`, notes `analyse/*.md` |
 | **5. Interprétation** | Résultats | `figures_*.py`, `fiches_regionales.py` | `analyse/figures/`, `analyse/fiches/`, `analyse/fiches_regionales_13.pdf` |
+| | Résultats | `export_tableau_de_bord.py` | `dashboard/public/data/tableau_de_bord.json` (jeu de données du tableau de bord, et fiches PDF copiées) |
+| **6. Mise en service** | Jeu de données exporté | `dashboard/db/seed.mjs` | Base **Neon** : tables `jeu_donnees`, `region`, `indicateur`, `alerte`, `facteur`, `texte` ; saisies du terrain dans `saisie_ecoles` |
 
 L'ordre exact des commandes est dans le `README.md`.
 
@@ -47,6 +49,8 @@ L'ordre exact des commandes est dans le `README.md`.
   - les conditions d'ACLED interdisent de redistribuer ses données.
 
   `data/raw/LISEZ-MOI.md` indique où récupérer chaque fichier.
+- **Base en ligne : Neon (PostgreSQL).** Une seule version des données est active à la fois. Les saisies du terrain sont gardées d'une version à l'autre, avec une clé (`client_id`) qui empêche les doublons.
+- **Base de l'appareil : IndexedDB.** L'application lit toujours d'abord l'appareil, ce qui la rend utilisable sans réseau. Les saisies y attendent le réseau.
 - **Aucune donnée personnelle.** Toutes les données sont des agrégats régionaux ou provinciaux.
 - **Traçabilité :**
   - chaque source externe nettoyée a son `.SOURCE.txt` ;

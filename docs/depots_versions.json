@@ -1,0 +1,286 @@
+{
+ "01-engineer-cadre-harmonise-provinces.xlsx": {
+  "signature": "2fd2b92064f190d5a43642e885662eaa",
+  "version": 1
+ },
+ "01-engineer-deplaces-conasur-2022.xlsx": {
+  "signature": "eca51e80848d600f8672a6b39fd993f0",
+  "version": 1
+ },
+ "01-engineer-limites-igb-2025.xlsx": {
+  "signature": "aae8dd242cb11ae5e3cf36909c521c09",
+  "version": 1
+ },
+ "01-engineer-population-provinces-2024.csv": {
+  "signature": "00476bfe67c3bed8ce6c1bad684992e2",
+  "version": 1
+ },
+ "01-engineer-presco-brut.txt": {
+  "signature": "c14ca4e25e3b50e3c6614e8b1a9896c7",
+  "version": 1
+ },
+ "01-engineer-sources-donnees.csv": {
+  "signature": "2a086e8f865a6c45d605c8d52a52b03d",
+  "version": 1
+ },
+ "02-engineer-controles-presco.py": {
+  "signature": "8b66393692b620a82dce2bb5c252f961",
+  "version": 1
+ },
+ "02-engineer-controles-qualite.txt": {
+  "signature": "9e0fe22f60321ce2e59a8a05c52b4a96",
+  "version": 1
+ },
+ "02-engineer-deplaces-conasur-2022-regions.csv": {
+  "signature": "24b15ff69eee753d85efff97c7519356",
+  "version": 1
+ },
+ "02-engineer-eds-2021-regions.csv": {
+  "signature": "0eaf401facaff4da362415ee6bb2091a",
+  "version": 1
+ },
+ "02-engineer-faim-cadre-harmonise-regions.csv": {
+  "signature": "278a4f68183a4066ecba86369981f4b3",
+  "version": 1
+ },
+ "02-engineer-journal-nettoyage.md": {
+  "signature": "376c5f86190d90478c7608767b2761c8",
+  "version": 1
+ },
+ "02-engineer-lecture-presco.py": {
+  "signature": "0d3aab17bd133dd21e2d952ecc213a92",
+  "version": 1
+ },
+ "02-engineer-pauvrete-ehcvm-2021-regions.csv": {
+  "signature": "23dffec3a3958c9fca5181d9a292c34a",
+  "version": 1
+ },
+ "02-engineer-preparation-sources-externes.py": {
+  "signature": "5a1488db0c0a573d70f295eec86a205d",
+  "version": 1
+ },
+ "02-engineer-presco-propre.csv": {
+  "signature": "96615bb2fe13504f88bdf6059992078a",
+  "version": 1
+ },
+ "03-architect-carte-13-regions.geojson": {
+  "signature": "62634c7ab1968be6cbfaee8a0ebdda09",
+  "version": 1
+ },
+ "03-architect-carte-13-regions.py": {
+  "signature": "095102e86b115c2bc81f34c32c2866f8",
+  "version": 1
+ },
+ "03-architect-correspondance-provinces-45-47.csv": {
+  "signature": "c10b36c2d6730a63cad68714a8b69910",
+  "version": 1
+ },
+ "03-architect-correspondance-regions-13-17.csv": {
+  "signature": "56b9e25f3237880869fdb86fe5b64c87",
+  "version": 1
+ },
+ "03-architect-dictionnaire-variables.md": {
+  "signature": "cd8c547cdd53e72011cb7fed6ed4632a",
+  "version": 1
+ },
+ "03-architect-parcours-donnees.md": {
+  "signature": "fd4cd3c9341bd5d49ed865dfd5203822",
+  "version": 1
+ },
+ "03-architect-referentiel-officiel.py": {
+  "signature": "bbf4151c10b8c116f022947247060794",
+  "version": 1
+ },
+ "03-architect-regions-2025.py": {
+  "signature": "f5a28d6495f27f20f3df005eb3352b73",
+  "version": 1
+ },
+ "03-engineer-panel-region-annee-2025.csv": {
+  "signature": "79539692562d14a56b7cc8fa0ba1172f",
+  "version": 1
+ },
+ "03-engineer-panel-region-annee.csv": {
+  "signature": "716aa7938c6b23b82eca710618a848df",
+  "version": 1
+ },
+ "03-engineer-presco-propre-regions-2025.csv": {
+  "signature": "14104fb790c19f35d64b689c65e32479",
+  "version": 1
+ },
+ "03-engineer-signaux-violence-region-annee.csv": {
+  "signature": "7ccfc69568dd19fc62f6afbd0e7b1785",
+  "version": 1
+ },
+ "03-engineer-violence-acled-region-annee.csv": {
+  "signature": "a5e4bc9f2e2e6dfc4627d6d58f83e48b",
+  "version": 1
+ },
+ "04-analyst-analyse-descriptive.py": {
+  "signature": "6d2d00885c0ff6b7a1785bfa6bf41ddf",
+  "version": 1
+ },
+ "04-analyst-analyse-pistes.py": {
+  "signature": "894466f15c541453af6765366de22f06",
+  "version": 1
+ },
+ "04-analyst-figures-analyse.pdf": {
+  "signature": "697c52e4cc82f6075cdf57e556a516b5",
+  "version": 1
+ },
+ "04-analyst-figures-pistes.py": {
+  "signature": "1aed3b5155a982e25d7612054b5eee6a",
+  "version": 1
+ },
+ "04-analyst-indicateurs-descriptifs.xlsx": {
+  "signature": "2d129aad4939c7515b2cfd01ca8068d7",
+  "version": 1
+ },
+ "04-analyst-pistes-defi1.md": {
+  "signature": "8d643028b3ecc834d31fc3b1a13eb9c0",
+  "version": 1
+ },
+ "04-analyst-sorties-brutes-analyse.txt": {
+  "signature": "5b58edb05acef1b76c439784f653e6a1",
+  "version": 1
+ },
+ "04-analyst-synthese-donnees.md": {
+  "signature": "1f4421ed3a01371d279a55140a9c900c",
+  "version": 1
+ },
+ "04-scientist-anticipation-et-hypothese.md": {
+  "signature": "4ee357287170233b25c807e97fea8283",
+  "version": 1
+ },
+ "04-scientist-anticipation-fine.py": {
+  "signature": "c18bd4e165cb1911778157ce5be3019c",
+  "version": 1
+ },
+ "04-scientist-apprentissage-automatique.md": {
+  "signature": "1fccf770aa231a16ba8b855d5735e038",
+  "version": 1
+ },
+ "04-scientist-apprentissage-automatique.py": {
+  "signature": "880a71041bfe15f69177006771496738",
+  "version": 1
+ },
+ "04-scientist-approches-prevision.py": {
+  "signature": "829f39ed133a47896f53bf753893edff",
+  "version": 1
+ },
+ "04-scientist-autres-approches-prevision.md": {
+  "signature": "75d3efa497949c535fdd89c2d893ab11",
+  "version": 1
+ },
+ "04-scientist-eloignement-ecoles-methode.py": {
+  "signature": "1af666b25bcf138a9922ace5b552573a",
+  "version": 1
+ },
+ "04-scientist-environnement-python.txt": {
+  "signature": "91ea3e72c6bd30ec4b488215eb6d68c3",
+  "version": 1
+ },
+ "04-scientist-facteurs-decrochage.md": {
+  "signature": "d392fc805548fa5074deef291f152c5f",
+  "version": 1
+ },
+ "04-scientist-facteurs-decrochage.py": {
+  "signature": "be25f92055fd6fc207d482ebb5c3af66",
+  "version": 1
+ },
+ "04-scientist-figures-ml.py": {
+  "signature": "9530594fc0041a1844e69795313f5710",
+  "version": 1
+ },
+ "04-scientist-figures-modeles.pdf": {
+  "signature": "69975de0de534a6f21e36f4fb4c2cd7f",
+  "version": 1
+ },
+ "04-scientist-figures-prevision.py": {
+  "signature": "704cdd9852e4ae92dcb60efb5c2c284c",
+  "version": 1
+ },
+ "04-scientist-journal-decisions.md": {
+  "signature": "6af918b3a727d2ad1399b98e902d5558",
+  "version": 1
+ },
+ "04-scientist-prevision-facteurs.py": {
+  "signature": "972598ee6371478de978d2fdd6cc9a48",
+  "version": 1
+ },
+ "04-scientist-prevision-hypothese.py": {
+  "signature": "d365d0adf2db0e41a7d31332957ce007",
+  "version": 1
+ },
+ "04-scientist-resultats-modeles.xlsx": {
+  "signature": "6530af337f3fd45fc9c59fd26749e6cd",
+  "version": 1
+ },
+ "04-scientist-solution-prevision.py": {
+  "signature": "0b11fa3beec7f2ab3df799f75941a325",
+  "version": 1
+ },
+ "04-scientist-sorties-brutes-modeles.txt": {
+  "signature": "71dae986050dd7373742b5d888c07fca",
+  "version": 1
+ },
+ "04-scientist-violence-acled.py": {
+  "signature": "a1f3f1cd6ecb70fc84d35eb668351aea",
+  "version": 1
+ },
+ "05-analyst-carte-achevement-profils.png": {
+  "signature": "956ff70eeb0e6345521e49671d8c837d",
+  "version": 1
+ },
+ "05-analyst-fiches-regionales-13.pdf": {
+  "signature": "36ca576f15843e4a4c470bf471305abb",
+  "version": 1
+ },
+ "05-analyst-fiches-regionales.py": {
+  "signature": "23eb351a6624030fa37e3ec68ae9ca1f",
+  "version": 1
+ },
+ "05-analyst-figures-solution.py": {
+  "signature": "9b85f11e1d39048990fba6099ef99780",
+  "version": 1
+ },
+ "05-analyst-matrice-priorite-2026-27.csv": {
+  "signature": "0755e85b24b476563e9bbf0e882e4e6c",
+  "version": 1
+ },
+ "05-analyst-matrice-priorite-2026-27.png": {
+  "signature": "f0e105c52cd0babb11adfbaf183cf2f1",
+  "version": 1
+ },
+ "05-analyst-profil-facteurs-regions.csv": {
+  "signature": "0ddaadbb2ae99f56c916751d456867a8",
+  "version": 1
+ },
+ "05-analyst-profil-facteurs-regions.png": {
+  "signature": "bd2c1c1b5611049297fefc5db4d11bc2",
+  "version": 1
+ },
+ "05-scientist-alertes-calendrier.csv": {
+  "signature": "f5fcf1758c61b3d2a6179a8dddaf8e75",
+  "version": 1
+ },
+ "05-scientist-calendrier-alerte.png": {
+  "signature": "df6a5737194c54cd068b5d2dced3c4cc",
+  "version": 1
+ },
+ "05-scientist-prevision-2025-26.csv": {
+  "signature": "b0b08ef54ad375c05594ee3980255cdf",
+  "version": 1
+ },
+ "05-scientist-projet-complet-relancable.zip": {
+  "signature": "53d2464fb32cc57e15c4c212503a1ef3c2492989",
+  "version": 1
+ },
+ "05-scientist-risque-2026-27.png": {
+  "signature": "2a079a3eeaa86c512b3983a43e438a65",
+  "version": 1
+ },
+ "05-scientist-solution-anticipation.md": {
+  "signature": "57a23d83cc3cef2a69917128e38e3407",
+  "version": 1
+ }
+}

@@ -1,0 +1,7 @@
+node_modules/
+.next/
+.env*
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+!.env.example

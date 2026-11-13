@@ -6,8 +6,14 @@ and no accent in names ; numbered versions ; a short LISEZ-MOI saying what each 
 
 Writes depots/01_collecte ... depots/05_interpretation, a LISEZ-MOI.txt in each, one at the root,
 and depots/<TEAM>_D1_depots_v<N>.zip. The full project archive (git HEAD) goes to step 5 so that
-the solution can be run again. Usage: python construire_depots.py [TEAM] [VERSION]
+the solution can be run again.
+
+Versions are per file and automatic: docs/depots_versions.json keeps, for each deposit, a signature
+of its sources and its version; a file whose sources changed gets the next version, the others keep
+theirs, so only what changed has to be uploaded again. Usage: python construire_depots.py [TEAM]
 """
+import hashlib
+import json
 import re
 import shutil
 import subprocess
@@ -18,7 +24,7 @@ import pandas as pd
 from PIL import Image
 
 TEAM = sys.argv[1] if len(sys.argv) > 1 else "Biiga"
-VERSION = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+REGISTRE = Path("docs/depots_versions.json")
 DEFI = "D1"
 OUT = Path("depots")
 STEPS = {"01": ("01_collecte", "01-collecte", "Collecte"), "02": ("02_nettoyage", "02-nettoyage", "Nettoyage"),
@@ -110,6 +116,7 @@ MANIFEST = [
     ("03", "architect", "referentiel-officiel", "scripts/referentiel_officiel.py", "Script de la correspondance officielle (referentiel_officiel.py)", "Équipe"),
     ("03", "architect", "regions-2025", "scripts/regions_2025.py", "Script qui ajoute les noms de 2025 (regions_2025.py)", "Équipe"),
     ("03", "architect", "carte-13-regions", "scripts/carte_13_regions.py", "Script du fond de carte des 13 régions et de la carte de l'achèvement (carte_13_regions.py)", "Équipe"),
+    ("03", "architect", "schema-base-neon", "dashboard/db/schema.sql", "Schéma de la base Neon (PostgreSQL) du tableau de bord : versions publiées, tables par région, saisies du terrain", "Équipe"),
     ("03", "engineer", "presco-propre-regions-2025", "data/tidy/presco_tidy_regions2025.csv", "Données propres avec les noms et codes de 2025", "regions-2025"),
     ("03", "engineer", "panel-region-annee", "analyse/panel_region_annee.csv", "Une ligne par région et par année : effectifs, taux, écoles, sorties apparentes, variations", "analyse-pistes (04)"),
     ("03", "engineer", "panel-region-annee-2025", "analyse/panel_region_annee_2025.csv", "Le même panel, avec les noms de 2025", "regions-2025"),
@@ -149,6 +156,9 @@ MANIFEST = [
     ("05", "analyst", "matrice-priorite-2026-27", "analyse/P13_matrice_priorite_2026_27.csv", "Matrice de priorité 2026/27 : taux d'achèvement, probabilité de baisse, enfants hors CM2, priorité", "solution-prevision (04)"),
     ("05", "analyst", "profil-facteurs-regions", FIG + "16_profil_facteurs.png", "Profil des facteurs de chaque région", "figures-solution"),
     ("05", "analyst", "profil-facteurs-regions", "analyse/P14_profil_facteurs.csv", "Valeurs et niveaux d'exposition par facteur et par région", "facteurs-decrochage (04)"),
+    ("05", "analyst", "tableau-de-bord-local-first", ("archive_dir", "dashboard"), "Le tableau de bord : application Next.js qui fonctionne sans réseau (carte, priorités, alertes, fiches, saisie des écoles ouvertes), base Neon. Lire son README.md", "Équipe"),
+    ("05", "analyst", "donnees-tableau-de-bord", "dashboard/public/data/tableau_de_bord.json", "Le jeu de données du tableau de bord (aussi chargé dans la base Neon)", "export-tableau-de-bord"),
+    ("05", "analyst", "export-tableau-de-bord", "scripts/export_tableau_de_bord.py", "Script qui prépare les données du tableau de bord (export_tableau_de_bord.py)", "Équipe"),
     ("05", "analyst", "fiches-regionales", "scripts/fiches_regionales.py", "Script des fiches régionales (fiches_regionales.py)", "Équipe"),
     ("05", "analyst", "figures-solution", "scripts/figures_approches.py", "Script des figures 13 à 17 (figures_approches.py)", "Équipe"),
     ("05", "scientist", "solution-anticipation", "analyse/solution_anticipation.md", "La solution : où agir, où le risque monte, combien d'enfants, calendrier d'alerte", "Équipe"),
@@ -160,8 +170,35 @@ MANIFEST = [
 ]
 
 
-def name(step, role, desc, ext):
-    n = f"{TEAM}_{STEPS[step][1]}_{DEFI}_{role}_{desc}_v{VERSION}.{ext}"
+def git(*args):
+    return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout.strip()
+
+
+def signature(src):
+    """What the deposit is made of: a change here means a new version of the file."""
+    h = hashlib.md5()
+    if isinstance(src, str):
+        h.update(Path(src).read_bytes())
+        return h.hexdigest()
+    kind, arg = src
+    if kind == "workbook":
+        for stem, _ in arg:
+            h.update(Path(f"analyse/{stem}.csv").read_bytes())
+    elif kind == "figures":
+        for f in arg:
+            h.update(Path(f"{FIG}{f}.png").read_bytes())
+    elif kind == "concat":
+        for f in arg:
+            h.update(Path("analyse", f).read_bytes())
+    elif kind == "archive":
+        return git("rev-parse", "HEAD^{tree}")
+    elif kind == "archive_dir":
+        return git("rev-parse", f"HEAD:{arg}")
+    return h.hexdigest()
+
+
+def name(step, role, desc, ext, version):
+    n = f"{TEAM}_{STEPS[step][1]}_{DEFI}_{role}_{desc}_v{version}.{ext}"
     assert NAME_RE.match(n), n
     return n
 
@@ -187,25 +224,33 @@ def build(src, dest):
                 out.write(Path("analyse", f).read_text())
     elif kind == "archive":
         subprocess.run(["git", "archive", "--format=zip", "-o", str(dest), "HEAD"], check=True)
+    elif kind == "archive_dir":
+        subprocess.run(["git", "archive", "--format=zip", "-o", str(dest), "HEAD", arg], check=True)
 
 
 def ext_of(src):
     if isinstance(src, str):
         return Path(src).suffix.lstrip(".")
-    return {"workbook": "xlsx", "figures": "pdf", "concat": "txt", "archive": "zip"}[src[0]]
+    return {"workbook": "xlsx", "figures": "pdf", "concat": "txt", "archive": "zip", "archive_dir": "zip"}[src[0]]
 
 
 def main():
     if OUT.exists():
         shutil.rmtree(OUT)
     rows = []
+    registre = json.loads(REGISTRE.read_text()) if REGISTRE.exists() else {}
     for step, role, desc, src, what, by in MANIFEST:
         folder = OUT / STEPS[step][0]
         folder.mkdir(parents=True, exist_ok=True)
-        n = name(step, role, desc, ext_of(src))
+        cle, sig = f"{step}-{role}-{desc}.{ext_of(src)}", signature(src)
+        avant = registre.get(cle)
+        version = 1 if not avant else (avant["version"] if avant["signature"] == sig else avant["version"] + 1)
+        registre[cle] = {"signature": sig, "version": version}
+        n = name(step, role, desc, ext_of(src), version)
         assert not (folder / n).exists(), f"nom en double : {n}"
         build(src, folder / n)
-        rows.append({"step": step, "role": role, "file": n, "what": what, "by": by,
+        rows.append({"step": step, "role": role, "file": n, "what": what, "by": by, "version": version,
+                     "nouveau": not avant or avant["version"] != version,
                      "src": src if isinstance(src, str) else src[0], "size": (folder / n).stat().st_size})
     files = pd.DataFrame(rows)
     sources = {p.stem.replace(".SOURCE", ""): p.read_text().strip() for p in Path("data/externe_propre").glob("*.SOURCE.txt")}
@@ -227,6 +272,9 @@ def main():
                       "(ACLED : redistribution interdite par ses conditions ; EDS : conditions du DHS Program ;",
                       "limites détaillées : 110 Mo, remplacées par la carte des 13 régions en 03_transformation).", ""]
         (OUT / folder / "LISEZ-MOI.txt").write_text("\n".join(lines))
+    def v(desc):
+        return files[files.file.str.contains(f"_{desc}_v")].file.iloc[0]
+
     root = [f"LISEZ-MOI - Équipe {TEAM} - Data Challenge Burkina, édition Éducation 2026", "",
             "Défi 1 : cartographie et anticipation du risque de décrochage scolaire par région.", "",
             "Nom des fichiers : EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN (un fichier = une étape).", "",
@@ -235,19 +283,24 @@ def main():
         f = files[files.step == step]
         root.append(f"* {folder} : {title} - {len(f)} fichiers ({', '.join(ROLES[r] for r in ROLES if r in set(f.role))})")
     root += ["", "Par où commencer :",
-             f"* 05_interpretation : {TEAM}_05-interpretation_{DEFI}_scientist_solution-anticipation_v{VERSION}.md (la solution)",
-             f"  et {TEAM}_05-interpretation_{DEFI}_analyst_fiches-regionales-13_v{VERSION}.pdf (une page par région).",
-             f"* 04_analyse : {TEAM}_04-analyse_{DEFI}_scientist_journal-decisions_v{VERSION}.md (chaque choix et ses limites).", "",
+             f"* 05_interpretation : {v('solution-anticipation')} (la solution)",
+             f"  et {v('fiches-regionales-13')} (une page par région).",
+             f"* 04_analyse : {v('journal-decisions')} (chaque choix et ses limites).",
+             f"* 05_interpretation : {v('tableau-de-bord-local-first')} : le tableau de bord, qui fonctionne sans réseau (lire son README.md).", "",
+             "Versions : chaque fichier porte sa propre version ; un fichier qui n'a pas changé garde la sienne.", "",
              "Pour tout relancer : décompresser le projet complet (05_interpretation), placer le fichier du challenge",
              "(01_collecte, presco-brut) sous data/raw/Presco.txt, puis suivre l'ordre des commandes du README.md.",
              "Les scripts sont aussi déposés un par un, à l'étape où ils servent ; leur nom d'origine est indiqué.", "",
              "Aucune donnée personnelle. Toutes les sources sont citées (01_collecte, liste des sources)."]
     (OUT / "LISEZ-MOI.txt").write_text("\n".join(root))
     # Zip outside the folder being zipped, then move it in; the inventory is written last, outside the zip.
-    tmp = shutil.make_archive(f"{TEAM}_{DEFI}_depots_v{VERSION}", "zip", root_dir=OUT, base_dir=".")
+    REGISTRE.write_text(json.dumps(registre, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
+    tmp = shutil.make_archive(f"{TEAM}_{DEFI}_depots_v{files.version.max()}", "zip", root_dir=OUT, base_dir=".")
     z = shutil.move(tmp, OUT / Path(tmp).name)
     files.to_csv(OUT / "inventaire.csv", index=False)
     print(files.groupby(["step", "role"]).size().to_string())
+    print("Nouveaux ou modifiés depuis la construction précédente :")
+    print("\n".join(f"  {f}" for f in files[files.nouveau].file) or "  aucun")
     print(f"{len(files)} fichiers, {files['size'].sum() / 1e6:.1f} Mo ; archive : {z}")
 
 

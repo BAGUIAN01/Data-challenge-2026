@@ -87,7 +87,8 @@ def tile(fig, x, y, w, h, value, label, sub):
     fig.text(x + 0.012, y + 0.010, sub, fontsize=7, color=INK2, va="bottom")
 
 
-def make(cle, data, out):
+def contenu(cle, data):
+    """Numbers, key facts and levers of one region: shared by the PDF fiche and the dashboard export."""
     p, fc, ex, typo, prob, acled, pov = data
     r = p[p.cle == cle].set_index("annee").loc[YEARS]
     n = p[p.region == "NATIONAL"].set_index("annee").loc[YEARS]
@@ -145,6 +146,12 @@ def make(cle, data, out):
     if level == "élevé":
         levers.append("Risque élevé pour 2026/27 : préparer dès maintenant un plan de continuité (lieux de repli, "
                       "enseignants mobiles, liste des élèves à suivre).")
+    return {k: v for k, v in locals().items() if k in ('r', 'n', 'name25', 'old', 'f', 'e', 't', 'profile', 'pr26', 'level', 'inc', 'poverty', 'tap0', 'tap1', 'tap21', 'el_max', 'el_now', 'ec_worst', 'g', 'fgl', 'inc24', 'inc25', 'facts', 'levers')}
+
+
+def make(cle, data, out):
+    c = contenu(cle, data)
+    (r, n, name25, old, f, e, t, profile, pr26, level, inc, poverty, tap0, tap1, tap21, el_max, el_now, ec_worst, g, fgl, inc24, inc25, facts, levers) = (c[k] for k in ('r', 'n', 'name25', 'old', 'f', 'e', 't', 'profile', 'pr26', 'level', 'inc', 'poverty', 'tap0', 'tap1', 'tap21', 'el_max', 'el_now', 'ec_worst', 'g', 'fgl', 'inc24', 'inc25', 'facts', 'levers'))
 
     fig = plt.figure(figsize=(8.27, 11.69))
     fig.patch.set_facecolor(SURFACE)

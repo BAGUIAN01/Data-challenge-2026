@@ -146,7 +146,7 @@ Les données du challenge sont la seule base fournie : il n'y a pas d'autre « D
 | EDS 2021 (`dhs-subnational-data-for-burkina-faso`) | Indicateurs régionaux : instruction des femmes, fécondité à 15-19 ans | Causes de fond (D15) | Collecte incomplète dans les zones d'insécurité |
 | CONASUR, déplacés internes (`situation-des-personnes-deplacees-internes`) | Déplacés par région d'accueil au 31 décembre 2022 | Pression des déplacements (D15) | Dernière série régionale publiée |
 
-Voir aussi `docs/journal_decisions.md`, décisions D1 à D15.
+Voir aussi `docs/journal_decisions.md`, décisions D1 à D18.
 
 ---
 

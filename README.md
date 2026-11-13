@@ -8,19 +8,21 @@ Data Challenge Burkina, édition Éducation 2026. **Défi 1 : cartographie et an
 | --- | --- |
 | `scripts/` | Le code Python de toutes les étapes : lecture des données, contrôles, analyses, modèles, figures, fiches |
 | `analyse/` | Résultats : tableaux (`P1_` à `P16_`), notes d'analyse (`*.md`), sorties brutes (`resultats_*.txt`), figures, fiches régionales |
-| `docs/` | Flux de travail, audit des données, journal des décisions (D1 à D17), note d'intention |
+| `docs/` | Flux de travail, audit des données, journal des décisions (D1 à D18), note d'intention |
 | `data/tidy/` | Données du challenge remises en tableau long |
 | `data/ref/` | Correspondance 13 / 17 régions et fond de carte des 13 régions |
 | `data/externe_propre/` | Sources externes nettoyées, chacune avec sa source |
 | `data/raw/` | Données brutes, **non versionnées** : voir `data/raw/LISEZ-MOI.md` |
+| `dashboard/` | **Le tableau de bord** : application Next.js local-first (fonctionne sans réseau), base Neon. Voir `dashboard/README.md` |
 
 ## Où lire les résultats
 
-1. `analyse/solution_anticipation.md` : la solution (où agir, où le risque monte, combien d'enfants, calendrier d'alerte).
-2. `analyse/facteurs_decrochage.md` : les causes autres que l'insécurité.
-3. `analyse/autres_approches_prevision.md` et `analyse/machine_learning.md` : ce qui prévoit et ce qui ne prévoit pas.
-4. `docs/journal_decisions.md` : chaque décision, sa raison et ses limites.
-5. `analyse/fiches_regionales_13.pdf` : une page par région.
+1. `dashboard/` : le tableau de bord, à lancer (`dashboard/README.md`).
+2. `analyse/solution_anticipation.md` : la solution (où agir, où le risque monte, combien d'enfants, calendrier d'alerte).
+3. `analyse/facteurs_decrochage.md` : les causes autres que l'insécurité.
+4. `analyse/autres_approches_prevision.md` et `analyse/machine_learning.md` : ce qui prévoit et ce qui ne prévoit pas.
+5. `docs/journal_decisions.md` : chaque décision, sa raison et ses limites.
+6. `analyse/fiches_regionales_13.pdf` : une page par région.
 
 ## Recalculer
 
@@ -86,7 +88,13 @@ python scripts/fiches_regionales.py
 
 Chaque script décrit en tête ce qu'il fait, ce qu'il lit et ce qu'il écrit.
 
-**7. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
+**7. Tableau de bord** (jeu de données, puis base Neon et application : voir `dashboard/README.md`)
+
+```bash
+python scripts/export_tableau_de_bord.py
+```
+
+**8. Dépôts du challenge** (dossiers `01_collecte` à `05_interpretation`, noms `EQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`, LISEZ-MOI)
 
 ```bash
 python scripts/construire_depots.py Biiga 1
