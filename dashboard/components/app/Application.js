@@ -260,7 +260,7 @@ function Coque({ donnees }) {
       </button>
       <div className="zone" ref={zoneRef}>
         <div className="zone-carte">
-          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
+          <CarteRegions jeu={jeu} classe={COUCHES[couche].classe} valeur={COUCHES[couche].valeur} selection={selection} onChoisir={apercevoir} commande={commande} marges={marges} />
           <div className="ftop">
             <label className="search">
               <IconeApp />

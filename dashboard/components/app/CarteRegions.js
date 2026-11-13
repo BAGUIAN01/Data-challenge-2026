@@ -19,10 +19,11 @@ function el(tag, attrs, parent) {
   return e;
 }
 
-export default function CarteRegions({ jeu, classe, selection, onChoisir, commande, marges }) {
+export default function CarteRegions({ jeu, classe, valeur, selection, onChoisir, commande, marges }) {
   const svgRef = useRef(null);
-  const etat = useRef({ classe, selection, onChoisir, marges });
+  const etat = useRef({ classe, valeur, selection, onChoisir, marges });
   etat.current.classe = classe;
+  etat.current.valeur = valeur;
   etat.current.selection = selection;
   etat.current.onChoisir = onChoisir;
   etat.current.marges = marges;
@@ -58,13 +59,24 @@ export default function CarteRegions({ jeu, classe, selection, onChoisir, comman
       gLab.innerHTML = "";
       const t = 12 * k, m = 3 * k, places = [];
       for (const r of [...ordre].sort((a, b) => (b.cle === sel) - (a.cle === sel))) {
-        const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], l = lignesNom(r.nom), c = s.classe(r);
+        const f = GEO[r.cle], [dx, dy] = DECALAGE[r.cle] ?? [0, 0], v = s.valeur?.(r), l = v ? [...lignesNom(r.nom), v] : lignesNom(r.nom), c = s.classe(r);
         const taille = t * (["CENTRE", "PLATEAUCENTRAL"].includes(r.cle) ? 0.88 : 1);
         const tx = el("text", { x: f.lx + dx, y: f.ly + dy - ((l.length - 1) * taille) / 2, "text-anchor": "middle", "data-etiquette": r.cle }, gLab);
         tx.style.cssText = `font-size:${taille}px;fill:var(--c${c}-t);stroke:var(--c${c});stroke-width:${2.5 * k}px`;
-        l.forEach((x, i) => { const ts = el("tspan", { x: f.lx + dx, dy: i ? taille * 1.1 : 0 }, tx); ts.textContent = x; });
-        const bb = tx.getBBox(), q = [bb.x - m, bb.y - m, bb.x + bb.width + m, bb.y + bb.height + m];
-        if (places.some((p) => q[0] < p[2] && q[2] > p[0] && q[1] < p[3] && q[3] > p[1])) tx.remove(); else places.push(q);
+        l.forEach((x, i) => {
+          const ts = el("tspan", { x: f.lx + dx, dy: i ? taille * 1.15 : 0 }, tx); ts.textContent = x;
+          if (v && i === l.length - 1) ts.setAttribute("style", "font-weight:700"); // the value, under the name
+        });
+        const boite = () => { const bb = tx.getBBox(); return [bb.x - m, bb.y - m, bb.x + bb.width + m, bb.y + bb.height + m]; };
+        const touche = (q) => places.some((p) => q[0] < p[2] && q[2] > p[0] && q[1] < p[3] && q[3] > p[1]);
+        let q = boite();
+        if (touche(q) && v) {
+          // No room for the name: keep the value alone, centred on the region.
+          tx.textContent = ""; tx.setAttribute("y", f.ly + dy);
+          const ts = el("tspan", { x: f.lx + dx }, tx); ts.textContent = v; ts.setAttribute("style", "font-weight:700");
+          q = boite();
+        }
+        if (touche(q)) tx.remove(); else places.push(q);
       }
     }
     // Viewbox that fits a box in the visible part of the map (between the controls and the sheet).
@@ -164,7 +176,7 @@ export default function CarteRegions({ jeu, classe, selection, onChoisir, comman
     };
   }, [jeu]);
 
-  useEffect(() => { api.current?.render(); }, [classe, selection]);
+  useEffect(() => { api.current?.render(); }, [classe, valeur, selection]);
   useEffect(() => {
     if (!commande?.n) return;
     if (commande.type === "region") api.current?.region(commande.cle);

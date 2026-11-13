@@ -35,18 +35,20 @@ export function couches(jeu) {
   const seuils = jeu.seuils;
   const nat = seuils.tap_national.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const score = jeu.score_global
-    ? { score: { nom: "Score", classe: (r) => { const s = scoreGlobal(jeu, r) ?? 0; return s >= 50 ? 1 : s >= 25 ? 2 : 3; }, legende: ["Score de 50 et plus", "25 à 49", "Moins de 25"] } }
+    ? { score: { nom: "Score", valeur: (r) => `${scoreGlobal(jeu, r)} %`, classe: (r) => { const s = scoreGlobal(jeu, r) ?? 0; return s >= 50 ? 1 : s >= 25 ? 2 : 3; }, legende: ["Score de 50 et plus", "25 à 49", "Moins de 25"] } }
     : {};
   return {
     ...score,
     risque: {
       nom: "Risque",
+      valeur: (r) => `${risque(r)} %`,
       classe: (r) => (risque(r) >= seuils.risque_eleve ? 1 : risque(r) >= seuils.risque_moyen ? 2 : 3),
       legende: ["Risque élevé", "Moyen", "Faible"],
     },
-    priorite: { nom: "Priorité", classe: (r) => r.priorite, legende: ["Priorité 1, agir maintenant", "Priorité 2", "Priorité 3"] },
+    priorite: { nom: "Priorité", valeur: (r) => `P${r.priorite}`, classe: (r) => r.priorite, legende: ["Priorité 1, agir maintenant", "Priorité 2", "Priorité 3"] },
     achevement: {
       nom: "Achèvement",
+      valeur: (r) => `${Math.round(r.tap.at(-1))} %`,
       classe: (r) => (r.tap.at(-1) < 35 ? 1 : r.tap.at(-1) < seuils.tap_national ? 2 : 3),
       legende: ["Achèvement sous 35 %", `35 à ${nat} %`, `${nat} % et plus`],
     },

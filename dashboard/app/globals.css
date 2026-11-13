@@ -362,3 +362,8 @@ button.row:active, a.row:active { background: var(--press); }
 /* A region tapped on the map is outlined by the selection; the focus box would draw a rectangle. */
 .carte-svg path:focus { outline: none; }
 .carte-svg path:focus-visible { outline: none; stroke: var(--fg); }
+.fiche .chiffre-xl { font-size: 48px; letter-spacing: -.03em; }
+.fiche .sec { margin-top: 30px; }
+.decomp { height: 12px; border-radius: 6px; }
+.contrib > div { grid-template-columns: 140px minmax(0, 1fr); }
+.contrib .axe { height: 12px; }
