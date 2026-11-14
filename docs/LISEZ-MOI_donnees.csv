@@ -1,0 +1,22 @@
+﻿fichier,dans_le_fichier,contenu,produit_par
+LISEZ-MOI_donnees.csv,,Ce fichier : ce que contient chaque fichier de données,
+05-interpretation_D1_analyst_priorites-2026-27_v1.csv,,"LE RÉSULTAT FINAL, une ligne par région : region_2025 (nom 2025), ancienne_region, score_global_2026_27 (0 à 100), probabilite_chute_effectifs_pct, alerte_septembre_pct, taux_achevement_2024_25_pct, priorite (1 agir maintenant, 2 veille renforcée, 3 consolider), agir_sur (facteur dominant), levier, ensuite (deuxième facteur), enfants_hors_cm2_estimes",cahiers 04b (modèles) et 05 (interprétation)
+05-interpretation_D1_analyst_donnees-tableau-de-bord_v1.json,,"Tout ce qu'affiche le tableau de bord, en un fichier : régions, séries 2015/16-2024/25, probabilités, score global et sa trajectoire, facteurs, carte",cahier 05 (interprétation)
+04-analyse_D1_scientist_resultats-analyse_v1.xlsx,feuille lisez-moi,La liste des feuilles et ce que contient chacune,
+04-analyse_D1_scientist_resultats-analyse_v1.xlsx,feuilles A à G,"Indicateurs descriptifs : tendances nationales, choc et reprise, sorties apparentes, passages, survie, parité, persistance",cahier 04a (analyse descriptive)
+04-analyse_D1_scientist_resultats-analyse_v1.xlsx,feuilles P1 à P19,"Résultats des pistes et des modèles : prévisions, alertes, apprentissage automatique, facteurs, formule du risque, score global, facteur dominant","cahiers 03, 04a et 04b"
+03-transformation_D1_engineer_donnees-transformees_v1.zip,panel_region_annee.csv,"LA TABLE DE BASE DES MODÈLES : une ligne par région et par année (2015/16 à 2024/25), effectifs, taux, écoles, sorties apparentes, variations, noms 2025",cahier 03 (transformation)
+03-transformation_D1_engineer_donnees-transformees_v1.zip,violence_acled_region_annee.csv,"Incidents et morts par région et par année scolaire (octobre à septembre), agrégés depuis ACLED",cahier 03
+03-transformation_D1_engineer_donnees-transformees_v1.zip,signaux_violence_region_annee.csv,"Signaux plus fins de violence par région et année : étendue, juillet-septembre, rentrée, civils, voisins",cahier 04b
+03-transformation_D1_engineer_donnees-transformees_v1.zip,attaques_education_region_annee.csv,"Attaques contre l'éducation par région et année scolaire, agrégées depuis Insecurity Insight",cahier 04b
+03-transformation_D1_engineer_donnees-transformees_v1.zip,correspondance_regions_13_17.csv,Correspondance officielle entre les 13 anciennes et les 17 nouvelles régions (IGB 2025),cahier 03
+03-transformation_D1_engineer_donnees-transformees_v1.zip,correspondance_provinces_45_47.csv,Correspondance officielle entre les 45 anciennes et les 47 nouvelles provinces,cahier 03
+03-transformation_D1_engineer_donnees-transformees_v1.zip,carte_13_regions.geojson,"Contours des 13 anciennes régions, reconstitués depuis les 17 nouvelles",cahier 03
+03-transformation_D1_engineer_donnees-transformees_v1.zip,dictionnaire_variables.md,Le dictionnaire des variables de toutes les tables,
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,donnees_challenge_propres.csv,"Les données du challenge (DGESS) en tableau long : une ligne par tableau, région, année, sexe, statut, niveau ; 6 621 valeurs, aucune modifiée",cahier 02 (nettoyage)
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,controles_qualite.txt,"Résultat des 8 contrôles de cohérence (sommes, parité, doublons, sauts, valeurs hors norme)",cahier 02
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,sources_donnees.csv,"La liste de toutes les sources : producteur, publication, année, adresse, licence, ce qui est fourni",
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,pauvrete_ehcvm_2021_regions.csv,"Pauvreté par région (INSD, EHCVM 2021), avec sa fiche source (.SOURCE.txt)",cahier 02
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,faim_cadre_harmonise_region_annee.csv,"Part de la population en phase 3 ou plus d'insécurité alimentaire, par région et année scolaire (Cadre harmonisé)",cahier 02
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,eds_2021_regions.csv,Femmes sans instruction et grossesses précoces par région (EDS 2021),cahier 02
+02-nettoyage_D1_engineer_donnees-nettoyees_v1.zip,pdi_conasur_2022_regions.csv,"Déplacés accueillis par région, en nombre et en part de la population (CONASUR, fin 2022)",cahier 02

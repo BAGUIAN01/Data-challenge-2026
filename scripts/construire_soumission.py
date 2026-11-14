@@ -185,7 +185,9 @@ def main():
     shutil.copy2(ROOT / "analyse/fiches_regionales_13.pdf", T / "fiches_regionales.pdf")
     shutil.copy2(ROOT / "analyse/formule_risque.md", T / "formule_du_risque.md")
     shutil.copy2(ROOT / "docs/journal_decisions.md", T / "journal_des_decisions.md")
-    shutil.copy2(ROOT / "docs/LISEZ-MOI_soumission.md", T / "LISEZ-MOI.md")
+    shutil.copy2(ROOT / "docs/LISEZ-MOI_soumission.md", T / "LISEZ-MOI_documentation.md")
+    shutil.copy2(ROOT / "docs/LISEZ-MOI_code.txt", C / "LISEZ-MOI_code.txt")
+    shutil.copy2(ROOT / "docs/LISEZ-MOI_donnees.csv", D / "LISEZ-MOI_donnees.csv")
 
     for old_name, name in UPLOAD_NAMES.items():
         f = OUT / old_name

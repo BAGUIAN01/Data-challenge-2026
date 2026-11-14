@@ -6,6 +6,8 @@ Burkina Faso, rentrée 2026/27 · 13 régions · données agrégées, aucune don
 
 `ÉTAPE_DÉFI_RÔLE_description_vN` : l'étape où le fichier est produit (02-nettoyage à 05-interpretation), le défi (D1), le rôle (engineer, architect, analyst, scientist), ce qu'il contient, sa version. Le nom de l'équipe n'y figure pas, pour l'évaluation à l'aveugle.
 
+Chaque catégorie a son LISEZ-MOI : `LISEZ-MOI_documentation.md` (ce fichier, vue d'ensemble), `LISEZ-MOI_code.txt` (code : cahiers, application, relance) et `LISEZ-MOI_donnees.csv` (données : un fichier par ligne, avec son contenu).
+
 ## Par où commencer
 
 1. **`05-interpretation_D1_analyst_rapport_v1.pdf`** (catégorie Documentation) : le rapport (10 pages). Le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
@@ -22,12 +24,13 @@ Burkina Faso, rentrée 2026/27 · 13 régions · données agrégées, aucune don
 | `05-interpretation_D1_analyst_fiches-regionales_v1.pdf` | Une page par région, pour un directeur régional, de la plus urgente à la moins urgente |
 | `04-analyse_D1_scientist_formule-risque_v1.md` | Les formules du risque, du score global et du facteur dominant, avec des exemples calculés à la main |
 | `04-analyse_D1_scientist_journal-decisions_v1.md` | Les 21 décisions de méthode : ce qui a été décidé, pourquoi, et ce qui a été écarté |
-| `LISEZ-MOI.md` | Ce fichier |
+| `LISEZ-MOI_documentation.md` | Ce fichier |
 
 ### Code
 
 | Fichier | Contenu |
 | --- | --- |
+| `LISEZ-MOI_code.txt` | Ce que contient chaque fichier de code, et comment tout relancer |
 | `02-nettoyage_D1_engineer_cahier-nettoyage_v1.ipynb` | Lecture du fichier du challenge, contrôles de cohérence, sources externes |
 | `03-transformation_D1_architect_cahier-transformation_v1.ipynb` | Correspondance des régions, panel région × année, violence, carte |
 | `04-analyse_D1_analyst_cahier-analyse-descriptive_v1.ipynb` | Ce que montrent les données, figures 01 à 07 |
@@ -42,6 +45,7 @@ Les cahiers sont **déjà exécutés** : les résultats et les figures se lisent
 
 | Fichier | Contenu |
 | --- | --- |
+| `LISEZ-MOI_donnees.csv` | Ce que contient chaque fichier de données, y compris l'intérieur des archives, et d'où il vient |
 | `05-interpretation_D1_analyst_priorites-2026-27_v1.csv` | **Le résultat final** : par région, score 2026/27, probabilité de chute des effectifs, alerte de septembre, achèvement, priorité, facteur dominant, levier, enfants hors CM2 |
 | `04-analyse_D1_scientist_resultats-analyse_v1.xlsx` | Tous les tableaux de résultats (A à G, P1 à P19), une feuille par tableau ; la feuille `lisez-moi` dit ce que contient chacune |
 | `05-interpretation_D1_analyst_donnees-tableau-de-bord_v1.json` | Tout ce qu'affiche le tableau de bord, en un fichier |
