@@ -57,6 +57,8 @@ Seules les données traitées sont fournies. Les données brutes viennent du cha
 ## Pour tout relancer
 
 1. Décompresser `05-interpretation_D1_scientist_projet-complet_v1.zip`.
-2. Placer les données brutes comme l'indique `data/raw/LISEZ-MOI.md`.
+2. Ajouter les données brutes, qui ne sont pas fournies (seules les données traitées le sont) :
+   - le fichier du challenge : le télécharger dans l'espace challenge et le placer tel quel dans `data/raw/` ;
+   - les sources publiques : les télécharger aux adresses données dans `data/raw/LISEZ-MOI.md`, et les placer aux chemins indiqués.
 3. Installer les dépendances : `pip install -r requirements.txt`.
 4. Lancer `python scripts/construire_notebooks.py`, ou suivre l'ordre des commandes du `README.md`.

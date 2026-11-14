@@ -32,7 +32,10 @@ LES ARCHIVES
 
 POUR TOUT RELANCER (Python 3.13)
   1. Décompresser le projet complet.
-  2. Placer les données brutes comme l'indique data/raw/LISEZ-MOI.md.
+  2. Ajouter les données brutes, qui ne sont pas fournies (seules les données traitées le sont) :
+     - le fichier du challenge : le télécharger dans l'espace challenge et le placer tel quel dans data/raw/ ;
+     - les sources publiques : les télécharger aux adresses données dans data/raw/LISEZ-MOI.md,
+       et les placer aux chemins indiqués.
   3. pip install -r requirements.txt
   4. python scripts/construire_notebooks.py
      (ou suivre l'ordre des commandes du README.md, étape par étape)

@@ -37,7 +37,7 @@ Les commandes se lancent depuis la racine du dépôt (Python 3.13) :
 pip install -r requirements.txt
 ```
 
-Placer ensuite les données brutes dans `data/raw/` (voir `data/raw/LISEZ-MOI.md`), puis lancer les étapes dans cet ordre.
+Ajouter ensuite les données brutes dans `data/raw/` : le fichier `.xlsx` du challenge, tel quel, et les sources publiques, aux adresses données dans `data/raw/LISEZ-MOI.md`. Puis lancer les étapes dans cet ordre.
 
 **1. Données du challenge**
 

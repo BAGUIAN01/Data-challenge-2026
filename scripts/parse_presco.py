@@ -1,7 +1,11 @@
 """Turn the challenge's Presco.txt export into one tidy CSV."""
 import csv
+import glob
+import os
 import re
 import sys
+
+import openpyxl
 
 YEARS = [f"{y}-{y + 1}" for y in range(2015, 2025)]
 
@@ -92,9 +96,42 @@ def labels_from_row(cells, kinds, carried):
     return out
 
 
+def xlsx_lines(path):
+    """The platform's .xlsx, read as the tab-separated export it comes from: one line per row, same layout."""
+    book = openpyxl.load_workbook(path, data_only=True)
+    sheet = book.worksheets[0]
+    lines = []
+    for row in sheet.iter_rows():
+        cells = []
+        for c in row:
+            v = c.value
+            if v is None:
+                cells.append("")
+            elif isinstance(v, float) and "%" in (c.number_format or ""):
+                cells.append(f"{v * 100:.1f}")
+            elif isinstance(v, float) and v.is_integer():
+                cells.append(str(int(v)))
+            else:
+                cells.append(str(v))
+        lines.append("\t".join(cells))
+    return lines
+
+
+def find_source(path):
+    """Presco.txt, or else the challenge .xlsx placed in the same folder."""
+    if os.path.exists(path):
+        return path
+    found = sorted(glob.glob(os.path.join(os.path.dirname(path) or ".", "*.xlsx")))
+    if not found:
+        raise SystemExit(f"Fichier du challenge introuvable : placer {path} ou le fichier .xlsx de la plateforme dans {os.path.dirname(path)}/")
+    return found[0]
+
+
 def parse(path):
-    text = open(path, encoding="utf-8", newline="").read()
-    lines = text.split("\r\n")
+    if path.lower().endswith(".xlsx"):
+        lines = xlsx_lines(path)
+    else:
+        lines = open(path, encoding="utf-8", newline="").read().split("\r\n")
     rows = []
     for tid, cycle, ind, unit, a, b, layout, kinds in TABLES:
         block = [lines[i].split("\t") for i in range(a - 1, b)]
@@ -140,8 +177,16 @@ def parse(path):
 
 
 def main():
-    src, dst = sys.argv[1], sys.argv[2]
+    src, dst = find_source(sys.argv[1]), sys.argv[2]
+    print("fichier du challenge lu :", src)
     rows = parse(src)
+    known = {(r[0], r[4].get("region", ""), r[5], r[6]): r[7] for r in rows}
+    checks = [(("E1", "TOTAL GENERAL", "T", "2024-2025"), 3308096), (("E8", "TOTAL GENERAL", "T", "2024-2025"), 51.6)]
+    for key_, expected in checks:
+        got = next((v for k, v in known.items() if k[0] == key_[0] and norm_label("region", k[1]) == "NATIONAL" and k[2:] == key_[2:]), None)
+        if got is None or abs(got - expected) > 0.05:
+            raise SystemExit(f"Lecture incorrecte du fichier du challenge ({key_[0]} {key_[3]} : {got} au lieu de {expected}). "
+                             "Enregistrer le fichier depuis Excel en « Texte (séparateur : tabulation) » sous data/raw/Presco.txt.")
     with open(dst, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["table", "cycle", "indicateur", "unite", "region", "statut", "milieu", "niveau",
