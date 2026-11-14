@@ -1,4 +1,6 @@
 """Build the files to upload on the challenge platform: three categories, at most 20 files, no team name."""
+import base64
+import io
 import json
 import re
 import shutil
@@ -7,6 +9,7 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "soumission"
@@ -93,9 +96,32 @@ def zip_files(dest, files):
             z.write(ROOT / src, arc)
 
 
-def git_archive(dest, subpath=None):
-    cmd = ["git", "archive", "--format=zip", "-o", str(dest), "HEAD"] + ([subpath] if subpath else [])
-    subprocess.run(cmd, cwd=ROOT, check=True)
+# Left out of the project archive: what the code regenerates, or what is uploaded on its own.
+REGENERATED = re.compile(r"^(notebooks/|maquettes/|rapport/img/|analyse/fiches/|analyse/figures/.*\.png$|.*\.pdf$)")
+
+
+def git_archive(dest, subpath=None, light=False):
+    files = subprocess.run(["git", "ls-files"] + ([subpath] if subpath else []), cwd=ROOT, capture_output=True, text=True, check=True).stdout.split("\n")
+    with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+        for f in filter(None, files):
+            if not (light and REGENERATED.match(f)):
+                z.write(ROOT / f, f)
+
+
+def light_notebook(src, dest, width=820, quality=55):
+    """Same notebook, figures shown as JPEG at screen size: the file stays small enough to upload."""
+    nb = json.load(open(src, encoding="utf-8"))
+    for cell in nb["cells"]:
+        for out in cell.get("outputs", []):
+            data = out.get("data", {})
+            if "image/png" in data:
+                im = Image.open(io.BytesIO(base64.b64decode(data.pop("image/png")))).convert("RGB")
+                im.thumbnail((width, width * 3))
+                buf = io.BytesIO()
+                im.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
+                data["image/jpeg"] = base64.b64encode(buf.getvalue()).decode()
+                out.get("metadata", {}).pop("image/png", None)
+    json.dump(nb, open(dest, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 
 def priorities(dataset):
@@ -150,10 +176,10 @@ def main():
         ("docs/dictionnaire_variables.md", "dictionnaire_variables.md"),
     ])
 
-    git_archive(C / "projet_complet.zip")
+    git_archive(C / "projet_complet.zip", light=True)
     git_archive(C / "tableau_de_bord.zip", "dashboard")
-    for i, notebook in enumerate(sorted((ROOT / "notebooks").glob("*.ipynb")), 1):
-        shutil.copy2(notebook, C / f"cahier_{notebook.name}")
+    for notebook in sorted((ROOT / "notebooks").glob("*.ipynb")):
+        light_notebook(notebook, C / f"cahier_{notebook.name}")
 
     shutil.copy2(ROOT / "rapport/rapport_defi1.pdf", T / "rapport.pdf")
     shutil.copy2(ROOT / "analyse/fiches_regionales_13.pdf", T / "fiches_regionales.pdf")

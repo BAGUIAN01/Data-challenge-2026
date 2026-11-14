@@ -7,7 +7,7 @@
 \captionsetup{font=small,labelfont=bf}
 \setlist{itemsep=1pt,topsep=3pt}
 \setlength{\parskip}{3pt}
-\graphicspath{{../analyse/figures/}{img/}{../analyse/fiches/}}
+\graphicspath{{.images/}}
 \title{\textbf{Anticiper le risque de décrochage scolaire,\\ région par région}\\[4pt]\large Burkina Faso, rentrée 2026/27}
 \author{Data Challenge Burkina 2026 · Éducation · Défi 1}
 \date{Novembre 2026}
@@ -49,7 +49,7 @@ Insecurity Insight & attaques contre l'éducation & agrégat par région et ann�
 Le découpage de 2025 compte dix-sept régions, mais les données du challenge n'en connaissent que treize. L'analyse est conduite sur les treize anciennes régions, présentées sous leur nom de 2025 (par exemple « Goulmou + Sirba + Tapoa » pour l'ancien Est) grâce à la correspondance officielle de l'IGB. Une région scindée en 2025 conserve un seul score.
 
 \section{Ce que montrent les données}
-\begin{figure}[H]\centering\includegraphics[width=.92\textwidth]{08_carte_profils_achevement.png}
+\begin{figure}[H]\centering\includegraphics[width=.92\textwidth]{08_carte_profils_achevement.jpg}
 \caption{Taux d'achèvement du primaire en 2024/25 et profils d'évolution des régions.}\end{figure}
 \begin{itemize}
 \item \textbf{Le choc de 2022/23.} Les effectifs du primaire passent de 3\,174\,946 à 2\,835\,544 ($-10{,}7$\,\%), les écoles de 14\,427 à 12\,780.
@@ -159,26 +159,26 @@ Kadiogo & Centre & 7 & 1 & 87{,}5 & 3 & (aucun : consolider) & 9\,900 \tabularne
 \item L'alerte de septembre porte Yaadga à 61\,\% et Guiriko de 1\,\% à 20\,\% : une région qui tient encore mais où le risque monte, à placer en veille.
 \end{itemize}
 \begin{figure}[H]\centering
-\includegraphics[width=.86\textwidth]{15_matrice_priorite_2026_27.png}
+\includegraphics[width=.86\textwidth]{15_matrice_priorite_2026_27.jpg}
 \caption{Matrice de priorité 2026/27 : retard d'achèvement et risque de chute.}\end{figure}
 \begin{figure}[H]\centering
-\includegraphics[width=.86\textwidth]{16_profil_facteurs.png}
+\includegraphics[width=.86\textwidth]{16_profil_facteurs.jpg}
 \caption{Profil des facteurs de fond de chaque région.}\end{figure}
 
 \clearpage
 \section{L'outil : un tableau de bord utilisable sans réseau}
 L'application est en ligne (lien indiqué dans la fiche de la solution) ; elle s'ouvre sur téléphone comme sur ordinateur et s'installe comme une application. L'accueil présente la carte du score ; un lecteur fait défiler les années de 2020/21 à la prévision 2026/27. Chaque région dispose d'une page : score et décomposition, score année par année jusqu'à la prévision avec les chutes réellement observées, facteur dominant et levier, achèvement, violence, et fiche imprimable.
-\begin{figure}[H]\centering\includegraphics[width=\textwidth]{app_bureau.png}
+\begin{figure}[H]\centering\includegraphics[width=\textwidth]{app_bureau.jpg}
 \caption{Le tableau de bord sur ordinateur : à gauche, les régions où agir maintenant et ce qui change d'une année à l'autre ; à droite, la carte du score 2026/27 (couleur et barre par région) et le lecteur des années.}\end{figure}
 \begin{figure}[H]\centering
-\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_carte.png}\caption{Carte du score.}\end{subfigure}\hfill
-\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_region_score.png}\caption{Score par année.}\end{subfigure}\hfill
-\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_region_action.png}\caption{Sur quoi agir.}\end{subfigure}\hfill
-\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_hors_ligne.png}\caption{Serveur arrêté.}\end{subfigure}
+\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_carte.jpg}\caption{Carte du score.}\end{subfigure}\hfill
+\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_region_score.jpg}\caption{Score par année.}\end{subfigure}\hfill
+\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_region_action.jpg}\caption{Sur quoi agir.}\end{subfigure}\hfill
+\begin{subfigure}{.235\textwidth}\includegraphics[width=\linewidth]{app_hors_ligne.jpg}\caption{Serveur arrêté.}\end{subfigure}
 \caption{Le tableau de bord sur téléphone. La dernière capture est prise serveur arrêté : l'application s'ouvre et l'indique, avec la date des données.}\end{figure}
 Les données sont conservées sur l'appareil ; sans réseau, l'écran l'indique. Le nombre d'écoles ouvertes saisi sur le terrain est enregistré localement, visible immédiatement, puis transmis au retour du réseau, une seule fois. La fiche régionale reste disponible hors ligne. Deux contrôles automatiques vérifient ce fonctionnement à chaque modification, dont l'un serveur réellement arrêté. Les chiffres affichés proviennent d'un fichier unique produit par l'analyse : l'application, les fiches et ce rapport ne peuvent pas se contredire.
 
-\begin{figure}[H]\centering\includegraphics[width=.62\textwidth]{fiche_koulse.png}
+\begin{figure}[H]\centering\includegraphics[width=.62\textwidth]{fiche_koulse.jpg}
 \caption{Fiche régionale d'une page (Koulsé, ancien Centre-Nord), destinée à un directeur régional.}\end{figure}
 
 \section{Limites}

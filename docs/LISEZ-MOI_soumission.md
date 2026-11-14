@@ -34,9 +34,9 @@ Burkina Faso, rentrée 2026/27 · 13 régions · données agrégées, aucune don
 | `04-analyse_D1_scientist_cahier-modeles_v1.ipynb` | Risque de chute, alertes, apprentissage automatique, facteurs, formule, score global, facteur dominant |
 | `05-interpretation_D1_analyst_cahier-interpretation_v1.ipynb` | Figures de la solution, données du tableau de bord, fiches régionales |
 | `05-interpretation_D1_analyst_tableau-de-bord_v1.zip` | Le code de l'application (Next.js, fonctionne sans réseau) ; voir son `README.md` |
-| `05-interpretation_D1_scientist_projet-complet_v1.zip` | Tout le projet, pour tout relancer : scripts, cahiers, données propres, rapport, application |
+| `05-interpretation_D1_scientist_projet-complet_v1.zip` | Tout le projet, pour tout relancer : scripts, données traitées, tableaux de résultats, source LaTeX du rapport, application. Les cahiers, les figures et les PDF n'y sont pas : le code les régénère, et ils sont fournis à part |
 
-Les cahiers sont **déjà exécutés** : les résultats et les figures se lisent sans rien lancer. Relancés dans le projet complet, ils redonnent exactement les mêmes résultats.
+Les cahiers sont **déjà exécutés** : les résultats et les figures se lisent sans rien lancer (figures allégées pour le dépôt). Relancés dans le projet complet, ils redonnent exactement les mêmes résultats.
 
 ### Données
 

@@ -1,8 +1,10 @@
 """Build the final report in LaTeX from the dashboard data set and the figures, then compile it with XeLaTeX."""
 import json
+import re
 import subprocess
 from pathlib import Path
 
+from PIL import Image
 from pypdf import PdfReader
 
 HERE = Path(__file__).resolve().parent
@@ -41,6 +43,16 @@ V = {
 }
 
 TEX = (HERE / "rapport_defi1.modele.tex").read_text(encoding="utf-8")
+# Images go in as JPEG at a print resolution (about 200 dpi at their width on A4): the PDF stays light enough to upload.
+LIGHT = HERE / ".images"
+LIGHT.mkdir(exist_ok=True)
+for name in re.findall(r"includegraphics\[[^]]*\]\{([^}]+)\.png\}", TEX):
+    src = next(d / f"{name}.png" for d in (ROOT / "analyse/figures", HERE / "img", ROOT / "analyse/fiches") if (d / f"{name}.png").exists())
+    im = Image.open(src).convert("RGB")
+    im.thumbnail((1400, 1400))
+    im.save(LIGHT / f"{name}.jpg", quality=72, optimize=True, progressive=True)
+TEX = re.sub(r"(includegraphics\[[^]]*\]\{[^}]+)\.png\}", r"\1.jpg}", TEX)
+TEX = TEX.replace(r"\graphicspath{{../analyse/figures/}{img/}{../analyse/fiches/}}", r"\graphicspath{{.images/}}")
 for k, v in V.items():
     TEX = TEX.replace(f"<<{k}>>", v)
 assert "<<" not in TEX
