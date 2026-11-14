@@ -108,7 +108,7 @@ python scripts/construire_notebooks.py
 
 Les cahiers reprennent le code des scripts, étape par étape ; les relancer redonne exactement les mêmes résultats.
 
-**8. Rapport** (LaTeX, XeLaTeX ; lit les mêmes données que l'application)
+**8. Rapport** (LaTeX, XeLaTeX ; lit les mêmes données que l'application ; demande les captures de `rapport/img/`, absentes de l'archive allégée de la soumission, où le rapport est fourni en PDF)
 
 ```bash
 python rapport/construire_rapport.py
