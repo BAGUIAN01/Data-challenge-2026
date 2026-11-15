@@ -6,7 +6,7 @@ Burkina Faso, rentrée 2026/27 · 13 régions · données agrégées, aucune don
 
 `ÉTAPE_DÉFI_RÔLE_description_vN` : l'étape où le fichier est produit (02-nettoyage à 05-interpretation), le défi (D1), le rôle (engineer, architect, analyst, scientist), ce qu'il contient, sa version. Le nom de l'équipe n'y figure pas, pour l'évaluation à l'aveugle.
 
-Chaque catégorie a son LISEZ-MOI : `LISEZ-MOI_documentation.md` (ce fichier, vue d'ensemble), `LISEZ-MOI_code.txt` (code : cahiers, application, relance) et `LISEZ-MOI_donnees.csv` (données : un fichier par ligne, avec son contenu).
+Chaque catégorie a son LISEZ-MOI : `LISEZ-MOI_documentation.md` (ce fichier, vue d'ensemble), `LISEZ-MOI_code.txt` (code : notebooks, application, relance) et `LISEZ-MOI_donnees.csv` (données : un fichier par ligne, avec son contenu).
 
 ## Par où commencer
 
@@ -31,15 +31,15 @@ Chaque catégorie a son LISEZ-MOI : `LISEZ-MOI_documentation.md` (ce fichier, vu
 | Fichier | Contenu |
 | --- | --- |
 | `LISEZ-MOI_code.txt` | Ce que contient chaque fichier de code, et comment tout relancer |
-| `02-nettoyage_D1_engineer_cahier-nettoyage_v1.ipynb` | Lecture du fichier du challenge, contrôles de cohérence, sources externes |
-| `03-transformation_D1_architect_cahier-transformation_v1.ipynb` | Correspondance des régions, panel région × année, violence, carte |
-| `04-analyse_D1_analyst_cahier-analyse-descriptive_v1.ipynb` | Ce que montrent les données, figures 01 à 07 |
-| `04-analyse_D1_scientist_cahier-modeles_v1.ipynb` | Risque de chute, alertes, apprentissage automatique, facteurs, formule, score global, facteur dominant |
-| `05-interpretation_D1_analyst_cahier-interpretation_v1.ipynb` | Figures de la solution, données du tableau de bord, fiches régionales |
+| `02-nettoyage_D1_engineer_notebook-nettoyage_v1.ipynb` | Lecture du fichier du challenge, contrôles de cohérence, sources externes |
+| `03-transformation_D1_architect_notebook-transformation_v1.ipynb` | Correspondance des régions, panel région × année, violence, carte |
+| `04-analyse_D1_analyst_notebook-analyse-descriptive_v1.ipynb` | Ce que montrent les données, figures 01 à 07 |
+| `04-analyse_D1_scientist_notebook-modeles_v1.ipynb` | Risque de chute, alertes, apprentissage automatique, facteurs, formule, score global, facteur dominant |
+| `05-interpretation_D1_analyst_notebook-interpretation_v1.ipynb` | Figures de la solution, données du tableau de bord, fiches régionales |
 | `05-interpretation_D1_analyst_tableau-de-bord_v1.zip` | Le code de l'application (Next.js, fonctionne sans réseau) ; voir son `README.md` |
-| `05-interpretation_D1_scientist_projet-complet_v1.zip` | Tout le projet, pour tout relancer : scripts, données traitées, tableaux de résultats, source LaTeX du rapport, application. Les cahiers, les figures et les PDF n'y sont pas : le code les régénère, et ils sont fournis à part |
+| `05-interpretation_D1_scientist_projet-complet_v1.zip` | Tout le projet, pour tout relancer : scripts, données traitées, tableaux de résultats, source LaTeX du rapport, application. Les notebooks, les figures et les PDF n'y sont pas : le code les régénère, et ils sont fournis à part |
 
-Les cahiers sont **déjà exécutés** : les résultats et les figures se lisent sans rien lancer (figures allégées pour le dépôt). Relancés dans le projet complet, ils redonnent exactement les mêmes résultats.
+Les notebooks sont **déjà exécutés** : les résultats et les figures se lisent sans rien lancer (figures allégées pour le dépôt). Relancés dans le projet complet, ils redonnent exactement les mêmes résultats.
 
 ### Données
 

@@ -6,7 +6,7 @@ Noms des fichiers : `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`.
 
 | Fichier | Rôle | Contenu |
 | --- | --- | --- |
-| `Biiga_05-interpretation_D1_analyst_cahier-interpretation_v1.ipynb` | analyst | **Le cahier Jupyter de l'étape**, déjà exécuté |
+| `Biiga_05-interpretation_D1_analyst_notebook-interpretation_v1.ipynb` | analyst | **Le notebook Jupyter de l'étape**, déjà exécuté |
 | `Biiga_05-interpretation_D1_analyst_fiches-regionales-13_v1.pdf` | analyst | Le livret des 13 fiches régionales, de la région la plus urgente à la moins urgente |
 | `Biiga_05-interpretation_D1_analyst_priorites-2026-27_v1.csv` | analyst | **Le résultat final** : une ligne par région (score, risque, priorité, sur quoi agir, levier) |
 | `Biiga_05-interpretation_D1_analyst_rapport_v1.pdf` | analyst | **Le rapport** (PDF, 10 pages) et sa source LaTeX |

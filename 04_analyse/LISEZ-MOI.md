@@ -6,8 +6,8 @@ Noms des fichiers : `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`.
 
 | Fichier | Rôle | Contenu |
 | --- | --- | --- |
-| `Biiga_04-analyse_D1_analyst_cahier-analyse-descriptive_v1.ipynb` | analyst | **Cahier Jupyter** : analyse descriptive et figures 01 à 07 |
-| `Biiga_04-analyse_D1_scientist_cahier-modeles_v1.ipynb` | scientist | **Cahier Jupyter** : tous les modèles, déjà exécuté |
+| `Biiga_04-analyse_D1_analyst_notebook-analyse-descriptive_v1.ipynb` | analyst | **Notebook Jupyter** : analyse descriptive et figures 01 à 07 |
+| `Biiga_04-analyse_D1_scientist_notebook-modeles_v1.ipynb` | scientist | **Notebook Jupyter** : tous les modèles, déjà exécuté |
 | `Biiga_04-analyse_D1_analyst_pistes-defi1_v1.md` | analyst | Les pistes d'analyse et leurs résultats |
 | `Biiga_04-analyse_D1_analyst_synthese-donnees_v1.md` | analyst | Ce que disent les données du challenge |
 | `Biiga_04-analyse_D1_scientist_anticipation-et-hypothese_v1.md` | scientist | Prévision prudente, alerte d'escalade, test de l'hypothèse |

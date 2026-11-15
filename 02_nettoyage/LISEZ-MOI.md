@@ -6,7 +6,7 @@ Noms des fichiers : `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`.
 
 | Fichier | Rôle | Contenu |
 | --- | --- | --- |
-| `Biiga_02-nettoyage_D1_engineer_cahier-nettoyage_v1.ipynb` | engineer | **Le cahier Jupyter de l'étape**, déjà exécuté |
+| `Biiga_02-nettoyage_D1_engineer_notebook-nettoyage_v1.ipynb` | engineer | **Le notebook Jupyter de l'étape**, déjà exécuté |
 | `Biiga_02-nettoyage_D1_engineer_audit-donnees_v1.md` | engineer | L'audit des données du challenge : contenu, qualité, limites |
 | `Biiga_02-nettoyage_D1_engineer_controles-qualite_v1.txt` | engineer | Résultat des 8 contrôles de cohérence |
 | `Biiga_02-nettoyage_D1_engineer_donnees-challenge-propres_v1.csv` | engineer | Les données du challenge en tableau long : 6 621 valeurs, aucune modifiée |

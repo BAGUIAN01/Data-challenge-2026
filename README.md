@@ -55,9 +55,9 @@ Chaque étape a son dossier et son `LISEZ-MOI.md` ; chaque fichier suit le modè
 | [`04_analyse/`](04_analyse/) | Analyse descriptive, modèles, formule du risque, journal des décisions, tableaux de résultats |
 | [`05_interpretation/`](05_interpretation/) | **Le rapport**, les fiches régionales, les priorités 2026/27, les captures |
 | [`dashboard/`](dashboard/) | Le tableau de bord (Next.js, fonctionne sans réseau) |
-| [`outils/`](outils/) | Construction des cahiers, du rapport et de la soumission ; registre des chemins |
+| [`outils/`](outils/) | Construction des notebooks, du rapport et de la soumission ; registre des chemins |
 
-Chaque étape a un **cahier Jupyter déjà exécuté** (`…_cahier-…_v1.ipynb`) : le code et ses résultats se lisent sans rien lancer.
+Chaque étape a un **notebook Jupyter déjà exécuté** (`…_notebook-…_v1.ipynb`) : le code et ses résultats se lisent sans rien lancer.
 
 ## Lancer en local
 
@@ -81,7 +81,7 @@ Placer ensuite les données brutes dans `01_collecte/brut/` : le fichier `.xlsx`
 python outils/construire_notebooks.py
 ```
 
-Les cinq cahiers sont relancés dans l'ordre des étapes (environ 4 minutes) et redonnent exactement les mêmes résultats. Le rapport se reconstruit avec `python outils/construire_rapport.py` (XeLaTeX).
+Les cinq notebooks sont relancés dans l'ordre des étapes (environ 4 minutes) et redonnent exactement les mêmes résultats. Le rapport se reconstruit avec `python outils/construire_rapport.py` (XeLaTeX).
 
 **Le tableau de bord** :
 

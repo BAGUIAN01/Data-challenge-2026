@@ -157,7 +157,7 @@ def main():
         notebook = build_notebook(f, *NOTEBOOKS[f])
         NotebookClient(notebook, timeout=3600, kernel_name="python3", resources={"metadata": {"path": str(ROOT)}}).execute()
         nbformat.write(notebook, chemins.path(f"{f}.ipynb"))
-        print("cahier :", chemins.rel(f"{f}.ipynb"))
+        print("notebook :", chemins.rel(f"{f}.ipynb"))
 
 
 if __name__ == "__main__":

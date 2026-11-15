@@ -79,11 +79,11 @@ UPLOAD_NAMES = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rappo
     'documentation/fiches_regionales.pdf': '05-interpretation_D1_analyst_fiches-regionales',
     'documentation/formule_du_risque.md': '04-analyse_D1_scientist_formule-risque',
     'documentation/journal_des_decisions.md': '04-analyse_D1_scientist_journal-decisions',
-    'code/cahier_02_nettoyage.ipynb': '02-nettoyage_D1_engineer_cahier-nettoyage',
-    'code/cahier_03_transformation.ipynb': '03-transformation_D1_architect_cahier-transformation',
-    'code/cahier_04a_analyse_descriptive.ipynb': '04-analyse_D1_analyst_cahier-analyse-descriptive',
-    'code/cahier_04b_modeles.ipynb': '04-analyse_D1_scientist_cahier-modeles',
-    'code/cahier_05_interpretation.ipynb': '05-interpretation_D1_analyst_cahier-interpretation',
+    'code/notebook_02_nettoyage.ipynb': '02-nettoyage_D1_engineer_notebook-nettoyage',
+    'code/notebook_03_transformation.ipynb': '03-transformation_D1_architect_notebook-transformation',
+    'code/notebook_04a_analyse_descriptive.ipynb': '04-analyse_D1_analyst_notebook-analyse-descriptive',
+    'code/notebook_04b_modeles.ipynb': '04-analyse_D1_scientist_notebook-modeles',
+    'code/notebook_05_interpretation.ipynb': '05-interpretation_D1_analyst_notebook-interpretation',
     'code/tableau_de_bord.zip': '05-interpretation_D1_analyst_tableau-de-bord',
     'code/projet_complet.zip': '05-interpretation_D1_scientist_projet-complet',
     'donnees/priorites_2026_27.csv': '05-interpretation_D1_analyst_priorites-2026-27',
@@ -209,7 +209,7 @@ def main():
     git_archive(C / "projet_complet.zip", light=True)
     git_archive(C / "tableau_de_bord.zip", "dashboard")
     for key in ("02_nettoyage.ipynb", "03_transformation.ipynb", "04a_analyse_descriptive.ipynb", "04b_modeles.ipynb", "05_interpretation.ipynb"):
-        light_notebook(chemins.path(key), C / f"cahier_{key}")
+        light_notebook(chemins.path(key), C / f"notebook_{key}")
 
     shutil.copy2(chemins.path("rapport.pdf"), T / "rapport.pdf")
     shutil.copy2(chemins.path("fiches_regionales_13.pdf"), T / "fiches_regionales.pdf")

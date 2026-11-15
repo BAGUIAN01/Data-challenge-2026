@@ -6,7 +6,7 @@ Noms des fichiers : `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`.
 
 | Fichier | Rôle | Contenu |
 | --- | --- | --- |
-| `Biiga_03-transformation_D1_architect_cahier-transformation_v1.ipynb` | architect | **Le cahier Jupyter de l'étape**, déjà exécuté |
+| `Biiga_03-transformation_D1_architect_notebook-transformation_v1.ipynb` | architect | **Le notebook Jupyter de l'étape**, déjà exécuté |
 | `Biiga_03-transformation_D1_architect_carte-13-regions_v1.geojson` | architect | Contours des 13 anciennes régions (GeoJSON) |
 | `Biiga_03-transformation_D1_architect_correspondance-provinces-45-47_v1.csv` | architect | Correspondance officielle 45 anciennes / 47 nouvelles provinces |
 | `Biiga_03-transformation_D1_architect_correspondance-regions-13-17_v1.csv` | architect | Correspondance officielle 13 anciennes / 17 nouvelles régions |
