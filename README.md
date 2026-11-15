@@ -1,131 +1,110 @@
-# Data-challenge-2026
+# Anticiper le risque de décrochage scolaire, région par région
 
-Data Challenge Burkina, édition Éducation 2026. **Défi 1 : cartographie et anticipation du risque de décrochage scolaire par région.**
+**Équipe Biiga** · Data Challenge Burkina 2026, édition Éducation · **Défi 1** : cartographie et anticipation du risque de décrochage scolaire par région.
 
-## Ce que contient le dépôt
+Une carte du risque pour la rentrée 2026/27, une alerte qui se précise de septembre à janvier, un levier d'action par région, et un tableau de bord qui fonctionne sans réseau.
+
+**Tableau de bord en ligne : <https://kalantigui-decrochage.vercel.app>**
+
+## Le rapport
+
+<a href="05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf"><img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-rapport-page-1_v1.png" width="340" alt="Première page du rapport" align="right"></a>
+
+**[Lire le rapport (PDF, 10 pages)](05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf)** : le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
+
+En bref :
+
+- **Le décrochage prend deux formes.** Brutale : les effectifs chutent quand la violence ferme les écoles. Lente : une part croissante d'enfants n'achève pas le primaire (51,6 % d'achèvement en 2024/25, contre 62,0 % en 2021/22).
+- **Un score de 0 à 100 réunit les deux** : moitié probabilité de chute des effectifs, prévue à partir de la violence, moitié part d'enfants qui n'achèvent pas.
+- **Un facteur dominant par région** dit sur quoi agir : insécurité, déplacés, pauvreté, grossesses précoces, instruction des mères, préscolaire.
+- **Tout est vérifié sur des années que les modèles n'avaient pas vues**, contre la règle « comme l'an passé ».
+
+<br clear="right">
+
+## Le résultat : où agir à la rentrée 2026/27
+
+| Région (nom 2025) | Ancienne région | Score | Risque de chute | Achèvement 2024/25 | Agir sur | Enfants hors CM2 |
+| --- | --- | ---: | ---: | ---: | --- | ---: |
+| Goulmou + Sirba + Tapoa | Est | 66 | 49 % | 16,5 % | l'insécurité | ≈ 50 600 |
+| Liptako + Soum | Sahel | 65 | 41 % | 11,1 % | l'accueil des déplacés | ≈ 28 200 |
+| Koulsé | Centre-Nord | 60 | 48 % | 27,7 % | les grossesses précoces | ≈ 42 000 |
+| Yaadga | Nord | 54 | 55 % | 46,4 % | la pauvreté | ≈ 28 600 |
+| Bankui + Sourou | Boucle du Mouhoun | 52 | 41 % | 37,2 % | l'insécurité | ≈ 35 300 |
+
+Les 13 régions : [`05_interpretation/…_priorites-2026-27_v1.csv`](05_interpretation/Biiga_05-interpretation_D1_analyst_priorites-2026-27_v1.csv). Rejouée sur le passé, cette règle de priorité désignait 35 % des régions et contenait 71 % des fortes baisses d'effectifs de l'année suivante.
+
+## Le tableau de bord
+
+![Le tableau de bord sur ordinateur](05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-bureau_v1.png)
+
+| Carte du score | Le score, année par année | Sur quoi agir | Serveur arrêté |
+| :---: | :---: | :---: | :---: |
+| <img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-carte_v1.png" width="200"> | <img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-region-score_v1.png" width="200"> | <img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-region-action_v1.png" width="200"> | <img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-hors-ligne_v1.png" width="200"> |
+
+Sur téléphone comme sur ordinateur. Les données restent sur l'appareil : l'application s'ouvre et se consulte sans réseau, et la saisie du terrain (écoles ouvertes à la rentrée) part au retour du réseau.
+
+## Le dépôt
+
+Chaque étape a son dossier et son `LISEZ-MOI.md` ; chaque fichier suit le modèle `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`.
 
 | Dossier | Contenu |
 | --- | --- |
-| `notebooks/` | **Le code de chaque étape en cahiers Jupyter, déjà exécutés** (02 nettoyage, 03 transformation, 04a analyse descriptive, 04b modèles, 05 interprétation) |
-| `scripts/` | Les mêmes étapes en scripts Python, dont les cahiers sont construits |
-| `rapport/` | **Le rapport** (`rapport_defi1.pdf`, LaTeX), avec sa source et les captures du tableau de bord |
-| `analyse/` | Résultats : tableaux (`P1_` à `P19_`), notes d'analyse (`*.md`), sorties brutes (`resultats_*.txt`), figures, fiches régionales |
-| `docs/` | Flux de travail, audit des données, journal des décisions (D1 à D21), note d'intention |
-| `data/tidy/` | Données du challenge remises en tableau long |
-| `data/ref/` | Correspondance 13 / 17 régions et fond de carte des 13 régions |
-| `data/externe_propre/` | Sources externes nettoyées, chacune avec sa source |
-| `data/raw/` | Données brutes, **non versionnées** : voir `data/raw/LISEZ-MOI.md` |
-| `dashboard/` | **Le tableau de bord** : application de téléphone Next.js local-first (fonctionne sans réseau), au niveau des 13 régions, base Neon. Voir `dashboard/README.md` |
-| `maquettes/` | La maquette de l'application, avant le code |
+| [`01_collecte/`](01_collecte/) | Note d'intention, liste des sources ; les données brutes à télécharger (`brut/`) |
+| [`02_nettoyage/`](02_nettoyage/) | Données du challenge contrôlées et mises au propre, sources externes nettoyées |
+| [`03_transformation/`](03_transformation/) | Correspondance 13 / 17 régions, panel région × année, violence, carte, dictionnaire des variables |
+| [`04_analyse/`](04_analyse/) | Analyse descriptive, modèles, formule du risque, journal des décisions, tableaux de résultats |
+| [`05_interpretation/`](05_interpretation/) | **Le rapport**, les fiches régionales, les priorités 2026/27, les captures |
+| [`dashboard/`](dashboard/) | Le tableau de bord (Next.js, fonctionne sans réseau) |
+| [`outils/`](outils/) | Construction des cahiers, du rapport et de la soumission ; registre des chemins |
 
-## Où lire les résultats
+Chaque étape a un **cahier Jupyter déjà exécuté** (`…_cahier-…_v1.ipynb`) : le code et ses résultats se lisent sans rien lancer.
 
-1. `rapport/rapport_defi1.pdf` : le rapport (10 pages).
-2. Le tableau de bord : code dans `dashboard/`, voir `dashboard/README.md` ; il est aussi en ligne (lien donné dans la fiche de la solution).
-3. `analyse/solution_anticipation.md` : la solution (où agir, où le risque monte, combien d'enfants, calendrier d'alerte).
-4. `analyse/facteurs_decrochage.md` : les causes autres que l'insécurité.
-5. `analyse/autres_approches_prevision.md` et `analyse/machine_learning.md` : ce qui prévoit et ce qui ne prévoit pas.
-6. `analyse/formule_risque.md` : la formule du risque, le score global et le facteur dominant, avec des exemples calculés à la main.
-7. `docs/journal_decisions.md` : chaque décision, sa raison et ses limites.
-8. `analyse/fiches_regionales_13.pdf` : une page par région.
+## Lancer en local
 
-## Recalculer
+```bash
+git clone https://github.com/BAGUIAN01/Data-challenge-2026.git
+```
 
-Les commandes se lancent depuis la racine du dépôt (Python 3.13) :
+```bash
+cd Data-challenge-2026
+```
+
+**L'analyse** (Python 3.13) :
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Ajouter ensuite les données brutes dans `data/raw/` : le fichier `.xlsx` du challenge, tel quel, et les sources publiques, aux adresses données dans `data/raw/LISEZ-MOI.md`. Puis lancer les étapes dans cet ordre.
-
-**1. Données du challenge**
+Placer ensuite les données brutes dans `01_collecte/brut/` : le fichier `.xlsx` du challenge, tel quel, et les sources publiques, aux adresses données dans [`01_collecte/brut/LISEZ-MOI.md`](01_collecte/brut/LISEZ-MOI.md). Puis :
 
 ```bash
-python scripts/parse_presco.py data/raw/Presco.txt data/tidy/presco_tidy.csv
-python scripts/check_presco.py data/tidy/presco_tidy.csv
-python scripts/analyse_presco.py data/tidy/presco_tidy.csv analyse/
+python outils/construire_notebooks.py
 ```
 
-**2. Référentiel des régions**
+Les cinq cahiers sont relancés dans l'ordre des étapes (environ 4 minutes) et redonnent exactement les mêmes résultats. Le rapport se reconstruit avec `python outils/construire_rapport.py` (XeLaTeX).
+
+**Le tableau de bord** :
 
 ```bash
-python scripts/referentiel_officiel.py data/raw/externe/hdx_cod_ab/bfa_admin_boundaries.xlsx data/ref/
-python scripts/regions_2025.py data/ref/regions_13_17.csv data/tidy/presco_tidy.csv data/tidy/presco_tidy_regions2025.csv
+cd dashboard
 ```
-
-**3. Panel, violence, carte**
 
 ```bash
-python scripts/analyse_pistes.py data/tidy/presco_tidy.csv analyse/
-python scripts/regions_2025.py data/ref/regions_13_17.csv analyse/panel_region_annee.csv analyse/panel_region_annee_2025.csv
-python scripts/acled_anticipation.py data/raw/externe/hdx_acled/acled_political_violence_month_year.xlsx analyse/panel_region_annee.csv analyse/
-python scripts/figures_pistes.py data/tidy/presco_tidy.csv analyse/ analyse/figures/
-python scripts/carte_13_regions.py data/raw/externe/hdx_cod_ab/geojson/bfa_admin1.geojson data/ref/regions_13_17.csv analyse/
+npm install
 ```
-
-**4. Prévision et modèles**
 
 ```bash
-python scripts/prevision_hypothese.py
-python scripts/figures_prevision.py
-python scripts/machine_learning.py
-python scripts/figures_ml.py
-python scripts/approches_prevision.py
-python scripts/solution_prevision.py
+npm run build
 ```
-
-**5. Autres facteurs et alertes**
 
 ```bash
-python scripts/prepare_facteurs.py
-python scripts/facteurs_decrochage.py
-python scripts/prevision_facteurs.py
-python scripts/anticipation_fine.py
-python scripts/formule_risque.py
-python scripts/score_global.py
-python scripts/facteur_dominant.py
-python scripts/figures_approches.py
+npm start
 ```
 
-**6. Tableau de bord** (jeu de données, puis base Neon et application : voir `dashboard/README.md`)
-
-```bash
-python scripts/export_tableau_de_bord.py
-```
-
-**7. Fiches régionales** (après le jeu de données : la fiche le lit, elle dit donc les mêmes chiffres que l'application)
-
-```bash
-python scripts/fiches_regionales.py
-```
-
-**Ou tout d'un coup, en cahiers Jupyter** (un par étape, dans `notebooks/`, déjà exécutés : résultats et figures visibles sans rien lancer) :
-
-```bash
-python scripts/construire_notebooks.py
-```
-
-Les cahiers reprennent le code des scripts, étape par étape ; les relancer redonne exactement les mêmes résultats.
-
-**8. Rapport** (LaTeX, XeLaTeX ; lit les mêmes données que l'application ; demande les captures de `rapport/img/`, absentes de l'archive allégée de la soumission, où le rapport est fourni en PDF)
-
-```bash
-python rapport/construire_rapport.py
-```
-
-**9. Soumission** (fichiers prêts à téléverser, rangés comme sur la plateforme : données, code, documentation ; 20 fichiers au plus, aucun nom d'équipe)
-
-```bash
-python scripts/construire_soumission.py
-```
-
-Le résultat va dans `soumission/`, qui n'est pas suivi par git.
+L'application s'ouvre sur <http://localhost:3000>. Sans base de données, elle utilise les données publiées avec elle. Détails : [`dashboard/README.md`](dashboard/README.md).
 
 ## Principes
 
-- **Chaque modèle est testé sur des années qu'il n'a pas vues**, contre la règle « comme l'an passé ».
-- **Les listes de modèles sont fixées avant de lancer les tests.**
-- **Ce qui ne marche pas est dit**, avec ses chiffres.
-- **Toute donnée externe est citée** (`data/externe_propre/*.SOURCE.txt`).
-- **Aucune donnée personnelle.**
+- Chaque modèle est testé sur des années qu'il n'a pas vues, contre la règle « comme l'an passé ».
+- Les listes de modèles sont fixées avant de lancer les tests ; ce qui ne marche pas est dit, avec ses chiffres.
+- Toutes les sources sont citées ([liste des sources](01_collecte/Biiga_01-collecte_D1_engineer_sources-donnees_v1.csv)) ; aucune donnée personnelle.

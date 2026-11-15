@@ -107,7 +107,7 @@ Sans base déclarée, le déploiement fonctionne aussi : l'application utilise l
 Depuis la racine du dépôt, après les scripts d'analyse :
 
 ```bash
-python scripts/export_tableau_de_bord.py
+python 05_interpretation/Biiga_05-interpretation_D1_analyst_script-export-tableau-de-bord_v1.py
 ```
 
 Puis, dans `dashboard/` :
@@ -120,7 +120,7 @@ npm run db:seed
 npm run build
 ```
 
-Les phrases et les leviers de chaque région viennent de la même fonction que les fiches PDF (`scripts/fiches_regionales.py`, fonction `content`) : la fiche et le tableau de bord ne peuvent pas se contredire.
+Les phrases et les leviers de chaque région viennent de la même fonction que les fiches PDF (`05_interpretation/Biiga_05-interpretation_D1_analyst_script-fiches-regionales_v1.py`, fonction `content`) : la fiche et le tableau de bord ne peuvent pas se contredire.
 
 ## Contrôles
 

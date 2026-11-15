@@ -1,7 +1,7 @@
 # Raw data are not versioned: challenge data (contest use only) and third-party downloads
-# (ACLED terms forbid redistributing its data). See data/raw/LISEZ-MOI.md.
-data/raw/*
-!data/raw/LISEZ-MOI.md
+# (ACLED terms forbid redistributing its data). See 01_collecte/brut/LISEZ-MOI.md.
+01_collecte/brut/*
+!01_collecte/brut/LISEZ-MOI.md
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
@@ -12,4 +12,4 @@ soumission/
 soumission_a_televerser.zip
 fiche_de_la_solution.md
 depots/
-rapport/.images/
+outils/.build_rapport/
