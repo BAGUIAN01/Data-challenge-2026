@@ -181,7 +181,10 @@ MODULES = {
 
 
 def path(key):
-    return str(ROOT / FILES[key])
+    """Absolute path of a file; its folder is created if missing (figures and fiches are regenerated)."""
+    p = ROOT / FILES[key]
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return str(p)
 
 
 def rel(key):
@@ -198,7 +201,9 @@ def folder(name):
 
 
 def fiche(slug, ext):
-    return str(ROOT / "05_interpretation" / "fiches" / f"Biiga_05-interpretation_D1_analyst_fiche-{slug}_v1.{ext}")
+    p = ROOT / "05_interpretation" / "fiches" / f"Biiga_05-interpretation_D1_analyst_fiche-{slug}_v1.{ext}"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return str(p)
 
 
 def module(name):
