@@ -67,36 +67,8 @@ export function CarteTendance({ jeu, onOuvrir }) {
   );
 }
 
-// What to act on, across the country: the regions grouped by their dominant background factor.
-// The lever itself is on each region's page; here, only the factor and its regions.
-export function CarteActions({ jeu, onOuvrir }) {
-  if (!jeu.facteur_dominant) return null;
-  const groupes = new Map();
-  for (const r of [...jeu.regions].sort((a, b) => (scoreGlobal(jeu, b) ?? 0) - (scoreGlobal(jeu, a) ?? 0))) {
-    const k = facteurDominant(jeu, r)?.dominant ?? "aucun";
-    if (!groupes.has(k)) groupes.set(k, []);
-    groupes.get(k).push(r);
-  }
-  const ordre = [...groupes.entries()].sort((a, b) => (a[0] === "aucun") - (b[0] === "aucun") || b[1].length - a[1].length);
-  const def = (id) => jeu.facteurs_def.find((d) => d.id === id);
-  return (
-    <section className="card" aria-label="Sur quoi agir">
-      <div className="ch"><b>Sur quoi agir</b><span>facteur dominant</span></div>
-      <div className="agir">
-        {ordre.map(([k, rs]) => (
-          <div key={k} className="agir-l">
-            <b>{k === "aucun" ? "Rien ne ressort" : def(k)?.libelle}</b>
-            <span className="puces">{rs.map((r) => <button key={r.cle} className="puce" onClick={() => onOuvrir(r.cle)}>{r.nom}</button>)}</span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// The country in three figures, the children who do not reach CM2 first: no chart, the charts live
-// on each region's page.
-export function CartePays({ jeu, nbSaisies, onSaisies }) {
+// The country in three figures, the children who do not reach CM2 first.
+export function CartePays({ jeu }) {
   const e = jeu.national.eleves, tap = jeu.national.tap, n = e.length - 1, d = (e[n] / e[n - 1] - 1) * 100;
   const hors = jeu.regions.reduce((s, r) => s + (r.enfants_hors_cm2 ?? 0), 0);
   return (
@@ -107,7 +79,6 @@ export function CartePays({ jeu, nbSaisies, onSaisies }) {
         <div><b className="num">{pctFr(tap[n])}</b><span>achèvent le primaire</span><em className="num down">{signe(tap[n] - tap[0])}{fr(Math.abs(tap[n] - tap[0]), 1)} pts depuis {jeu.annees[0]}</em></div>
         <div><b className="num">{fr(e[n])}</b><span>élèves au primaire</span><em className="num">{signe(d)}{fr(Math.abs(d), 1)} % sur un an</em></div>
       </div>
-      <button className="inrow" onClick={onSaisies}>Écoles ouvertes saisies<b>{nbSaisies} région{nbSaisies > 1 ? "s" : ""} sur 13</b><Chevron /></button>
     </section>
   );
 }
@@ -143,12 +114,9 @@ export function CarteMatrice({ jeu, onOuvrir }) {
   const C = couches(jeu).priorite, r = lu && jeu.regions.find((x) => x.cle === lu);
   return (
     <section className="card">
-      <div className="ch"><b>Matrice de priorité</b><span>{r ? `${r.nom} · ${pctFr(r.tap.at(-1))} · ${risque(r)} %` : "Toucher un point"}</span></div>
+      <div className="ch"><b>Matrice de priorité</b><span>{r ? `${r.nom} · ${pctFr(r.tap.at(-1))} · ${risque(r)} %` : ""}</span></div>
       <Matrice regions={jeu.regions} seuils={jeu.seuils} couleur={(x) => `var(--c${C.classe(x)})`} lu={lu} onLire={setLu} onOuvrir={onOuvrir} />
-      <p className="foot">
-        À gauche, l'achèvement 2024/25 sous la moyenne du pays ({pctFr(jeu.seuils.tap_national)}) ; en haut, un risque de baisse élevé
-        (40 % ou plus). Le coin grisé, c'est la priorité 1.
-      </p>
+      <p className="foot">Coin grisé : priorité 1 (achèvement sous {pctFr(jeu.seuils.tap_national)}, risque de 40 % ou plus).</p>
     </section>
   );
 }
@@ -160,7 +128,7 @@ export function CarteCalendrier({ jeu }) {
       <div className="ch"><b>Calendrier d'alerte</b><span>rentrée <span className="nw">2026-2027</span></span></div>
       <div className="tl">
         <div className="done"><i /><div><b>Fin septembre · alerte de rentrée</b>
-          <span>Violence de l'année, dont juillet à septembre. Fiabilité {fr(v.auc_septembre, 2)} (1 = parfait, 0,5 = hasard).</span></div></div>
+          <span>Violence de l'année, dont juillet à septembre. Fiabilité {fr(v.auc_septembre, 2)}.</span></div></div>
         <div className="now"><i /><div><b>En cours · écoles ouvertes</b>
           <span>Dès qu'elles sont comptées : les élèves de l'année, erreur ± {fr(jeu.nowcast.erreur_pct, 1)} % au lieu de ± {fr(jeu.nowcast.erreur_persistance_pct, 1)} %.</span></div></div>
         <div><i /><div><b>Début janvier · mise à jour</b><span>On ajoute la violence d'octobre à décembre. Fiabilité {fr(v.auc_janvier, 2)}.</span></div></div>

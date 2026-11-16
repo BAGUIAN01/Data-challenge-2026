@@ -2,7 +2,7 @@
 // Content of the screens: the country summary (sheet over the map), the region preview, the tab
 // roots (Régions, Alertes, Plus) and the pushed screens (region, method, sources, pending entries).
 import { useEffect, useRef, useState } from "react";
-import { BlocEstimation, CarteActions, CarteCalendrier, CarteMatrice, CartePays, CarteTendance, CarteUrgences } from "./Cartes";
+import { BlocEstimation, CarteCalendrier, CarteMatrice, CartePays, CarteTendance, CarteUrgences } from "./Cartes";
 import { Chevron, IconeApp } from "./icones";
 import { dateFr, dateHeureFr, fr } from "@/lib/format";
 import { ANNEES_SAISIE, estimerEffectifs } from "@/lib/prevision-effectifs";
@@ -49,19 +49,17 @@ export function LigneRegion({ jeu, r, onOuvrir, valeur = "score" }) {
     <button className="row" onClick={() => onOuvrir(r.cle)}>
       <span className="lead"><Silhouette jeu={jeu} cle={r.cle} c={r.priorite} /></span>
       <span className="t"><b>{r.nom}</b><span>{PRIORITES[r.priorite].libelle} · {sousTitre(jeu, r)}</span></span>
-      <span className="v num">{v}<small>{montre === "sept" ? "septembre" : montre === "risque" ? "risque" : "score /100"}</small></span><Chevron />
+      <span className="v num">{v}</span><Chevron />
     </button>
   );
 }
 
-export function ResumePays({ jeu, saisies, nav }) {
-  const nb = new Set(saisies.map((s) => s.cle)).size;
+export function ResumePays({ jeu, nav }) {
   return (
     <>
       <CarteUrgences jeu={jeu} onOuvrir={nav.ouvrirRegion} onToutes={() => nav.ongletRegions("toutes")} />
       <CarteTendance jeu={jeu} onOuvrir={nav.ouvrirRegion} />
-      <CartePays jeu={jeu} nbSaisies={nb} onSaisies={() => nav.onglet("alertes")} />
-      <CarteActions jeu={jeu} onOuvrir={nav.ouvrirRegion} />
+      <CartePays jeu={jeu} />
     </>
   );
 }
@@ -73,7 +71,6 @@ export function VueRegions({ jeu, filtre, setFiltre, nav }) {
   const liste = trierRegions(jeu.regions, jeu).filter((r) => filtre === "toutes" || (filtre === "eleve" ? risque(r) >= jeu.seuils.risque_eleve : `p${r.priorite}` === filtre));
   return (
     <>
-      <p className="sub" style={{ marginTop: 0 }}>De la plus urgente à la moins urgente</p>
       <CarteMatrice jeu={jeu} onOuvrir={nav.ouvrirRegion} />
       <div className="chips" role="group" aria-label="Filtrer les régions">
         {FIL.map(([k, l, c]) => <button key={k} aria-pressed={filtre === k} onClick={() => setFiltre(k)}>{l} · {c}</button>)}
@@ -103,7 +100,6 @@ export function VueAlertes({ jeu, saisies, nav }) {
   const parSept = [...jeu.regions].sort((a, b) => alerteSeptembre(b) - alerteSeptembre(a));
   return (
     <>
-      <p className="sub" style={{ marginTop: 0 }}>Plus l'information arrive, mieux on anticipe.</p>
       <CarteCalendrier jeu={jeu} />
       <div className="sh">Écoles ouvertes saisies<span>{saisies.length ? `${saisies.length} saisie${saisies.length > 1 ? "s" : ""}` : "aucune"}</span></div>
       <div className="group">
@@ -112,7 +108,7 @@ export function VueAlertes({ jeu, saisies, nav }) {
       </div>
       <div className="sh">Alerte de septembre<span>probabilité de baisse</span></div>
       <div className="group">{parSept.map((r) => <LigneRegion key={r.cle} jeu={jeu} r={r} valeur="sept" onOuvrir={nav.ouvrirRegion} />)}</div>
-      <p className="note">Élevé : 40 % ou plus · moyen : 15 à 39 % · faible : moins de 15 %. Ces probabilités classent bien les régions mais restent approximatives.</p>
+      <p className="note">Élevé : 40 % ou plus · moyen : 15 à 39 %.</p>
     </>
   );
 }

@@ -304,7 +304,7 @@ function Coque({ donnees }) {
               <div className={`screen racine-carte${couvertRacine("carte") ? " covered" : ""}`} data-ecran="carte">
                 <Feuille cran={cran} setCran={setCran}
                   tete={<div className="tt"><b>Burkina Faso</b><span>13 régions · {sousTitre}</span></div>}>
-                  <ResumePays jeu={jeu} saisies={saisies} nav={nav} />
+                  <ResumePays jeu={jeu} nav={nav} />
                 </Feuille>
               </div>
               {piles.carte.map((e, i, p) => ecranPousse(e, i, p, "carte"))}

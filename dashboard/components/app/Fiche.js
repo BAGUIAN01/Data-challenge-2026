@@ -81,7 +81,6 @@ function BlocScore({ jeu, r, annee, anime, onRejouer }) {
             label={`Score de ${r.nom} de ${tr.annees[0]} à ${tr.annees.at(-1)}, la dernière année est la prévision`} />
           <div className="lg"><span><i className="bx" style={{ "--c": "var(--bad-txt)" }} />Chute des effectifs observée</span>
             <span>Pointillé : prévision {tr.annees.at(-1)}</span></div>
-          <p className="foot">Chaque point est calculé avec ce qu'on savait cette année-là, sans les années suivantes.</p>
         </>
       )}
       <button className="rejouer" onClick={onRejouer}>{anime ? `Année ${annee}…` : "Rejouer les années"}</button>
@@ -114,7 +113,6 @@ function BlocAction({ jeu, r }) {
           </div>
         ))}
       </div>
-      <p className="lecture">Les 4 facteurs qui pèsent le plus ; à droite du trait, plus exposé que la moyenne des 13 régions.</p>
     </section>
   );
 }
