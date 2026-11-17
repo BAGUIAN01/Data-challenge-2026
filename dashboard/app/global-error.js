@@ -8,7 +8,7 @@ export default function ErreurGlobale({ error }) {
   useEffect(() => { console.error(error); }, [error]);
   return (
     <html lang="fr">
-      <body><Reprise /></body>
+      <body><Reprise error={error} /></body>
     </html>
   );
 }
