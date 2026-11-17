@@ -30,6 +30,7 @@ export default function Application() {
       <div className="lancement" role="status">
         <IconeApp /><b>Décrochage scolaire</b>
         <p>{donnees.serveur === "inconnu" ? "Lecture des données de ce téléphone…"
+          : donnees.message ? `Aucune donnée sur ce téléphone. ${donnees.message}`
           : "Aucune donnée sur ce téléphone et pas de réseau. Ouvrez l'application une première fois avec une connexion : elle fonctionnera ensuite sans réseau."}</p>
       </div>
     );

@@ -7,6 +7,7 @@
 // few seconds in which the user can still cancel them have passed.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { db } from "@/lib/db-locale";
+import { jeuValide } from "@/lib/valider-jeu";
 
 const Contexte = createContext(null);
 const DELAI_MS = 8000;
@@ -20,6 +21,17 @@ async function chercher(url, options = {}) {
     return await fetch(url, { cache: "no-store", ...options, signal: ctrl.signal });
   } finally {
     clearTimeout(t);
+  }
+}
+
+// Device storage can be refused (private window, full disk, blocked site data): every access goes
+// through here, and the app then keeps working from memory for this visit instead of freezing.
+async function essayer(action, repli) {
+  try {
+    return await action();
+  } catch (e) {
+    console.warn("stockage de l'appareil indisponible", e);
+    return repli;
   }
 }
 
@@ -37,18 +49,24 @@ export function DonneesProvider({ children }) {
   const [saisies, setSaisies] = useState([]);
   const [envoi, setEnvoi] = useState(false);
   const enCours = useRef(false);
+  // In-memory copy of the outbox, used only when device storage is refused.
+  const memoire = useRef(new Map());
 
-  const relireSaisies = useCallback(async () => setSaisies(await db.saisies.toArray()), []);
+  const relireSaisies = useCallback(async () => {
+    setSaisies(await essayer(() => db.saisies.toArray(), [...memoire.current.values()]));
+  }, []);
 
   const enregistrer = useCallback(async (donnees, source) => {
     const ligne = { cle: "courant", donnees, version: donnees.version, source, recu_le: new Date().toISOString() };
-    await db.jeu.put(ligne);
+    await essayer(() => db.jeu.put(ligne));
     return ligne;
   }, []);
 
   const envoyerSaisies = useCallback(async () => {
     const mures = Date.now() - DELAI_ANNULATION_MS;
-    const attente = (await db.saisies.where("statut").equals("en_attente").toArray()).filter((s) => Date.parse(s.saisi_le) <= mures);
+    const enAttente = await essayer(() => db.saisies.where("statut").equals("en_attente").toArray(),
+      [...memoire.current.values()].filter((s) => s.statut === "en_attente"));
+    const attente = enAttente.filter((s) => Date.parse(s.saisi_le) <= mures);
     if (!attente.length) return { envoyees: 0 };
     setEnvoi(true);
     try {
@@ -58,7 +76,9 @@ export function DonneesProvider({ children }) {
       });
       const corps = await rep.json().catch(() => ({}));
       if (!rep.ok) throw Object.assign(new Error(corps.message || "Envoi impossible"), { corps });
-      await db.saisies.where("client_id").anyOf(corps.recues ?? []).modify({ statut: "envoyee" });
+      const recues = corps.recues ?? [];
+      for (const id of recues) if (memoire.current.has(id)) memoire.current.get(id).statut = "envoyee";
+      await essayer(() => db.saisies.where("client_id").anyOf(recues).modify({ statut: "envoyee" }));
       return { envoyees: corps.recues?.length ?? 0 };
     } finally {
       setEnvoi(false);
@@ -68,9 +88,16 @@ export function DonneesProvider({ children }) {
   const recevoirSaisies = useCallback(async () => {
     const rep = await chercher("/api/saisies");
     if (!rep.ok) return;
-    const { saisies: distantes = [] } = await rep.json();
+    const corps = await rep.json().catch(() => ({}));
+    const distantes = Array.isArray(corps.saisies) ? corps.saisies : [];
     for (const s of distantes) {
-      if (!(await db.saisies.get(s.client_id))) await db.saisies.put({ ...s, saisi_le: new Date(s.saisi_le).toISOString(), statut: "envoyee" });
+      if (!s?.client_id) continue;
+      const ligne = { ...s, saisi_le: new Date(s.saisi_le).toISOString(), statut: "envoyee" };
+      const ok = await essayer(async () => {
+        if (!(await db.saisies.get(s.client_id))) await db.saisies.put(ligne);
+        return true;
+      }, false);
+      if (!ok && !memoire.current.has(s.client_id)) memoire.current.set(s.client_id, ligne);
     }
   }, []);
 
@@ -78,13 +105,23 @@ export function DonneesProvider({ children }) {
     if (enCours.current) return;
     enCours.current = true;
     try {
-      const locale = await db.jeu.get("courant");
+      let locale = await essayer(() => db.jeu.get("courant"), null);
+      // A broken device copy (older app, interrupted write) is dropped, not shown.
+      if (locale && !jeuValide(locale.donnees)) {
+        await essayer(() => db.jeu.delete("courant"));
+        locale = null;
+      }
       if (locale) setEtat((e) => ({ ...e, jeu: locale.donnees, source: locale.source, recuLe: locale.recu_le }));
       let serveur = "injoignable", message = null;
       try {
         const rep = await chercher("/api/donnees");
         const corps = await rep.json().catch(() => ({}));
-        if (rep.ok) {
+        if (rep.ok && !jeuValide(corps)) {
+          // The server answered, but with something that is not a complete data set (deploy in
+          // progress, cut transfer): never saved, the device copy stays in use.
+          serveur = "erreur";
+          message = "Le serveur a envoyé des données incomplètes. Les données de cet appareil restent affichées.";
+        } else if (rep.ok) {
           serveur = "ok";
           const ligne = locale?.version === corps.version && locale?.source === "serveur" ? locale : await enregistrer(corps, "serveur");
           setEtat({ jeu: ligne.donnees, source: "serveur", recuLe: ligne.recu_le, serveur, message: null });
@@ -103,8 +140,8 @@ export function DonneesProvider({ children }) {
         if (!ligne || ligne.source === "instantane") {
           try {
             const rep = await chercher("/data/tableau_de_bord.json");
-            const instantane = rep.ok ? await rep.json() : null;
-            if (instantane && instantane.version !== ligne?.version) ligne = await enregistrer(instantane, "instantane");
+            const instantane = rep.ok ? await rep.json().catch(() => null) : null;
+            if (jeuValide(instantane) && instantane.version !== ligne?.version) ligne = await enregistrer(instantane, "instantane");
           } catch { /* handled below: no data at all */ }
         }
         setEtat({ jeu: ligne?.donnees ?? null, source: ligne?.source ?? null, recuLe: ligne?.recu_le ?? null, serveur, message });
@@ -116,6 +153,10 @@ export function DonneesProvider({ children }) {
         } catch { /* entries stay on the device; the screen counts them */ }
       }
       await relireSaisies();
+    } catch (e) {
+      // Never leave the screen on "loading": say what happened instead.
+      console.error("synchronisation", e);
+      setEtat((x) => (x.serveur === "inconnu" ? { ...x, serveur: "erreur", message: "Les données n'ont pas pu être lues. Rechargez la page." } : x));
     } finally {
       enCours.current = false;
     }
@@ -141,7 +182,8 @@ export function DonneesProvider({ children }) {
 
   const ajouterSaisie = useCallback(async ({ cle, annee, ecoles_ouvertes }) => {
     const s = { client_id: uuid(), cle, annee, ecoles_ouvertes, saisi_le: new Date().toISOString(), statut: "en_attente" };
-    await db.saisies.put(s);
+    const ok = await essayer(async () => { await db.saisies.put(s); return true; }, false);
+    if (!ok) memoire.current.set(s.client_id, s);
     await relireSaisies();
     // Leaves once the cancel window is over (or at the next synchronisation if the network is down).
     setTimeout(() => synchroniser(), DELAI_ANNULATION_MS + 300);
@@ -150,9 +192,10 @@ export function DonneesProvider({ children }) {
 
   // Cancel an entry that has not left the device yet. Returns false if it was already sent.
   const retirerSaisie = useCallback(async (clientId) => {
-    const s = await db.saisies.get(clientId);
+    const s = await essayer(() => db.saisies.get(clientId), null) ?? memoire.current.get(clientId);
     if (s?.statut !== "en_attente") return false;
-    await db.saisies.delete(clientId);
+    memoire.current.delete(clientId);
+    await essayer(() => db.saisies.delete(clientId));
     await relireSaisies();
     return true;
   }, [relireSaisies]);

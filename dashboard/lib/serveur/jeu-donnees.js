@@ -47,16 +47,18 @@ export function depuisLignes({ jeu, region, indicateur, alerte, facteur, texte }
   return { ...jeu.parametres, version: jeu.version, genere_le: genere, regions: [...parCle.values()].sort((a, b) => a.cle.localeCompare(b.cle)) };
 }
 
+// One read-only transaction at REPEATABLE READ: the six queries see the same committed state, even
+// while a deploy reloads the data (a read straddling that commit could mix two states).
 export async function lireJeuActif(sql) {
-  const [jeu] = await sql`SELECT version, genere_le, parametres FROM jeu_donnees WHERE actif`;
-  if (!jeu) return null;
-  const v = jeu.version;
-  const [region, indicateur, alerte, facteur, texte] = await Promise.all([
-    sql`SELECT * FROM region WHERE version = ${v}`,
-    sql`SELECT cle, indicateur, rang, valeur FROM indicateur WHERE version = ${v}`,
-    sql`SELECT cle, periode, probabilite FROM alerte WHERE version = ${v}`,
-    sql`SELECT cle, facteur, valeur, niveau FROM facteur WHERE version = ${v}`,
-    sql`SELECT cle, genre, rang, contenu FROM texte WHERE version = ${v}`,
-  ]);
-  return depuisLignes({ jeu, region, indicateur, alerte, facteur, texte });
+  return sql.begin("isolation level repeatable read read only", async (tx) => {
+    const [jeu] = await tx`SELECT version, genere_le, parametres FROM jeu_donnees WHERE actif`;
+    if (!jeu) return null;
+    const v = jeu.version;
+    const region = await tx`SELECT * FROM region WHERE version = ${v}`;
+    const indicateur = await tx`SELECT cle, indicateur, rang, valeur FROM indicateur WHERE version = ${v}`;
+    const alerte = await tx`SELECT cle, periode, probabilite FROM alerte WHERE version = ${v}`;
+    const facteur = await tx`SELECT cle, facteur, valeur, niveau FROM facteur WHERE version = ${v}`;
+    const texte = await tx`SELECT cle, genre, rang, contenu FROM texte WHERE version = ${v}`;
+    return depuisLignes({ jeu, region, indicateur, alerte, facteur, texte });
+  });
 }

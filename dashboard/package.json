@@ -12,7 +12,8 @@
     "db:seed": "node --env-file-if-exists=.env.local db/seed.mjs",
     "verif:aller-retour": "node --env-file-if-exists=.env.local scripts/verif-aller-retour.mjs",
     "verif:hors-ligne": "node --env-file-if-exists=.env.local scripts/verif-hors-ligne.mjs",
-    "verif:ecran": "node scripts/verif-ecran.mjs"
+    "verif:ecran": "node scripts/verif-ecran.mjs",
+    "verif:jeu-valide": "node scripts/verif-jeu-valide.mjs"
   },
   "dependencies": {
     "@serwist/next": "9.5.13",

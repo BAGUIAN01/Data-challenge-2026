@@ -3,6 +3,7 @@
 // then to the snapshot shipped with the app. The 503 body says why, in French, for the banner.
 import { baseConfiguree, sql } from "@/lib/serveur/db";
 import { lireJeuActif } from "@/lib/serveur/jeu-donnees";
+import { jeuValide } from "@/lib/valider-jeu";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,10 @@ export async function GET() {
     const jeu = await lireJeuActif(sql());
     if (!jeu) {
       return Response.json({ erreur: "aucune_version", message: "Aucune version des données n'est encore publiée dans la base." },
+        { status: 503, headers: ENTETES });
+    }
+    if (!jeuValide(jeu)) {
+      return Response.json({ erreur: "jeu_incomplet", message: "Les données de la base sont incomplètes." },
         { status: 503, headers: ENTETES });
     }
     return Response.json(jeu, { headers: ENTETES });
