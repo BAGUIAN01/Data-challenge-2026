@@ -10,10 +10,11 @@ Une carte du risque pour la rentrée 2026/27, une alerte qui se précise de sept
 
 <a href="05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf"><img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-rapport-page-1_v1.png" width="340" alt="Première page du rapport" align="right"></a>
 
-**[Lire le rapport (PDF, 10 pages)](05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf)** : le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
+**[Lire le rapport (PDF, 11 pages)](05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf)** : le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
 
 En bref :
 
+- **Avant chaque rentrée, l'outil dit au décideur où agir en premier, où le risque monte, combien d'enfants sont en jeu et sur quoi agir dans chaque région**, sur téléphone et sans réseau.
 - **Le décrochage prend deux formes.** Brutale : les effectifs chutent quand la violence ferme les écoles. Lente : une part croissante d'enfants n'achève pas le primaire (51,6 % d'achèvement en 2024/25, contre 62,0 % en 2021/22).
 - **Un score de 0 à 100 réunit les deux** : moitié probabilité de chute des effectifs, prévue à partir de la violence, moitié part d'enfants qui n'achèvent pas.
 - **Un facteur dominant par région** dit sur quoi agir : insécurité, déplacés, pauvreté, grossesses précoces, instruction des mères, préscolaire.

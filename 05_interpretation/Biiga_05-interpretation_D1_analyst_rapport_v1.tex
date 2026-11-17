@@ -16,15 +16,28 @@
 \maketitle
 
 \begin{abstract}
-\noindent Le décrochage scolaire au primaire prend deux formes au Burkina Faso : brutale, quand la violence ferme les écoles et fait chuter les effectifs ; lente, quand une part croissante d'enfants n'achève pas le cycle (51,6\,\% d'achèvement en 2024/25, contre 62,0\,\% en 2021/22). Nous proposons un score de risque de 0 à 100 qui réunit les deux, une alerte qui se précise de septembre à janvier, un facteur dominant par région qui oriente l'action, et un tableau de bord utilisable sans réseau. Tous les modèles sont évalués sur des années qu'ils n'ont pas vues, contre la règle « comme l'an passé ». Pour la rentrée 2026/27, cinq régions sur treize relèvent d'une action immédiate ; elles réunissent environ <<P1HORS>> enfants qui n'atteignent pas le CM2 (<<P1PCT>>\,\% du pays). Rejouée sur le passé, la règle de priorité aurait désigné <<MREG>>\,\% des régions et contenu <<MBAISSES>>\,\% des fortes baisses d'effectifs de l'année suivante.
+\noindent \textbf{Avant chaque rentrée, cet outil dit à un décideur où agir, où le risque monte, combien d'enfants sont en jeu et sur quoi agir dans chaque région} : une carte du risque, une alerte qui se précise de septembre à janvier, un levier par région, une fiche d'une page par directeur régional, le tout sur téléphone et sans réseau. \textbf{Cela marche sur le passé} : rejouée avec la seule information de chaque année, notre règle de priorité désignait <<MREG>>\,\% des régions mais contenait <<MBAISSES>>\,\% des fortes baisses d'effectifs de l'année suivante, et, entre une région qui va chuter et une qui ne chute pas, l'alerte place la bonne au-dessus 83 à 88 fois sur 100, sur des années que les modèles n'avaient pas vues. \textbf{Pour la rentrée 2026/27}, cinq régions sur treize relèvent d'une action immédiate ; elles réunissent environ <<P1HORS>> enfants qui n'atteignent pas le CM2 (<<P1PCT>>\,\% du pays). Le décrochage y est mesuré sous ses deux formes : brutale, quand la violence ferme les écoles et fait chuter les effectifs ; lente, quand une part croissante d'enfants n'achève pas le primaire (51,6\,\% d'achèvement en 2024/25, contre 62,0\,\% en 2021/22).
 \end{abstract}
 
-\section{Le besoin}
-Avant chaque rentrée, quand se décident les réouvertures, les cantines et les affectations d'enseignants, un décideur pose trois questions : \emph{où agir en premier}, \emph{où la situation va s'aggraver}, et \emph{combien d'enfants sont en jeu}, avec, pour chaque région, \emph{sur quoi agir}.
+\section{Le besoin et notre réponse}
+\subsection{Le besoin}
+Avant chaque rentrée, quand se décident les réouvertures, les cantines et les affectations d'enseignants, un décideur pose quatre questions : \emph{où agir en premier}, \emph{où la situation va s'aggraver}, \emph{combien d'enfants sont en jeu}, et \emph{sur quoi agir} dans chaque région.
 
 Les outils existants arrivent trop tard ou voient mal. Le taux d'abandon par cohorte n'est connu qu'après la rentrée suivante et compte comme abandons les élèves déplacés réinscrits ailleurs. Le suivi de l'éducation en situation d'urgence recense les écoles fermées (5\,336 en février 2024) mais pas les élèves qui manquent encore. Les systèmes d'alerte élève par élève supposent un identifiant unique, encore en phase pilote au Burkina.
 
-Trois contraintes ont guidé la conception : des données \textbf{agrégées} par région et par année, sans aucune donnée personnelle ; une alerte disponible \textbf{avant la rentrée} ; un outil \textbf{utilisable sans réseau}, puisque le risque est le plus fort là où la connexion manque.
+\subsection{Ce que la solution donne au décideur}
+\begin{table}[H]\centering\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright}p{2.6cm}>{\raggedright}X>{\raggedright}p{2.2cm}>{\raggedright\arraybackslash}X@{}}\toprule
+La question & Ce que la solution répond & Quand & Pourquoi s'y fier\\\midrule
+Où agir en premier ? & Une priorité (1, 2 ou 3) et un score de 0 à 100 par région, sur la carte et dans la liste & avant la rentrée & la priorité 1 désignait <<MREG>>\,\% des régions et contenait <<MBAISSES>>\,\% des fortes baisses de l'année suivante\\
+Où la situation va-t-elle s'aggraver ? & La probabilité d'une chute des effectifs de plus de 5\,\%, mise à jour en cours d'année & fin septembre, puis début janvier & entre une région qui chute et une qui ne chute pas, elle place la bonne au-dessus 83 fois sur 100, puis 85 et 88 avec les alertes, sur des années non vues\\
+Combien d'enfants ? & Les enfants qui n'atteignent pas le CM2 par région ; les élèves attendus dès que les écoles ouvertes sont comptées & dès la rentrée & erreur de ±\,<<NCERR>>\,\% sur les élèves, contre ±\,<<NCPERS>>\,\% en reprenant l'année d'avant\\
+Sur quoi agir ? & Le facteur dominant de la région et son levier (cantines, continuité éducative, maintien des filles, accueil des déplacés…) & toute l'année & chaque facteur est pondéré par son lien mesuré avec l'achèvement\\\bottomrule
+\end{tabularx}\caption{Les questions du décideur et les réponses de la solution.}\end{table}
+
+\textbf{Les trois contraintes sont tenues.} Seules des données \textbf{agrégées} par région et par année sont utilisées, sans aucune donnée personnelle. L'alerte est disponible \textbf{avant la rentrée}, et non après l'annuaire. L'outil fonctionne \textbf{sans réseau}, là où le risque est le plus fort : nous l'avons vérifié serveur arrêté.
+
+\textbf{Concrètement, pour la rentrée 2026/27} : agir maintenant dans cinq régions, Goulmou + Sirba + Tapoa et Bankui + Sourou sur l'insécurité, Liptako + Soum sur l'accueil des déplacés, Koulsé sur les grossesses précoces, Yaadga sur la pauvreté ; placer Guiriko en veille, où le risque passe de 1 à 20\,\% avec l'alerte de septembre. La suite du rapport montre comment ces réponses sont construites et vérifiées.
 
 \section{Les données}
 \subsection{Les données du challenge}
