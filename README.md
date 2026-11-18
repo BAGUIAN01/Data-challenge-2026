@@ -8,9 +8,9 @@ Une carte du risque pour la rentrée 2026/27, une alerte qui se précise de sept
 
 ## Le rapport
 
-<a href="05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf"><img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-rapport-page-1_v1.png" width="340" alt="Première page du rapport" align="right"></a>
+<a href="05_interpretation/Biiga_05-interpretation_D1_analyst_presentation_v1.pdf"><img src="05_interpretation/captures/Biiga_05-interpretation_D1_analyst_capture-presentation-page-1_v1.png" width="420" alt="Couverture du rapport : anticiper le décrochage région par région" align="right"></a>
 
-**[Lire le rapport (PDF, 11 pages)](05_interpretation/Biiga_05-interpretation_D1_analyst_rapport_v1.pdf)** : le besoin, les données, la méthode et ses formules, les résultats 2026/27, l'outil, les limites.
+**[Lire le rapport (PDF, 11 diapositives)](05_interpretation/Biiga_05-interpretation_D1_analyst_presentation_v1.pdf)** : cartographier, anticiper, agir. La carte du décrochage, les cinq régions en alerte pour 2026/27 et la preuve que l'alerte voit juste, le levier de chaque région, l'outil, les données, les modèles testés et la formule retenue, les limites.
 
 En bref :
 
