@@ -262,7 +262,8 @@ def main():
     # Laid out by step, as in the repository (02_nettoyage/ ... 05_interpretation/); the READMEs at the top.
     for f in [p for p in OUT.rglob("*") if p.is_file()]:
         m = STEP.search(f.name)
-        folder = OUT / f"{m[1]}_{m[2]}" if m else OUT
+        # The presentation is the entry point: kept at the top, next to the READMEs.
+        folder = OUT / f"{m[1]}_{m[2]}" if m and "_presentation_" not in f.name else OUT
         folder.mkdir(exist_ok=True)
         f.rename(folder / f.name)
     for d in (D, C, T):
