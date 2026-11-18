@@ -98,6 +98,7 @@ UPLOAD_NAMES = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rappo
     'donnees/donnees_tableau_de_bord.json': '05-interpretation_D1_analyst_donnees-tableau-de-bord',
     'donnees/donnees_transformees.zip': '03-transformation_D1_engineer_donnees-transformees',
     'donnees/donnees_nettoyees.zip': '02-nettoyage_D1_engineer_donnees-nettoyees'}
+STEP = re.compile(r"(0[1-5])-([a-z]+)_D1_")
 ACTION_NAME = {"violence": "l'insécurité", "deplaces": "l'accueil des déplacés", "pauvrete": "la pauvreté", "faim": "la faim",
               "meres": "l'instruction des mères", "grossesses": "les grossesses précoces", "prescolaire": "le préscolaire"}
 
@@ -258,6 +259,14 @@ def main():
         f = OUT / old_name
         if f.exists():
             f.rename(f.with_name(f"{prefix}{name}_v{VERSION}{f.suffix}"))
+    # Laid out by step, as in the repository (02_nettoyage/ ... 05_interpretation/); the READMEs at the top.
+    for f in [p for p in OUT.rglob("*") if p.is_file()]:
+        m = STEP.search(f.name)
+        folder = OUT / f"{m[1]}_{m[2]}" if m else OUT
+        folder.mkdir(exist_ok=True)
+        f.rename(folder / f.name)
+    for d in (D, C, T):
+        d.rmdir()
     files = sorted(p for p in OUT.rglob("*") if p.is_file())
     if (ROOT / "fiche_de_la_solution.md").exists():
         shutil.copy2(ROOT / "fiche_de_la_solution.md", OUT / "fiche_de_la_solution.md")

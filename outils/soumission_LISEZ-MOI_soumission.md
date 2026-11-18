@@ -6,6 +6,8 @@ Burkina Faso, rentrée 2026/27 · 13 régions · données agrégées, aucune don
 
 `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN` : l'équipe (Biiga), l'étape où le fichier est produit (02-nettoyage à 05-interpretation), le défi (D1), le rôle (engineer, architect, analyst, scientist), ce qu'il contient, sa version.
 
+Les fichiers sont rangés par étape, comme dans le dépôt : `02_nettoyage/`, `03_transformation/`, `04_analyse/`, `05_interpretation/` (la collecte, étape 01, est décrite dans la liste des sources, jointe aux données nettoyées). Sur la plateforme, chacun va dans sa catégorie (Données, Code, Documentation), indiquée plus bas.
+
 Chaque catégorie a son LISEZ-MOI : `LISEZ-MOI_documentation.md` (ce fichier, vue d'ensemble), `LISEZ-MOI_code.txt` (code : notebooks, application, relance) et `LISEZ-MOI_donnees.csv` (données : un fichier par ligne, avec son contenu).
 
 ## Par où commencer
