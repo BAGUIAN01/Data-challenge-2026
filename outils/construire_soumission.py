@@ -250,9 +250,7 @@ def main():
     shutil.copy2(chemins.path("fiches_regionales_13.pdf"), T / "fiches_regionales.pdf")
     copy_text(chemins.path("formule_risque.md"), T / "formule_du_risque.md")
     copy_text(chemins.path("journal_decisions.md"), T / "journal_des_decisions.md")
-    copy_text(HERE / "soumission_LISEZ-MOI_soumission.md", T / "LISEZ-MOI_documentation.md")
-    copy_text(HERE / "soumission_LISEZ-MOI_code.txt", C / "LISEZ-MOI_code.txt")
-    shutil.copy2(HERE / "soumission_LISEZ-MOI_donnees.csv", D / "LISEZ-MOI_donnees.csv")
+    copy_text(HERE / "soumission_LISEZ-MOI.md", T / "LISEZ-MOI.md")
 
     prefix = "" if ANONYMOUS else f"{TEAM}_"
     for old_name, name in UPLOAD_NAMES.items():
@@ -263,7 +261,12 @@ def main():
     for f in [p for p in OUT.rglob("*") if p.is_file()]:
         m = STEP.search(f.name)
         # The presentation is the entry point: kept at the top, next to the READMEs.
-        folder = OUT / f"{m[1]}_{m[2]}" if m and "_presentation_" not in f.name else OUT
+        if "_presentation_" in f.name or not m:
+            folder = OUT
+        elif "_tableau-de-bord_" in f.name:  # the app, in its own folder as in the repository
+            folder = OUT / "dashboard"
+        else:
+            folder = OUT / f"{m[1]}_{m[2]}"
         folder.mkdir(exist_ok=True)
         f.rename(folder / f.name)
     for d in (D, C, T):
