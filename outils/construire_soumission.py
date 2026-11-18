@@ -1,14 +1,19 @@
-"""Build the files to upload on the challenge platform: three categories, at most 20 files, no team name."""
+"""Build the files to upload on the challenge platform: three categories, at most 20 files.
+
+Default: files named with the team, ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN, as in the repository.
+With --anonyme: no team name in names or contents (blind review), and the presentation is left out."""
 import base64
 import io
 import json
 import re
 import shutil
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
 import pandas as pd
+import pymupdf
 from PIL import Image
 
 import chemins
@@ -73,9 +78,11 @@ TABLES = [
     ("P18_score_global_trajectoire", "Score de chaque région année par année"),
     ("P19_facteur_dominant", "Facteur dominant de chaque région"),
 ]
-# Challenge naming rule without the team part (blind review): ETAPE_DEFI_ROLE_description_vN.
+ANONYMOUS = "--anonyme" in sys.argv
+# Challenge naming rule: EQUIPE_ETAPE_DEFI_ROLE_description_vN (team part dropped with --anonyme).
 VERSION = 1
 UPLOAD_NAMES = {'documentation/rapport.pdf': '05-interpretation_D1_analyst_rapport',
+    'documentation/presentation.pdf': '05-interpretation_D1_analyst_presentation',
     'documentation/fiches_regionales.pdf': '05-interpretation_D1_analyst_fiches-regionales',
     'documentation/formule_du_risque.md': '04-analyse_D1_scientist_formule-risque',
     'documentation/journal_des_decisions.md': '04-analyse_D1_scientist_journal-decisions',
@@ -101,11 +108,16 @@ TEXT = (".py", ".md", ".txt", ".csv", ".json", ".geojson", ".tex", ".js", ".mjs"
 
 def anonymous(text):
     """For the blind review: no team prefix in names or paths, and no line that names the team."""
+    if not ANONYMOUS:
+        return text
     text = text.replace(f"{TEAM}_", "")
     return "\n".join(l for l in text.split("\n") if TEAM.lower() not in l.lower() and not (FORBIDDEN and FORBIDDEN.search(l)))
 
 
 def put(z, src, arc):
+    if not ANONYMOUS:
+        z.write(src, arc)
+        return
     arc = arc.replace(f"{TEAM}_", "")
     if str(src).endswith(TEXT):
         text = Path(src).read_text(encoding="utf-8")
@@ -147,6 +159,26 @@ def light_notebook(src, dest, width=820, quality=55):
                 data["image/jpeg"] = base64.b64encode(buf.getvalue()).decode()
                 out.get("metadata", {}).pop("image/png", None)
     Path(dest).write_text(json.dumps(json.loads(anonymous(json.dumps(nb, ensure_ascii=False, indent=1))), ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def light_pdf(src, dest, max_side=1600, quality=70):
+    """Same PDF, its JPEG images re-encoded smaller (uploads fail above about 1 MB). Image objects are
+    replaced one by one: rewriting them with the library's own helper broke the slides' patterns."""
+    d = pymupdf.open(src)
+    for xref in range(1, d.xref_length()):
+        if d.xref_get_key(xref, "Subtype")[1] != "/Image" or d.xref_get_key(xref, "Filter")[1] != "/DCTDecode":
+            continue
+        raw = d.xref_stream_raw(xref)
+        im = Image.open(io.BytesIO(raw))
+        im.thumbnail((max_side, max_side))
+        buf = io.BytesIO()
+        im.save(buf, "JPEG", quality=quality, optimize=True)
+        if buf.tell() >= len(raw):
+            continue
+        d.update_stream(xref, buf.getvalue(), compress=False)
+        for key, value in (("Filter", "/DCTDecode"), ("Width", im.width), ("Height", im.height), ("Length", buf.tell())):
+            d.xref_set_key(xref, key, str(value))
+    d.save(dest, garbage=1, deflate=True)
 
 
 def copy_text(src, dest):
@@ -212,6 +244,8 @@ def main():
         light_notebook(chemins.path(key), C / f"notebook_{key}")
 
     shutil.copy2(chemins.path("rapport.pdf"), T / "rapport.pdf")
+    if not ANONYMOUS:  # the slides carry the team name on every page
+        light_pdf(ROOT / "05_interpretation" / f"{TEAM}_05-interpretation_D1_analyst_presentation_v1.pdf", T / "presentation.pdf")
     shutil.copy2(chemins.path("fiches_regionales_13.pdf"), T / "fiches_regionales.pdf")
     copy_text(chemins.path("formule_risque.md"), T / "formule_du_risque.md")
     copy_text(chemins.path("journal_decisions.md"), T / "journal_des_decisions.md")
@@ -219,9 +253,11 @@ def main():
     copy_text(HERE / "soumission_LISEZ-MOI_code.txt", C / "LISEZ-MOI_code.txt")
     shutil.copy2(HERE / "soumission_LISEZ-MOI_donnees.csv", D / "LISEZ-MOI_donnees.csv")
 
+    prefix = "" if ANONYMOUS else f"{TEAM}_"
     for old_name, name in UPLOAD_NAMES.items():
         f = OUT / old_name
-        f.rename(f.with_name(f"{name}_v{VERSION}{f.suffix}"))
+        if f.exists():
+            f.rename(f.with_name(f"{prefix}{name}_v{VERSION}{f.suffix}"))
     files = sorted(p for p in OUT.rglob("*") if p.is_file())
     if (ROOT / "fiche_de_la_solution.md").exists():
         shutil.copy2(ROOT / "fiche_de_la_solution.md", OUT / "fiche_de_la_solution.md")
@@ -229,6 +265,11 @@ def main():
     for p in files:
         print(f"  {p.relative_to(OUT)}  {p.stat().st_size / 1e6:.2f} Mo")
     assert len(files) <= 20 and all(p.stat().st_size < 50e6 for p in files)
+    heavy = [p.name for p in files if p.stat().st_size > 1e6]
+    print("au-dessus de 1 Mo :", heavy or "aucun")
+    if not ANONYMOUS:
+        print(f"nom d'équipe gardé ({TEAM}_…) ; --anonyme pour une version sans nom")
+        return
     if FORBIDDEN is None:
         print("liste .noms_interdits absente : contrôle d'anonymat non fait")
         return

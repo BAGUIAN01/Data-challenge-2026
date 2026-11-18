@@ -1,19 +1,19 @@
 CODE · Défi 1 · Anticiper le risque de décrochage scolaire, région par région
 ==========================================================================
 
-Noms des fichiers : ÉTAPE_DÉFI_RÔLE_description_vN (sans nom d'équipe, pour l'évaluation à l'aveugle).
+Noms des fichiers : ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN (équipe Biiga).
 
 LES NOTEBOOKS JUPYTER (déjà exécutés : résultats et figures visibles sans rien lancer)
-  02-nettoyage_D1_engineer_notebook-nettoyage_v1.ipynb
+  Biiga_02-nettoyage_D1_engineer_notebook-nettoyage_v1.ipynb
       Lecture du fichier du challenge, 8 contrôles de cohérence, nettoyage des sources externes.
-  03-transformation_D1_architect_notebook-transformation_v1.ipynb
+  Biiga_03-transformation_D1_architect_notebook-transformation_v1.ipynb
       Correspondance 13 / 17 régions, panel région × année, agrégat de violence (ACLED), carte des 13 régions.
-  04-analyse_D1_analyst_notebook-analyse-descriptive_v1.ipynb
+  Biiga_04-analyse_D1_analyst_notebook-analyse-descriptive_v1.ipynb
       Ce que montrent les données, figures 01 à 07.
-  04-analyse_D1_scientist_notebook-modeles_v1.ipynb
+  Biiga_04-analyse_D1_scientist_notebook-modeles_v1.ipynb
       Risque de chute des effectifs, alertes de septembre et de janvier, apprentissage automatique,
       facteurs, formule du risque, score global, facteur dominant.
-  05-interpretation_D1_analyst_notebook-interpretation_v1.ipynb
+  Biiga_05-interpretation_D1_analyst_notebook-interpretation_v1.ipynb
       Figures de la solution, données du tableau de bord, fiches régionales.
 
   Chaque notebook commence par une cellule qui contient tous ses imports. Chaque étape y est un script
@@ -21,11 +21,11 @@ LES NOTEBOOKS JUPYTER (déjà exécutés : résultats et figures visibles sans r
   Pour les lire : Jupyter, VS Code, ou tout lecteur de notebooks.
 
 LES ARCHIVES
-  05-interpretation_D1_analyst_tableau-de-bord_v1.zip
+  Biiga_05-interpretation_D1_analyst_tableau-de-bord_v1.zip
       Le code de l'application (Next.js), qui fonctionne sans réseau. Voir son README.md.
       Lancer : npm install, puis npm run build, puis npm start (http://localhost:3000).
       Sans base de données, l'application utilise les données publiées avec elle.
-  05-interpretation_D1_scientist_projet-complet_v1.zip
+  Biiga_05-interpretation_D1_scientist_projet-complet_v1.zip
       Tout le projet, pour tout relancer : scripts, données traitées, tableaux de résultats,
       source LaTeX du rapport, application. Les notebooks, figures et PDF n'y sont pas :
       le code les régénère.
