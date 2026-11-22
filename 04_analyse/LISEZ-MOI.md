@@ -28,6 +28,7 @@ Noms des fichiers : `ÉQUIPE_ÉTAPE_DÉFI_RÔLE_description_vN`.
 | `Biiga_04-analyse_D1_scientist_script-figures-prevision_v1.py` | scientist | Script : figures 09 et 10 |
 | `Biiga_04-analyse_D1_scientist_script-formule-risque_v1.py` | scientist | Script : la formule du risque, vérifiée contre les probabilités affichées |
 | `Biiga_04-analyse_D1_scientist_script-prevision-facteurs_v1.py` | scientist | Script : les facteurs aident-ils à prévoir ? |
+| `Biiga_04-analyse_D1_scientist_script-robustesse_v1.py` | scientist | Script : robustesse de l'alerte (baseline « comme l'an passé », seuil de 5 %, logarithme) ; résultats `resultats/…_p20-*` |
 | `Biiga_04-analyse_D1_scientist_script-prevision-hypothese_v1.py` | scientist | Script : prévision 2025/26, alerte, test de l'hypothèse insécurité × pauvreté |
 | `Biiga_04-analyse_D1_scientist_script-score-global_v1.py` | scientist | Script : le score global, son rejeu sur le passé, sa trajectoire |
 | `Biiga_04-analyse_D1_scientist_script-solution-prevision_v1.py` | scientist | Script : où agir, combien, matrice de priorité |

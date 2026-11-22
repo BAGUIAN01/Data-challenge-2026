@@ -1,0 +1,6 @@
+seuil_forte_baisse,baisses_apprentissage,baisses_testees,AUC
+plus de 3 %,23,18,0.72
+plus de 5 %,19,14,0.829
+plus de 7 %,16,12,0.869
+plus de 10 %,12,10,0.818
+plus de 15 %,8,7,0.796
