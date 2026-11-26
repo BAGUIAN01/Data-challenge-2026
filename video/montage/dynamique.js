@@ -60,24 +60,34 @@ window.render = async function (t) {
   const src = CAM + "c" + String(n).padStart(5, "0") + ".jpg";
   if (src !== lastSrc) { ci.src = src; lastSrc = src; await ci.decode(); }
 
-  // the words beside: hello and my name, my teammate, then the team and its three verbs
-  const s0 = SEG[0], s1 = SEG[1] || SEG[0], s2 = SEG[2] || SEG[SEG.length - 1];
-  $("#p0").style.display = t < s1.a + 0.3 ? "" : "none";
-  const h = $("#p0 .hello"), hq = back(p(t, s0.a + 0.05, 0.45)), hu = inout(p(t, s0.a + 1.0, 0.45));
-  h.style.opacity = clamp(hq * 1.5) * (1 - out(p(t, s1.a - 0.1, 0.25)));
+  // the words beside, each on the word that says it (EV: times on the edited timeline, from the transcript)
+  const EV = CFG.ev || {}, end = T;
+  const mateAt = EV.coequipier ?? EV.mate ?? end;
+  $("#p0").style.display = t < mateAt + 0.3 ? "" : "none";
+  const h = $("#p0 .hello"), hq = back(p(t, EV.bonjour - 0.05, 0.4)), hu = inout(p(t, EV.nom - 0.2, 0.4));
+  h.style.opacity = clamp(hq * 1.5) * (1 - out(p(t, mateAt - 0.15, 0.25)));
   h.style.transform = `translateY(${-150 * hu}px) scale(${(0.7 + 0.3 * hq) * (1 - 0.3 * hu)})`;
   h.style.transformOrigin = "0% 50%";
-  card($("#c0"), t, s0.a + 1.05, s1.a - 0.1);
-  $("#p1").style.display = t >= s1.a - 0.1 && t < s2.a + 0.3 ? "" : "none";
-  card($("#c1"), t, s1.a + 0.15, s2.a - 0.1);
-  $("#p2").style.display = t >= s2.a - 0.1 ? "" : "none";
-  const b2 = $("#b2"), bq = out(p(t, s2.a + 0.1, 0.3));
-  b2.style.opacity = bq; b2.style.transform = `scale(${1.5 - 0.5 * bq})`; b2.style.transformOrigin = "0% 60%";
-  document.querySelectorAll(".chip").forEach((c, i) => {
-    const q = back(p(t, s2.a + 0.8 + i * 0.55, 0.45));
-    c.style.opacity = clamp(q * 1.5);
-    c.style.transform = `translateX(${(1 - q) * -70}px) scale(${0.8 + 0.2 * q})`;
-  });
+  card($("#c0"), t, EV.nom - 0.15, mateAt - 0.15);
+  const t0 = $("#t0"), tq = out(p(t, (EV.titre ?? EV.nom + 0.6) - 0.05, 0.35));
+  t0.style.opacity = tq; t0.style.transform = `translateY(${(1 - tq) * 16}px)`;
+  $("#p1").style.display = t >= mateAt - 0.15 && t < end + 1 ? "" : "none";
+  card($("#c1"), t, mateAt - 0.05, (EV.equipe ?? 1e9) - 0.1);
+  for (const [id, at] of [["#n1", EV.mate ?? mateAt], ["#t1", EV.mateTitre ?? (EV.mate ?? mateAt) + 0.7]]) {
+    const el = $(id), q = out(p(t, at - 0.05, 0.35));
+    el.style.opacity = q; el.style.transform = `translateY(${(1 - q) * 16}px)`;
+  }
+  $("#p2").style.display = EV.equipe !== undefined && t >= EV.equipe - 0.1 ? "" : "none";
+  if (EV.equipe !== undefined) {
+    const b2 = $("#b2"), bq = out(p(t, EV.equipe, 0.3));
+    b2.style.opacity = bq; b2.style.transform = `scale(${1.5 - 0.5 * bq})`; b2.style.transformOrigin = "0% 60%";
+    const verbs = [EV.cartographier, EV.predire, EV.agir];
+    document.querySelectorAll(".chip").forEach((c, i) => {
+      const q = back(p(t, (verbs[i] ?? EV.equipe + 0.8 + i * 0.55) - 0.05, 0.45));
+      c.style.opacity = clamp(q * 1.5);
+      c.style.transform = `translateX(${(1 - q) * -70}px) scale(${0.8 + 0.2 * q})`;
+    });
+  }
 
   $("#prog").style.width = `${1920 * clamp(t / T)}px`;
 };

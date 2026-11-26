@@ -11,6 +11,14 @@ from pathlib import Path
 HERE = Path(__file__).parent
 work, cfg = Path(sys.argv[1]), json.load(open(sys.argv[2], encoding="utf-8"))
 cut = json.load(open(work / "decoupe.json"))
+# events are given in the take's own time (from the transcript); place them on the edited timeline
+def place(t):
+    for s in cut["segments"]:
+        a, b = s["src"]
+        if a <= t <= b:
+            return cfg["intro"] + s["from"] / cut["fps"] + (t - a)
+    return None
+cfg["ev"] = {k: place(v) for k, v in cfg.get("events", {}).items()}
 D = json.load(open(HERE.parents[1] / "preparation_jury/deck/donnees.json", encoding="utf-8"))
 MAP = D["carte"]
 outline = "".join(f'<path d="{g["d"]}"/>' for g in MAP["regions"].values())
@@ -60,8 +68,8 @@ html, body {{ margin: 0; background: #000; }}
 <div id="grid"></div><svg id="bf" viewBox="{VB}">{outline}</svg>
 <div id="cam"><img id="ci"><div id="flash"></div></div>
 <div class="panel" id="p0"><div class="hello">Bonjour.</div>
-  <div class="card" id="c0"><div class="bar"></div><div class="box"><small>JE ME PRÉSENTE</small><b>{cfg["moi"]["nom"]}</b><p>{cfg["moi"]["titre"]}</p></div></div></div>
-<div class="panel" id="p1"><div class="card" id="c1" style="top:400px"><div class="bar"></div><div class="box"><small>MON COÉQUIPIER</small><b>{cfg["equipier"]["nom"]}</b><p>{cfg["equipier"]["titre"]}</p></div></div></div>
+  <div class="card" id="c0"><div class="bar"></div><div class="box"><small>JE ME PRÉSENTE</small><b>{cfg["moi"]["nom"]}</b><p id="t0">{cfg["moi"]["titre"]}</p></div></div></div>
+<div class="panel" id="p1"><div class="card" id="c1" style="top:400px"><div class="bar"></div><div class="box"><small>MON COÉQUIPIER</small><b id="n1">{cfg["equipier"]["nom"]}</b><p id="t1">{cfg["equipier"]["titre"]}</p></div></div></div>
 <div class="panel" id="p2"><div class="big" id="b2">Équipe <em>Biiga</em></div><div class="chips">{chips}</div></div>
 <div id="bug"><div class="badge"><img src="file://{img}/logo-mark.png"></div>ÉQUIPE BIIGA</div>
 <div id="sting"><div class="badge" id="sb"><img src="file://{img}/logo-mark.png"></div><b id="st">Équipe <em>Biiga</em></b></div>

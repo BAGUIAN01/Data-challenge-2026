@@ -10,6 +10,8 @@ from pathlib import Path
 
 take, work = sys.argv[1], Path(sys.argv[2])
 start = float(sys.argv[sys.argv.index("--start") + 1]) if "--start" in sys.argv else 0.0
+# --keep a-b,c-d: the ranges to keep, chosen on the word timings of the transcript (overrides the pauses)
+keep = [tuple(map(float, r.split("-"))) for r in sys.argv[sys.argv.index("--keep") + 1].split(",")] if "--keep" in sys.argv else None
 work.mkdir(parents=True, exist_ok=True)
 dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", take], capture_output=True, text=True).stdout)
 log = subprocess.run(["ffmpeg", "-nostats", "-i", take, "-af", "silencedetect=n=-42dB:d=0.45", "-f", "null", "-"], capture_output=True, text=True).stderr
@@ -25,6 +27,8 @@ if dur - cur > 0.6:
     speech.append((cur, dur))
 segs = [(max(start, a - 0.12), min(dur, b + 0.18)) for a, b in speech if b > start]
 segs = [(a, b) for a, b in segs if b - a > 0.6]
+if keep:
+    segs = keep
 # frames of each segment, upright, numbered on the output timeline; and the voice, cleaned
 fr = work / "cam"
 fr.mkdir(exist_ok=True)

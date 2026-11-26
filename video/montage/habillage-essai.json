@@ -1,4 +1,5 @@
 {"intro": 1.4,
- "moi": {"nom": "Harouna Baguian", "titre": "Ingénieur de conception"},
+ "moi": {"nom": "Harouna Baguian", "titre": "Ingénieur de conception IA & Data"},
  "equipier": {"nom": "Mohamed Saïd Ouédraogo", "titre": "Formateur en IA et en informatique"},
- "punch": [1.0, 1.2, 1.06]}
+ "punch": [1.0, 1.18, 1.06],
+ "events": {"bonjour": 2.7, "nom": 4.3, "titre": 6.64, "coequipier": 9.34, "mate": 10.82, "mateTitre": 11.45}}
