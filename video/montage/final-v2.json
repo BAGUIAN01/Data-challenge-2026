@@ -1,0 +1,24 @@
+{"intro": 1.4,
+ "moi": {"nom": "Harouna Baguian", "titre": "Ingénieur de conception en IA"},
+ "equipier": {"nom": "Mohamed Saïd Ouédraogo", "titre": "Formateur en IA"},
+ "punch": [1.12, 1.0, 1.0, 1.0, 1.0, 1.1, 1.0, 1.0, 1.15, 1.0, 1.0],
+ "events": {"bonjour": 10.48, "nom": 11.6, "titre": 12.4, "mate": 15.0, "mateTitre": 16.54,
+            "equipe": 43.56, "cartographier": 53.7, "predire": 54.0, "agir": 54.3, "equipeFin": 56.55},
+ "phrases": [
+   {"at": [1.9, 4.88, 6.3], "until": 9.05, "lines": ["Et si on pouvait savoir,", "dans quelle région,", "<em>les élèves risquent d'abandonner l'école ?</em>"]},
+   {"at": [72.98, 75.06], "until": 76.55, "lines": ["Anticiper, c'est bien.", "<em>Agir, c'est encore mieux.</em>"]}
+ ],
+ "shots": [
+   {"src": [1.85, 9.05], "face": true},
+   {"src": [10.25, 17.75], "face": true},
+   {"src": [17.95, 31.75], "film": [[17.95, 0.0], [25.8, 3.2], [31.75, 6.45]]},
+   {"src": [31.95, 41.85], "film": [[31.95, 6.5], [37.1, 10.25], [41.85, 12.45]]},
+   {"src": [41.9, 49.05], "face": true},
+   {"src": [49.95, 56.6], "face": true},
+   {"src": [56.6, 61.8], "film": [[56.6, 16.0], [61.8, 23.45]]},
+   {"src": [61.8, 70.1], "film": [[61.8, 23.5], [70.1, 30.95]]},
+   {"src": [70.6, 76.55], "face": true},
+   {"src": [76.7, 85.0], "film": [[76.7, 31.0], [79.2, 33.5], [85.0, 37.6]]},
+   {"src": [85.1, 90.47], "film": [[85.1, 39.5], [89.6, 42.0], [90.47, 42.6]]}
+ ],
+ "tail": [42.6, 52.0]}

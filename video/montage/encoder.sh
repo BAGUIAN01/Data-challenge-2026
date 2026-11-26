@@ -2,11 +2,11 @@
 # Assemble the complete video: frames, voice over the music bed, then the tail of the animation with its own sound.
 #   bash montage/encoder.sh work_dir out.mp4
 set -e
-W=$1; OUT=$2; V=$(cd "$(dirname "$0")/.." && pwd)
+W=$1; OUT=$2; CFG=${3:-$(dirname "$0")/final.json}; CFG=$(cd "$(dirname "$CFG")" && pwd)/$(basename "$CFG"); V=$(cd "$(dirname "$0")/.." && pwd)
 TALK=$(python3 -c "import json;print(round(json.load(open('$W/durees.json'))['talk'],3))")
-TAIL=$(python3 -c "import json;c=json.load(open('$V/montage/final.json'));print(c['tail'][1]-c['tail'][0])")
-TAIL0=$(python3 -c "import json;c=json.load(open('$V/montage/final.json'));print(c['tail'][0])")
-INTRO_MS=$(python3 -c "import json;c=json.load(open('$V/montage/final.json'));print(int(c['intro']*1000))")
+TAIL=$(python3 -c "import json;c=json.load(open('$CFG'));print(c['tail'][1]-c['tail'][0])")
+TAIL0=$(python3 -c "import json;c=json.load(open('$CFG'));print(c['tail'][0])")
+INTRO_MS=$(python3 -c "import json;c=json.load(open('$CFG'));print(int(c['intro']*1000))")
 ffmpeg -y -loglevel error -framerate 30 -i "$W/final/f%05d.jpg" -i "$W/fond.wav" -i "$W/voix.wav" -ss "$TAIL0" -t "$TAIL" -i "$V/audio/son.wav" -filter_complex "
 [1:a]aresample=48000,volume='if(lt(t,1.25),1,if(lt(t,1.6),1-(t-1.25)/0.35*0.82,0.18))':eval=frame,atrim=duration=$TALK[bed];
 [2:a]aresample=48000,adelay=$INTRO_MS|$INTRO_MS,apad,atrim=duration=$TALK[vo];

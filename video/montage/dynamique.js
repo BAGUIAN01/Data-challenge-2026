@@ -77,13 +77,19 @@ window.render = async function (t) {
     const el = $(id), q = out(p(t, at - 0.05, 0.35));
     el.style.opacity = q; el.style.transform = `translateY(${(1 - q) * 16}px)`;
   }
-  const P3 = (CFG.phrase || {}).ev || [];
-  $("#p2").style.display = EV.equipe !== undefined && t >= EV.equipe - 0.1 && !(P3.length && t >= P3[0] - 0.2) ? "" : "none";
-  $("#p3").style.display = P3.length && t >= P3[0] - 0.2 ? "" : "none";
-  document.querySelectorAll("#p3 .lw").forEach((el, i) => {
-    const q = out(p(t, (P3[i] ?? 1e9) - 0.05, 0.55));
-    el.style.transform = `translateY(${(1 - q) * 140}px)`;
-    el.style.opacity = t < (P3[i] ?? 1e9) - 0.05 ? 0 : 1;
+  const PH = CFG.phrases || [];
+  const inPhrase = PH.some((ph) => t >= ph.ev[0] - 0.2 && t < (ph.evEnd ?? 1e9));
+  const teamOn = EV.equipe !== undefined && t >= EV.equipe - 0.1 && t < (EV.equipeFin ?? 1e9);
+  $("#p2").style.display = teamOn && !inPhrase ? "" : "none";
+  document.querySelectorAll(".p3").forEach((panel) => {
+    const ph = PH[+panel.dataset.k];
+    const on = t >= ph.ev[0] - 0.2 && t < (ph.evEnd ?? 1e9);
+    panel.style.display = on ? "" : "none";
+    panel.querySelectorAll(".lw").forEach((el, i) => {
+      const at = (ph.ev[i] ?? 1e9) - 0.05, q = out(p(t, at, 0.55));
+      el.style.transform = `translateY(${(1 - q) * 140}px)`;
+      el.style.opacity = t < at ? 0 : 1;
+    });
   });
   if (EV.equipe !== undefined) {
     const b2 = $("#b2"), bq = out(p(t, EV.equipe, 0.3));
