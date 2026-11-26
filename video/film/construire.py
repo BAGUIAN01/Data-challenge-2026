@@ -163,6 +163,7 @@ def build():
     <div class="chips"><div class="chip w" id="lent"><i></i>Lent</div><div class="chip w" id="brutal"><i></i>Brutal</div></div></div>
   <div class="txt" id="t5"><small class="w">2 · IL PRÉVIENT</small><b><span class="m"><span class="w">Le risque,</span></span><br><span class="m"><em class="w">avant la rentrée.</em></span></b>
     <div class="cal2"><div class="w" id="sep">Septembre<i>on alerte</i></div><div class="w" id="jan">Janvier<i>on confirme</i></div></div></div>
+  <div class="txt" id="cap"></div>
   <div class="txt" id="t6"><small class="w">3 · IL DIT QUOI FAIRE</small><b><span class="m"><span class="w">Où agir.</span></span><br><span class="m"><em class="w">Sur quoi.</em></span></b></div>
 
   <div class="panel" id="s2">

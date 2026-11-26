@@ -278,3 +278,25 @@ window.render = function (t) {
   $("#fade").style.opacity = Math.max(1 - p(t, 0, 0.35), p(t, SC.end - 0.6, 0.6));
 };
 window.render(0);
+
+
+// captions over the animation, in the complete video: [{small, smallAt, lines, at, until, night}] in output time
+window.CAPMODE = false;
+let capKey = "";
+window.caption = function (caps, T) {
+  for (const id of ["#t4", "#t5", "#t6"]) $(id).style.visibility = window.CAPMODE ? "hidden" : "";
+  const box = $("#cap");
+  const c = (caps || []).find((c) => T >= c.smallAt - 0.3 && T < c.until);
+  if (!c) { box.style.display = "none"; return; }
+  box.style.display = "";
+  const key = c.small + c.lines.join("|");
+  if (key !== capKey) {
+    box.innerHTML = `<small class="m"><span class="w">${c.small}</span></small><b>` +
+      c.lines.map((l) => `<span class="m"><span class="w">${l}</span></span>`).join("<br>") + "</b>";
+    capKey = key;
+  }
+  box.className = "txt " + (c.night ? "night" : "day");
+  const ws = box.querySelectorAll(".w");
+  word(ws[0], T, c.smallAt);
+  c.lines.forEach((_, i) => word(ws[i + 1], T, c.at[i]));
+};

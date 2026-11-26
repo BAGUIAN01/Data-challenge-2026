@@ -96,7 +96,8 @@ window.render = async function (t) {
     b2.style.opacity = bq; b2.style.transform = `scale(${1.5 - 0.5 * bq})`; b2.style.transformOrigin = "0% 60%";
     const verbs = [EV.cartographier, EV.predire, EV.agir];
     document.querySelectorAll(".chip").forEach((c, i) => {
-      const q = back(p(t, (verbs[i] ?? EV.equipe + 0.8 + i * 0.55) - 0.05, 0.45));
+      // the three verbs only appear when the voice says them (events cartographier, predire, agir)
+      const q = verbs[i] === undefined ? 0 : back(p(t, verbs[i] - 0.05, 0.45));
       c.style.opacity = clamp(q * 1.5);
       c.style.transform = `translateX(${(1 - q) * -70}px) scale(${0.8 + 0.2 * q})`;
     });

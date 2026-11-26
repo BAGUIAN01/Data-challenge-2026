@@ -37,10 +37,22 @@ for shot, seg in zip(cfg["shots"], cut["segments"]):
             plan.append(["dyn", t_out])
         else:
             src = seg["src"][0] + (n - seg["from"]) / FPS
-            plan.append(["film", interp(shot["film"], src)])
+            plan.append(["film", interp(shot["film"], src), t_out])
 talk = len(plan) / FPS
 a, b = cfg["tail"]
-plan += [["film", a + n / FPS] for n in range(round((b - a) * FPS))]
-json.dump(plan, open(work / "plan.json", "w"))
+plan += [["film", a + n / FPS, len(plan) / FPS + n / FPS] for n in range(round((b - a) * FPS))]
+
+
+def place(t):
+    for s in cut["segments"]:
+        x, y = s["src"]
+        if x - 0.05 <= t <= y + 0.05:
+            return I + s["from"] / FPS + (t - x)
+    raise SystemExit(f"caption time {t} is in no kept range")
+
+
+caps = [{"small": c["small"], "smallAt": place(c["smallAt"]), "lines": c["lines"], "at": [place(t) for t in c["at"]],
+         "until": place(c["until"]), "night": c.get("night", False)} for c in cfg.get("captions", [])]
+json.dump({"frames": plan, "caps": caps}, open(work / "plan.json", "w"))
 print(f"{len(plan)} frames, voice ends at {talk:.2f} s, total {len(plan) / FPS:.2f} s")
 json.dump({"talk": talk, "total": len(plan) / FPS}, open(work / "durees.json", "w"))

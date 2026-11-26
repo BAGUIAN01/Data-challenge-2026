@@ -105,3 +105,7 @@ html, body { margin: 0; background: #000; }
 .s3t .m { display: block; }
 #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(5, 12, 26, .28) 100%); }
 #grain { position: absolute; inset: 0; opacity: .075; mix-blend-mode: overlay; pointer-events: none; }
+
+/* captions driven by the voice (complete video) */
+#cap small { color: inherit; }
+#cap.night { color: #fff; } #cap.night em { color: #FDCD2F; } #cap.day em { color: #1f4f8f; }
