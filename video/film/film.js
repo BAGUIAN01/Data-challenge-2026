@@ -275,7 +275,6 @@ window.render = function (t) {
     end.style.transform = `translateY(${(1 - qe) * 60}px)`;
   }
   $("#gt").setAttribute("seed", Math.floor(t * 30) % 17 + 1);
-  if (t >= SC.tard && t < SC.titre + 0.6) $("#dp").src = `img/dp/${String(Math.floor(t * 24) % 26).padStart(2, "0")}.png`;
   $("#fade").style.opacity = Math.max(1 - p(t, 0, 0.35), p(t, SC.end - 0.6, 0.6));
 };
 window.render(0);

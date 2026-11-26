@@ -165,7 +165,7 @@ def build():
     <div class="cal2"><div class="w" id="sep">Septembre<i>on alerte</i></div><div class="w" id="jan">Janvier<i>on confirme</i></div></div></div>
   <div class="txt" id="t6"><small class="w">3 · IL DIT QUOI FAIRE</small><b><span class="m"><span class="w">Où agir.</span></span><br><span class="m"><em class="w">Sur quoi.</em></span></b></div>
 
-  <div class="panel" id="s2"><img id="dp" src="img/dp/00.png">
+  <div class="panel" id="s2">
     <div class="s2t"><p class="w" id="s2a">Septembre :<br><b>il faut décider.</b></p><p class="w" id="s2b">Le rapport arrive…</p></div>
     <div class="cal"><div class="pg back" style="--i:2"></div><div class="pg back" style="--i:1"></div>
       <div class="pg" id="pgcur"><div class="pg-h" id="pgm">Septembre</div><div class="pg-b"><span id="pgr">RENTRÉE</span>
