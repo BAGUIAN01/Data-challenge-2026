@@ -100,7 +100,7 @@ html, body { margin: 0; background: #000; }
 #mapcam { position: absolute; inset: 0; transform-style: preserve-3d; }
 #map { filter: drop-shadow(0 26px 30px rgba(8, 18, 36, .35)); }
 .slab path { stroke: none; }
-.m { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 .06em .08em 0; margin-bottom: -.08em; }
+.m { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 10px 36px 0; margin-bottom: -36px; }
 .m .w { display: inline-block; }
 .s3t .m { display: block; }
 #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(5, 12, 26, .28) 100%); }
