@@ -19,6 +19,8 @@ def place(t):
             return cfg["intro"] + s["from"] / cut["fps"] + (t - a)
     return None
 cfg["ev"] = {k: place(v) for k, v in cfg.get("events", {}).items()}
+if "phrase" in cfg:
+    cfg["phrase"]["ev"] = [place(t) for t in cfg["phrase"]["at"]]
 D = json.load(open(HERE.parents[1] / "preparation_jury/deck/donnees.json", encoding="utf-8"))
 MAP = D["carte"]
 outline = "".join(f'<path d="{g["d"]}"/>' for g in MAP["regions"].values())
@@ -63,6 +65,8 @@ html, body {{ margin: 0; background: #000; }}
 .chip {{ display: flex; align-items: center; gap: 22px; font: 800 60px Jakarta; background: #fff; color: #13294B; border-radius: 26px; padding: 18px 36px 18px 20px; box-shadow: 0 10px 0 #FDCD2F; align-self: flex-start; }}
 .chip i {{ width: 76px; height: 76px; border-radius: 20px; background: #FDCD2F; display: flex; align-items: center; justify-content: center; }} .chip svg {{ width: 48px; height: 48px; }}
 #chap {{ position: absolute; left: 150px; bottom: 0; height: 0; }}
+#p3 {{ padding-top: 250px; }} #p3 .ln {{ overflow: hidden; padding-bottom: 30px; margin-bottom: -18px; }}
+#p3 .lw {{ display: inline-block; font: 800 104px/1.02 Jakarta; letter-spacing: -.02em; }} #p3 .lw em {{ font-style: normal; color: #FDCD2F; }}
 #prog {{ position: absolute; left: 0; bottom: 0; height: 8px; background: #FDCD2F; }}
 </style></head><body><div id="f">
 <div id="grid"></div><svg id="bf" viewBox="{VB}">{outline}</svg>
@@ -71,6 +75,7 @@ html, body {{ margin: 0; background: #000; }}
   <div class="card" id="c0"><div class="bar"></div><div class="box"><small>JE ME PRÉSENTE</small><b>{cfg["moi"]["nom"]}</b><p id="t0">{cfg["moi"]["titre"]}</p></div></div></div>
 <div class="panel" id="p1"><div class="card" id="c1" style="top:400px"><div class="bar"></div><div class="box"><small>MON COÉQUIPIER</small><b id="n1">{cfg["equipier"]["nom"]}</b><p id="t1">{cfg["equipier"]["titre"]}</p></div></div></div>
 <div class="panel" id="p2"><div class="big" id="b2">Équipe <em>Biiga</em></div><div class="chips">{chips}</div></div>
+<div class="panel" id="p3">{"".join(f'<div class="ln"><span class="lw" data-i="{i}">{l}</span></div>' for i, l in enumerate(cfg.get("phrase", {}).get("lines", [])))}</div>
 <div id="bug"><div class="badge"><img src="file://{img}/logo-mark.png"></div>ÉQUIPE BIIGA</div>
 <div id="sting"><div class="badge" id="sb"><img src="file://{img}/logo-mark.png"></div><b id="st">Équipe <em>Biiga</em></b></div>
 <div id="prog"></div>

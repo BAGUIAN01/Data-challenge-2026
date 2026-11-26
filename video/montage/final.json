@@ -1,0 +1,18 @@
+{"intro": 1.4,
+ "moi": {"nom": "Harouna Baguian", "titre": "Ingénieur de conception en IA"},
+ "equipier": {"nom": "Mohamed Saïd Ouédraogo", "titre": "Formateur en IA"},
+ "punch": [1.0, 1.15, 1.0, 1.12, 1.0, 1.0, 1.08, 1.0],
+ "events": {"bonjour": 1.14, "nom": 2.8, "titre": 4.84, "mate": 8.62, "mateTitre": 10.2,
+            "equipe": 13.0, "cartographier": 34.92, "predire": 35.25, "agir": 35.6},
+ "phrase": {"at": [53.86, 58.3, 61.34], "lines": ["Le plus important :", "donner aux décideurs", "<em>les moyens d'agir.</em>"]},
+ "shots": [
+   {"src": [1.0, 11.05], "face": true},
+   {"src": [12.05, 18.3], "face": true},
+   {"src": [19.6, 28.95], "film": [[19.6, 6.5], [25.0, 10.25], [28.95, 12.45]]},
+   {"src": [29.2, 36.9], "face": true},
+   {"src": [36.9, 43.1], "film": [[36.9, 16.0], [43.1, 23.45]]},
+   {"src": [44.5, 52.45], "film": [[44.5, 23.5], [52.45, 30.95]]},
+   {"src": [52.45, 62.35], "face": true},
+   {"src": [62.6, 70.2], "film": [[62.6, 31.0], [66.9, 33.5], [70.2, 37.4]]}
+ ],
+ "tail": [39.5, 52.0]}

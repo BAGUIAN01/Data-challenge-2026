@@ -77,7 +77,14 @@ window.render = async function (t) {
     const el = $(id), q = out(p(t, at - 0.05, 0.35));
     el.style.opacity = q; el.style.transform = `translateY(${(1 - q) * 16}px)`;
   }
-  $("#p2").style.display = EV.equipe !== undefined && t >= EV.equipe - 0.1 ? "" : "none";
+  const P3 = (CFG.phrase || {}).ev || [];
+  $("#p2").style.display = EV.equipe !== undefined && t >= EV.equipe - 0.1 && !(P3.length && t >= P3[0] - 0.2) ? "" : "none";
+  $("#p3").style.display = P3.length && t >= P3[0] - 0.2 ? "" : "none";
+  document.querySelectorAll("#p3 .lw").forEach((el, i) => {
+    const q = out(p(t, (P3[i] ?? 1e9) - 0.05, 0.55));
+    el.style.transform = `translateY(${(1 - q) * 140}px)`;
+    el.style.opacity = t < (P3[i] ?? 1e9) - 0.05 ? 0 : 1;
+  });
   if (EV.equipe !== undefined) {
     const b2 = $("#b2"), bq = out(p(t, EV.equipe, 0.3));
     b2.style.opacity = bq; b2.style.transform = `scale(${1.5 - 0.5 * bq})`; b2.style.transformOrigin = "0% 60%";

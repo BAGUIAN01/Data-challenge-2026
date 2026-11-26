@@ -72,8 +72,8 @@ def risk_fill(p):
     return "#F2673A" if p >= 40 else "#F5A524" if p >= 15 else "#1b3a66"
 
 
-LEVER = {"violence": ("Continuité éducative", "book"), "deplaces": ("Classes passerelles", "bridge"),
-         "grossesses": ("Maintien des filles", "venus"), "pauvrete": ("Cantines scolaires", "food")}
+LEVER = {"violence": ("Insécurité", "alert"), "deplaces": ("Déplacés", "bridge"),
+         "grossesses": ("Grossesses précoces", "venus"), "pauvrete": ("Pauvreté", "food")}
 ICON = {
     "book": '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
     "bridge": '<path d="M2 18h20"/><path d="M4 18v-4"/><path d="M20 18v-4"/><path d="M2 14c3-6 17-6 20 0"/><path d="M8 18v-5"/><path d="M16 18v-5"/>',
