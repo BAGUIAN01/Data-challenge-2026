@@ -11,9 +11,36 @@ const mix = (a, b, q) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v,
 const NAVY = "#13294B", SUN = "#FDCD2F", PAPER = "#F6F1E7", DEEP = "#1b3a66", EDGE = "#2c4f82";
 
 function word(el, t, at, leave = 1e9, dy = 46) {
+  if (el.parentElement.classList.contains("m")) {
+    const h = el.offsetHeight * 1.1, q = out(p(t, at, 0.55)), r = inout(p(t, leave, 0.4));
+    el.style.opacity = t < at ? 0 : 1;
+    el.style.transform = `translateY(${(1 - q) * h - r * h}px)`;
+    return;
+  }
   const q = out(p(t, at, 0.45)), r = out(p(t, leave, 0.3));
   el.style.opacity = q * (1 - r);
   el.style.transform = `translateY(${(1 - q) * dy - r * 30}px)`;
+}
+
+// the camera over the map: scale, focus point, tilt; keyframes eased one into the next
+const SX = (x) => STAGE.left + (x + 10) * SCALE, SY = (y) => STAGE.top + (y + 10) * SCALE;
+const RP = (k) => { const r = REGIONS.find((r) => r.k === k); return [SX(r.lx), SY(r.ly)]; };
+const MID = [640, 560], NE = [824, 451];
+const KF = [
+  [0, 1, ...NE, 0], [SC.off - 0.2, 1, ...NE, 0], [SC.off + 2.6, 1.24, ...NE, 0], [SC.titre - 0.01, 1.24, ...NE, 0],
+  [SC.titre, 1, ...MID, 0], [SC.montre, 1, ...MID, 0], [SC.montre + 1.4, 1.02, ...MID, 16], [SC.bulles, 1.03, ...MID, 16],
+  [SC.bulles + 2.8, 1.1, ...RP("CENTRENORD"), 14], [SC.previent, 1.1, ...RP("CENTRENORD"), 14],
+  [SC.previent + 0.8, 1.05, ...RP("CENTRENORD"), 20], [SC.agir, 1.14, ...RP("CENTRENORD"), 20],
+  [SC.agir + 0.6, 1.0, ...MID, 26], [SC.tags, 1.0, ...MID, 26],
+  [SC.tags + 0.5, 1.07, ...RP("NORD"), 26], [SC.tags + 1.4, 1.07, ...RP("SAHEL"), 26], [SC.tags + 2.3, 1.07, ...RP("CENTRENORD"), 26],
+  [SC.tags + 3.2, 1.04, 640, 640, 26], [SC.outil, 1.04, 640, 640, 26],
+];
+function camera(t) {
+  let k = 0;
+  while (k < KF.length - 1 && t >= KF[k + 1][0]) k++;
+  const A = KF[k], B = KF[Math.min(k + 1, KF.length - 1)];
+  const q = B[0] > A[0] ? inout(clamp((t - A[0]) / (B[0] - A[0]))) : 0;
+  return A.slice(1).map((v, i) => v + (B[i + 1] - v) * q);
 }
 function slam(el, t, at, origin = "0% 60%") {
   const q = out(p(t, at, 0.28));
@@ -85,10 +112,16 @@ window.render = function (t) {
   const map = $("#map");
   const qm = out(p(t, 0, 0.7));
   // opening: the camera closes in on the north and east while schools switch off, then lets go
-  const z = t < SC.tard ? inout(p(t, SC.off - 0.2, 2.8)) * 0.24 : 0;
   map.style.opacity = qm;
-  map.style.transformOrigin = "68% 38%";
-  map.style.transform = `scale(${(0.96 + 0.04 * qm) * (1 + z)})`;
+  const [cs, fx, fy, rx] = camera(t);
+  const mc = $("#mapcam");
+  mc.style.transformOrigin = `${fx}px ${fy}px`;
+  mc.style.transform = `perspective(2400px) rotateX(${rx}deg) scale(${cs * (0.96 + 0.04 * qm)})`;
+  // the solid base under the country: dark on the night scenes, warm on paper, built up as the regions arrive
+  const night = t < SC.montre ? 1 : t < SC.previent ? 1 - out(p(t, SC.montre, 0.5)) : t < SC.agir ? out(p(t, SC.previent, 0.5)) : 1 - out(p(t, SC.agir, 0.5));
+  const slab = mix("#c2b8a3", "#0a1830", night);
+  $("#base").style.opacity = t < SC.titre ? 1 : t < SC.previent ? out(p(t, SC.montre + 0.2, 1.6)) : 1;
+  $$(".slab").forEach((g) => g.setAttribute("fill", slab));
   const st = regionStroke(t);
   for (const r of REGIONS) {
     const el = document.getElementById("r-" + r.k), s = region(r.k, t);
@@ -117,6 +150,10 @@ window.render = function (t) {
   bubs.forEach((b, i) => {
     const q = back(p(t, SC.bulles + i * 0.25, 0.42)) * (1 - out(p(t, SC.previent, 0.3)));
     b.setAttribute("r", (+b.dataset.r * Math.max(0, q)).toFixed(2));
+  });
+  $$(".bl").forEach((g, i) => {
+    const q = back(p(t, SC.bulles + 1.4 + i * 0.3, 0.4)) * (1 - out(p(t, SC.previent, 0.3)));
+    g.setAttribute("opacity", clamp(q * 1.5)); g.style.transformBox = "fill-box"; g.style.transformOrigin = "center"; g.style.transform = `scale(${Math.max(0, q)})`;
   });
   $("#rings").style.display = t >= SC.previent && t < SC.agir + 0.4 ? "" : "none";
   $("#rings").style.opacity = 1 - out(p(t, SC.agir, 0.35));
@@ -150,7 +187,7 @@ window.render = function (t) {
   // ── the words beside the map
   const w1 = $$("#t1 .w");
   $("#t1").style.display = t < SC.tard + 0.6 ? "" : "none";
-  word(w1[0], t, 0.7); word(w1[1], t, 1.0); slam(w1[2], t, SC.off + 0.1); word(w1[3], t, SC.off + 1.1); word(w1[4], t, SC.off + 1.7);
+  word(w1[0], t, 0.7); slam(w1[1], t, SC.off + 0.1); word(w1[2], t, SC.off + 1.1); word(w1[3], t, SC.off + 1.7);
   const w4 = $$("#t4 .w"), L4 = SC.previent;
   $("#t4").style.display = t >= SC.montre && t < SC.previent + 0.4 ? "" : "none";
   word(w4[0], t, SC.montre + 0.3, L4); word(w4[1], t, SC.montre + 0.5, L4); word(w4[2], t, SC.montre + 0.8, L4);
@@ -237,6 +274,8 @@ window.render = function (t) {
     end.style.opacity = qe;
     end.style.transform = `translateY(${(1 - qe) * 60}px)`;
   }
+  $("#gt").setAttribute("seed", Math.floor(t * 30) % 17 + 1);
+  if (t >= SC.tard && t < SC.titre + 0.6) $("#dp").src = `img/dp/${String(Math.floor(t * 24) % 26).padStart(2, "0")}.png`;
   $("#fade").style.opacity = Math.max(1 - p(t, 0, 0.35), p(t, SC.end - 0.6, 0.6));
 };
 window.render(0);

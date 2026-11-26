@@ -142,22 +142,30 @@ def build():
             x, y = at(c)
             leads += f'<line class="lead" data-i="{i}" x1="{tx + 190:.0f}" y1="{ty + 38:.0f}" x2="{x:.1f}" y2="{y:.1f}"/><circle class="leadp" data-i="{i}" cx="{x:.1f}" cy="{y:.1f}" r="7"/>'
     months = ["", "", "", "", "", ""]
+    outline = "".join(f'<path d="{g["d"]}"/>' for g in MAP["regions"].values())
+    base = "".join(f'<g class="slab" transform="translate(0,{k})">{outline}</g>' for k in (10, 8, 6, 4, 2))
+    big = sorted([r for r in regions if r["drop"] <= -25], key=lambda r: r["drop"])
+    blab = "".join(f'<g transform="translate({r["lx"]},{r["ly"] + 44 * (abs(r["drop"]) / 47.4) ** 0.5 + 18})"><g class="bl" data-i="{i}">'
+                   f'<rect x="-{len(REG[r["k"]]["ancienne"]) * 5.6 + 12:.0f}" y="-14" width="{len(REG[r["k"]]["ancienne"]) * 11.2 + 24:.0f}" height="28" rx="14" fill="#13294B"/>'
+                   f'<text text-anchor="middle" y="6" fill="#fff" font-family="Jakarta" font-weight="800" font-size="16">{REG[r["k"]]["ancienne"]}</text></g></g>' for i, r in enumerate(big))
     page = f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><style>{(HERE / "film.css").read_text()}</style></head><body>
 <div id="film">
   <div id="bg"></div>
+  <div id="mapcam">
   <svg id="map" viewBox="-10 -10 {W + 20} {H + 20}" style="left:{STAGE["left"]}px;top:{STAGE["top"]}px;width:{STAGE["width"]}px">
-    <g id="regions">{paths}</g><g id="dots">{dot_svg}</g><g id="extr">{extr}</g><g id="lifted">{lifted}</g><g id="bubs">{bub}</g><g id="rings">{rings}</g>
+    <g id="base">{base}</g><g id="regions">{paths}</g><g id="dots">{dot_svg}</g><g id="extr">{extr}</g><g id="lifted">{lifted}</g><g id="bubs">{bub}</g><g id="rings">{rings}</g><g id="blab">{blab}</g>
   </svg>
   <svg id="leads" viewBox="0 0 1920 1080">{leads}</svg>{tags}
-  <div class="txt" id="t1"><b><span class="w">Des</span> <span class="w">écoles</span><br><em class="w">ferment.</em></b>
-    <p class="w">Des enfants quittent la classe.</p><div class="key w"><i class="on"></i>école ouverte<i></i>école fermée</div></div>
-  <div class="txt" id="t4"><small class="w">1 · IL MONTRE</small><b><span class="w">Où les enfants</span><br><span class="w">décrochent.</span></b>
+  </div>
+  <div class="txt" id="t1"><b><span class="m"><span class="w">Des écoles</span></span><br><em class="w">ferment.</em></b>
+    <p class="w">Des enfants quittent la classe.</p><div class="key w" style="display:none"><i class="on"></i>école ouverte<i></i>école fermée</div></div>
+  <div class="txt" id="t4"><small class="w">1 · IL MONTRE</small><b><span class="m"><span class="w">Où les enfants</span></span><br><span class="m"><span class="w">décrochent.</span></span></b>
     <div class="chips"><div class="chip w" id="lent"><i></i>Lent</div><div class="chip w" id="brutal"><i></i>Brutal</div></div></div>
-  <div class="txt" id="t5"><small class="w">2 · IL PRÉVIENT</small><b><span class="w">Le risque,</span><br><em class="w">avant la rentrée.</em></b>
+  <div class="txt" id="t5"><small class="w">2 · IL PRÉVIENT</small><b><span class="m"><span class="w">Le risque,</span></span><br><span class="m"><em class="w">avant la rentrée.</em></span></b>
     <div class="cal2"><div class="w" id="sep">Septembre<i>on alerte</i></div><div class="w" id="jan">Janvier<i>on confirme</i></div></div></div>
-  <div class="txt" id="t6"><small class="w">3 · IL DIT QUOI FAIRE</small><b><span class="w">Où agir.</span><br><em class="w">Sur quoi.</em></b></div>
+  <div class="txt" id="t6"><small class="w">3 · IL DIT QUOI FAIRE</small><b><span class="m"><span class="w">Où agir.</span></span><br><span class="m"><em class="w">Sur quoi.</em></span></b></div>
 
-  <div class="panel" id="s2">
+  <div class="panel" id="s2"><img id="dp" src="img/dp/00.png">
     <div class="s2t"><p class="w" id="s2a">Septembre :<br><b>il faut décider.</b></p><p class="w" id="s2b">Le rapport arrive…</p></div>
     <div class="cal"><div class="pg back" style="--i:2"></div><div class="pg back" style="--i:1"></div>
       <div class="pg" id="pgcur"><div class="pg-h" id="pgm">Septembre</div><div class="pg-b"><span id="pgr">RENTRÉE</span>
@@ -166,7 +174,7 @@ def build():
       <div class="stamp" id="stamp">TROP TARD</div></div>
   </div>
   <div class="panel" id="s3"><div class="logo" id="logo"><img src="../maquettes/img/logo-mark.png"></div>
-    <div class="s3t"><b class="w">Kalantigui</b><p class="w">Anticiper le décrochage,</p><p class="w"><em>région par région.</em></p></div></div>
+    <div class="s3t"><span class="m"><b class="w">Kalantigui</b></span><span class="m"><p class="w">Anticiper le décrochage,</p></span><span class="m"><p class="w"><em>région par région.</em></p></span></div></div>
   <div class="panel" id="s7">
     <div id="s7in"><div class="dev" id="lap"><div class="lab7">Ordinateur</div><div class="lap-s"><div class="lap-in"><img src="../maquettes/img/bureau.jpg" id="lapimg"></div></div><div class="lap-b"></div></div>
     <div class="dev" id="pho"><div class="lab7">Téléphone</div><div class="pho-f"><div class="pho-sb"><span>9:41</span><i id="plane">{icon("plane", 22, "#13294B", 2.4)}</i></div>
@@ -178,14 +186,16 @@ def build():
     <div class="s7c w" id="s7c">L'appli répond quand même.</div>
   </div>
   <div class="panel" id="s8">
-    <div class="s8t" id="s8t"><b class="w">Avant la rentrée.</b><b class="w"><em>Pas après.</em></b></div>
+    <div class="s8t" id="s8t"><span class="m"><b class="w">Avant la rentrée.</b></span><b class="w"><em>Pas après.</em></b></div>
     <div class="end" id="end"><div class="logo sm"><img src="../maquettes/img/logo-mark.png"></div>
       <div class="end-t"><b>Kalantigui · Décrochage</b><p>Équipe Biiga · Data Challenge Burkina</p><p class="url">{URL}</p></div>
       <div class="qr">{qr_svg("https://" + URL)}</div></div>
   </div>
+  <div id="vig"></div>
+  <svg id="grain" width="1920" height="1080"><filter id="gn"><feTurbulence id="gt" type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="1"/><feColorMatrix type="saturate" values="0"/></filter><rect width="1920" height="1080" filter="url(#gn)"/></svg>
   <div id="fade"></div>
 </div>
-<script>const SC = {json.dumps(SCENES)}; const REGIONS = {json.dumps(regions)}; const MONTHS = {json.dumps(months)};</script>
+<script>const STAGE = {json.dumps(STAGE)}; const SCALE = {SCALE}; const SC = {json.dumps(SCENES)}; const REGIONS = {json.dumps(regions)}; const MONTHS = {json.dumps(months)};</script>
 <script>{(HERE / "film.js").read_text()}</script></body></html>'''
     (HERE / "film.html").write_text(page, encoding="utf-8")
     print("film.html", len(page) // 1024, "ko,", len(dots), "écoles,", sum(d[2] for d in dots), "éteintes")

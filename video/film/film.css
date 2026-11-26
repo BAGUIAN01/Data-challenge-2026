@@ -95,3 +95,16 @@ html, body { margin: 0; background: #000; }
 #pgm.later { font-size: 44px; color: #FDCD2F; }
 .avion { top: 230px; left: -30px; } .s7c { bottom: 60px; } .s7c { font-size: 44px; }
 #s7c { left: 50%; right: auto; transform-origin: 50% 50%; background: #13294B; color: #FDCD2F; padding: 18px 36px; border-radius: 999px; white-space: nowrap; }
+
+/* version 3: depth, camera, masked words, grain */
+#mapcam { position: absolute; inset: 0; transform-style: preserve-3d; }
+#map { filter: drop-shadow(0 26px 30px rgba(8, 18, 36, .35)); }
+.slab path { stroke: none; }
+.m { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 .06em .08em 0; margin-bottom: -.08em; }
+.m .w { display: inline-block; }
+.s3t .m { display: block; }
+#dp { position: absolute; left: 60px; top: 330px; height: 720px; }
+.s2t { top: 170px; left: 470px; width: 560px; }
+.s2t p { font-size: 56px; } .s2t b { font-size: 84px; }
+#vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(5, 12, 26, .28) 100%); }
+#grain { position: absolute; inset: 0; opacity: .075; mix-blend-mode: overlay; pointer-events: none; }
