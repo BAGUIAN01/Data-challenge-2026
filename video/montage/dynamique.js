@@ -62,7 +62,7 @@ window.render = async function (t) {
 
   // the words beside, each on the word that says it (EV: times on the edited timeline, from the transcript)
   const EV = CFG.ev || {}, end = T;
-  const mateAt = EV.coequipier ?? EV.mate ?? end;
+  const mateAt = EV.mate ?? EV.coequipier ?? end;  // my card stays until the teammate's name is said
   $("#p0").style.display = t < mateAt + 0.3 ? "" : "none";
   const h = $("#p0 .hello"), hq = back(p(t, EV.bonjour - 0.05, 0.4)), hu = inout(p(t, EV.nom - 0.2, 0.4));
   h.style.opacity = clamp(hq * 1.5) * (1 - out(p(t, mateAt - 0.15, 0.25)));
@@ -72,8 +72,8 @@ window.render = async function (t) {
   const t0 = $("#t0"), tq = out(p(t, (EV.titre ?? EV.nom + 0.6) - 0.05, 0.35));
   t0.style.opacity = tq; t0.style.transform = `translateY(${(1 - tq) * 16}px)`;
   $("#p1").style.display = t >= mateAt - 0.15 && t < end + 1 ? "" : "none";
-  card($("#c1"), t, mateAt - 0.05, (EV.equipe ?? 1e9) - 0.1);
-  for (const [id, at] of [["#n1", EV.mate ?? mateAt], ["#t1", EV.mateTitre ?? (EV.mate ?? mateAt) + 0.7]]) {
+  card($("#c1"), t, mateAt - 0.2, (EV.equipe ?? 1e9) - 0.1);
+  for (const [id, at] of [["#n1", mateAt - 0.1], ["#t1", EV.mateTitre ?? (EV.mate ?? mateAt) + 0.7]]) {
     const el = $(id), q = out(p(t, at - 0.05, 0.35));
     el.style.opacity = q; el.style.transform = `translateY(${(1 - q) * 16}px)`;
   }
