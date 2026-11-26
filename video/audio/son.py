@@ -117,14 +117,14 @@ def score():
 
 def gestures():
     # schools light up: a rising balafon run; then switch off one by one, north and east first
-    for i, m in enumerate([67, 69, 72, 74, 76, 79, 81, 84, 86, 88]):
-        add(0.5 + i * 0.22, balafon(m, 0.6), 0.55, -0.4 + i * 0.08)
-    for i in range(9):
-        add(3.7 + i * 0.22, tok(), 0.9 - i * 0.05, 0.3 - i * 0.06)
-    impact(3.7, 0.5)
+    for i, m in enumerate([67, 69, 72, 74, 76, 79, 81, 84, 86]):
+        add(0.4 + i * 0.2, balafon(m, 0.6), 0.55, -0.4 + i * 0.09)
+    for i in range(10):
+        add(S["off"] + i * 0.22, tok(), 0.95 - i * 0.05, 0.3 - i * 0.06)
+    impact(S["off"] + 0.1, 0.5)
     # the calendar
     add(S["tard"] - 0.15, whoosh(), 1.0)
-    for k in range(7):
+    for k in range(6):
         add(S["flip"] + k * 0.25, flip(), 1.0, (-1) ** k * 0.3)
     add(S["rapport"], ping(76), 1.0)
     impact(S["stamp"], 1.4)
@@ -134,26 +134,28 @@ def gestures():
     # it shows: one balafon note per sudden drop
     add(S["montre"] - 0.15, whoosh(), 0.9)
     for i, m in enumerate([72, 74, 76, 79, 81, 84, 86, 88]):
-        add(S["bulles"] + i * 0.28, balafon(m, 0.7), 0.85, -0.4 + i * 0.1)
+        add(S["bulles"] + i * 0.25, balafon(m, 0.7), 0.85, -0.4 + i * 0.1)
     # it warns: a high ping per alert
     add(S["previent"] - 0.1, whoosh(0.5, 200, 1800), 1.0)
     for i in range(5):
-        add(S["previent"] + 1.4 + i * 0.2, ping(81 + (i % 2) * 3), 0.8, -0.3 + i * 0.15)
-    add(31.0, ping(76), 0.9)
-    add(32.5, ping(79), 0.9)
+        add(S["alertes"] + i * 0.2, ping(81 + (i % 2) * 3), 0.8, -0.3 + i * 0.15)
+    add(S["sep"], ping(76), 0.9)
+    add(S["jan"], ping(79), 0.9)
     # what to do: the regions rise, then one chord per lever
     add(S["agir"] - 0.1, whoosh(), 0.9)
-    add(S["agir"] + 0.6, whoosh(0.8, 150, 900), 0.8)
+    add(S["lift"], whoosh(0.8, 150, 900), 0.8)
     for i, (r, ch) in enumerate(CHORDS):
         for m in ch:
-            add(S["tags"] + i * 1.0, balafon(m + 12, 0.9), 0.55)
+            add(S["tags"] + i * 0.9, balafon(m + 12, 0.9), 0.55)
     # the tool
     add(S["outil"] - 0.15, whoosh(), 1.0)
-    add(48.6, whoosh(0.4, 400, 2500), 0.7)
+    add(S["phone"], whoosh(0.4, 400, 2500), 0.7)
+    add(S["zoom"], whoosh(1.0, 150, 1200), 0.7)
+    add(S["zoom"] + 1.0, ping(84), 0.8)
     add(S["papier"], whoosh(0.5, 300, 2200), 0.8)
     # the end
     add(S["fin"] - 0.1, whoosh(0.6, 200, 1500), 1.0)
-    impact(56.0, 1.1)
+    impact(S["fin"] + 1.0, 1.1)
     for i, m in enumerate([57, 60, 64, 69, 72, 76]):
         add(S["logo"] + i * 0.09, balafon(m, 2.5), 0.7)
     add(S["logo"], pad([57, 60, 64, 69], 3.5), 1.6)

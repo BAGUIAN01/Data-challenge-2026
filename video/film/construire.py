@@ -128,16 +128,20 @@ def build():
     groups = {}
     for c in p1:
         groups.setdefault(REG[c]["dominant"], []).append(c)
-    tag_at = {"pauvrete": (150, 175), "deplaces": (860, 120), "grossesses": (880, 330), "violence": (470, 905)}
+    def at(c):
+        return px(float(MAP["regions"][c]["lx"]), float(MAP["regions"][c]["ly"]))
+    nx, ny = at("NORD"); sx, sy = at("SAHEL"); cx, cy = at("CENTRENORD"); ex, ey = at("EST"); bx, by = at("BOUCLEDUMOUHOUN")
+    tag_at = {"pauvrete": (nx - 420, ny - 150), "deplaces": (sx - 60, sy - 190), "grossesses": (cx + 10, cy + 60),
+              "violence": ((bx + ex) / 2 - 190, max(by, ey) + 150)}
     tags, leads = "", ""
-    for i, (lev, cs) in enumerate(sorted(groups.items(), key=lambda kv: ["pauvrete", "deplaces", "grossesses", "violence"].index(kv[0]))):
+    for i, lev in enumerate(["pauvrete", "deplaces", "grossesses", "violence"]):
         name, ic = LEVER[lev]
         tx, ty = tag_at[lev]
-        tags += f'<div class="tag" data-i="{i}" style="left:{tx}px;top:{ty}px">{icon(ic, 36, "#13294B")}<b>{name}</b></div>'
-        for c in cs:
-            x, y = px(float(MAP["regions"][c]["lx"]), float(MAP["regions"][c]["ly"]))
-            leads += f'<line class="lead" data-i="{i}" x1="{tx + 150}" y1="{ty + 34}" x2="{x:.1f}" y2="{y:.1f}"/>'
-    months = ["Octobre", "Novembre", "Décembre", "Janvier", "Février", "Mars", "Avril"]
+        tags += f'<div class="tag" data-i="{i}" style="left:{tx:.0f}px;top:{ty:.0f}px">{icon(ic, 42, "#13294B")}<b>{name}</b></div>'
+        for c in groups[lev]:
+            x, y = at(c)
+            leads += f'<line class="lead" data-i="{i}" x1="{tx + 190:.0f}" y1="{ty + 38:.0f}" x2="{x:.1f}" y2="{y:.1f}"/><circle class="leadp" data-i="{i}" cx="{x:.1f}" cy="{y:.1f}" r="7"/>'
+    months = ["", "", "", "", "", ""]
     page = f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><style>{(HERE / "film.css").read_text()}</style></head><body>
 <div id="film">
   <div id="bg"></div>
@@ -145,7 +149,7 @@ def build():
     <g id="regions">{paths}</g><g id="dots">{dot_svg}</g><g id="extr">{extr}</g><g id="lifted">{lifted}</g><g id="bubs">{bub}</g><g id="rings">{rings}</g>
   </svg>
   <svg id="leads" viewBox="0 0 1920 1080">{leads}</svg>{tags}
-  <div class="txt" id="t1"><b><span class="w">Des</span> <span class="w">écoles</span><br><em class="w slam">ferment.</em></b>
+  <div class="txt" id="t1"><b><span class="w">Des</span> <span class="w">écoles</span><br><em class="w">ferment.</em></b>
     <p class="w">Des enfants quittent la classe.</p><div class="key w"><i class="on"></i>école ouverte<i></i>école fermée</div></div>
   <div class="txt" id="t4"><small class="w">1 · IL MONTRE</small><b><span class="w">Où les enfants</span><br><span class="w">décrochent.</span></b>
     <div class="chips"><div class="chip w" id="lent"><i></i>Lent</div><div class="chip w" id="brutal"><i></i>Brutal</div></div></div>
@@ -164,12 +168,14 @@ def build():
   <div class="panel" id="s3"><div class="logo" id="logo"><img src="../maquettes/img/logo-mark.png"></div>
     <div class="s3t"><b class="w">Kalantigui</b><p class="w">Anticiper le décrochage,</p><p class="w"><em>région par région.</em></p></div></div>
   <div class="panel" id="s7">
-    <div class="s7t w" id="s7t">Même <em>sans internet.</em></div>
-    <div class="dev" id="lap"><div class="lab7">Ordinateur</div><div class="lap-s"><div class="lap-in"><img src="../maquettes/img/bureau.jpg" id="lapimg"></div></div><div class="lap-b"></div></div>
+    <div id="s7in"><div class="dev" id="lap"><div class="lab7">Ordinateur</div><div class="lap-s"><div class="lap-in"><img src="../maquettes/img/bureau.jpg" id="lapimg"></div></div><div class="lap-b"></div></div>
     <div class="dev" id="pho"><div class="lab7">Téléphone</div><div class="pho-f"><div class="pho-sb"><span>9:41</span><i id="plane">{icon("plane", 22, "#13294B", 2.4)}</i></div>
       <div class="pho-sc"><img src="../maquettes/img/carte.jpg" id="pho1"><img src="../maquettes/img/hors-ligne.jpg" id="pho2"></div></div>
       <div class="avion" id="avion">{icon("plane", 26, "#ffffff")}<span>Mode avion</span></div></div>
     <div class="dev" id="fic"><div class="lab7">Papier</div><img src="../maquettes/img/fiche-1.png"></div>
+    <div id="ringoff"></div></div>
+    <div class="s7t w" id="s7t">Même <em>sans internet.</em></div>
+    <div class="s7c w" id="s7c">L'appli répond quand même.</div>
   </div>
   <div class="panel" id="s8">
     <div class="s8t" id="s8t"><b class="w">Avant la rentrée.</b><b class="w"><em>Pas après.</em></b></div>

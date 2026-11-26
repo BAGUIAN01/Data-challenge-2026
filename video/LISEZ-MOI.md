@@ -1,6 +1,6 @@
 # Vidéo de la dernière étape : la partie animée
 
-Une minute, sans voix, en musique, qui suit la partie face caméra. Aucun chiffre à l'écran : des cartes et des mots.
+Environ 50 secondes, sans voix, en musique, qui suit la partie face caméra. Aucun chiffre à l'écran : des cartes et des mots.
 Chaque état de la carte vient des données de l'analyse (écoles par région et part fermée, taux d'achèvement, pires
 baisses, risque 2026/27, régions prioritaires et leviers).
 

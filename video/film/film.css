@@ -82,3 +82,16 @@ html, body { margin: 0; background: #000; }
 .end-t b { display: block; font: 800 54px Jakarta; } .end-t p { font: 600 30px Inter; margin: 10px 0 0; opacity: .85; } .end-t .url { color: #FDCD2F; opacity: 1; font-weight: 700; }
 .qr { background: #fff; padding: 18px; border-radius: 22px; display: flex; }
 #fade { position: absolute; inset: 0; background: #000; pointer-events: none; }
+
+/* version 2 */
+.txt { left: 1290px; width: 600px; }
+.lead { stroke: #13294B; stroke-width: 3; stroke-dasharray: none; } .leadp { fill: #13294B; }
+.tag { padding: 16px 26px 16px 18px; border-radius: 22px; box-shadow: 0 8px 0 #13294B; } .tag b { font: 800 36px Jakarta; }
+#map path { transform-box: fill-box; transform-origin: center; }
+#s7in { position: absolute; inset: 0; transform-origin: 1175px 432px; }
+#ringoff { position: absolute; left: 1016px; top: 414px; width: 318px; height: 36px; border: 4px solid #E5484D; border-radius: 12px; opacity: 0; }
+.s7t { z-index: 3; } .s7c { position: absolute; left: 0; right: 0; bottom: 70px; text-align: center; font: 800 52px Jakarta; z-index: 3; }
+.s7c { display: block !important; } .s7c span { background: #13294B; }
+#pgm.later { font-size: 44px; color: #FDCD2F; }
+.avion { top: 230px; left: -30px; } .s7c { bottom: 60px; } .s7c { font-size: 44px; }
+#s7c { left: 50%; right: auto; transform-origin: 50% 50%; background: #13294B; color: #FDCD2F; padding: 18px 36px; border-radius: 999px; white-space: nowrap; }
