@@ -217,8 +217,22 @@
   }
  ],
  "tail": [
-  42.6,
-  52.0
+  {
+   "film": [
+    42.6,
+    47.0
+   ]
+  },
+  {
+   "img": "/tmp/claude-0/-home-user/02f46c0d-2725-5bb0-ae9c-c46831452b25/scratchpad/demo/rec/c",
+   "n": 448
+  },
+  {
+   "film": [
+    47.0,
+    52.0
+   ]
+  }
  ],
  "captions": [
   {

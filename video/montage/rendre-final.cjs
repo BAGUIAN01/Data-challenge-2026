@@ -13,6 +13,7 @@ const fs = require('fs'), path = require('path');
   const n1 = Math.min(plan.length, +(to || plan.length));
   for (let n = +(from || 0); n < n1; n++) {
     const [which, t, T] = plan[n];
+    if (which === 'img') { fs.copyFileSync(t, `${dir}/f${String(n).padStart(5, '0')}.jpg`); continue; }
     const p = which === 'dyn' ? dyn : film;
     await p.evaluate((t) => window.render(t), t);
     if (which === 'film') await film.evaluate(([caps, T]) => { window.CAPMODE = true; window.caption(caps, T); }, [caps, T]);

@@ -39,8 +39,32 @@ for shot, seg in zip(cfg["shots"], cut["segments"]):
             src = seg["src"][0] + (n - seg["from"]) / FPS
             plan.append(["film", interp(shot["film"], src), t_out])
 talk = len(plan) / FPS
-a, b = cfg["tail"]
-plan += [["film", a + n / FPS, len(plan) / FPS + n / FPS] for n in range(round((b - a) * FPS))]
+tail = cfg["tail"] if isinstance(cfg["tail"], list) and isinstance(cfg["tail"][0], dict) else [{"film": cfg["tail"]}]
+pieces = []  # the tail's sound, piece by piece
+for piece in tail:
+    if "film" in piece:
+        a, b = piece["film"]
+        base = len(plan) / FPS
+        plan += [["film", a + n / FPS, base + n / FPS] for n in range(round((b - a) * FPS))]
+        pieces.append(["son", a, b - a])
+    else:
+        n = piece["n"]
+        plan += [["img", f"{piece['img']}/f{k:05d}.jpg"] for k in range(n)]
+        pieces.append(["fond", 0, n / FPS])
+# the tail's sound: the animation's own sound for its pieces, the music bed for the frames
+parts = []
+for i, (kind, a, d) in enumerate(pieces):
+    out = work / f"tail{i}.wav"
+    if kind == "son":
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", str(a), "-t", str(d), "-i", str(HERE.parent / "audio/son.wav"),
+                        "-ar", "48000", "-ac", "2", str(out)], check=True)
+    else:
+        subprocess.run(["python3", str(HERE.parent / "audio/fond.py"), str(d + 0.05), str(out) + ".raw.wav"], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(out) + ".raw.wav", "-af", "volume=-3dB", "-t", str(d),
+                        "-ar", "48000", "-ac", "2", str(out)], check=True)
+    parts.append(out)
+(work / "tail.txt").write_text("".join(f"file '{x}'\n" for x in parts))
+subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(work / "tail.txt"), str(work / "tail.wav")], check=True)
 
 
 def place(t):
